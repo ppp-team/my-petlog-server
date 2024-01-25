@@ -1,4 +1,4 @@
-package com.ppp.domain.entity;
+package com.ppp.domain.common;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

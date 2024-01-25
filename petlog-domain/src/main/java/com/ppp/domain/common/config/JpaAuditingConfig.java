@@ -1,4 +1,4 @@
-package com.ppp.domain.config;
+package com.ppp.domain.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
