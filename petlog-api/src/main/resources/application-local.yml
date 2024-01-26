@@ -1,19 +1,31 @@
+server:
+  port: 8001
+
 project:
   version: v1
+
 spring:
   datasource:
-    url: jdbc:h2:mem:test
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-  h2:
-    console:
-      enabled: true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/petlog?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
+    username: admin
+    password: admin
+
   jpa:
-    database-platform: H2
-    hibernate:
-      ddl-auto: create
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
-        show_sql: true
+    hibernate:
+      ddl-auto: create
+
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 86400000 # a day
+      #      expiration: 1000
+      refresh-token:
+        secret-key: vwzd6rhhPVr2D3NYWiBMpiB3DX9JbaerzjPBUfN6IhuDa7AEzxZ5ojjZn6ugBNKJ
+        expiration: 604800000 # 7 days
+#        expiration: 30000
