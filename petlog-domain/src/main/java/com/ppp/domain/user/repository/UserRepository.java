@@ -1,4 +1,4 @@
-package com.ppp.api.user.repository;
+package com.ppp.domain.user.repository;
 
 import com.ppp.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
