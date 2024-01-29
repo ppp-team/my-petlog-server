@@ -2,6 +2,7 @@ package com.ppp.api.auth.exception;
 
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.user.exception.NotFoundUserException;
+import com.ppp.common.exception.TokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,17 @@ public class UserExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<ExceptionResponse> TokenException(TokenException exception){
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .status(exception.getStatus())
+                .code(exception.getErrorCode())
+                .message(exception.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
 
     @ExceptionHandler(ExistsEmailException.class)
     public ResponseEntity<ExceptionResponse> existsEmailException(ExistsEmailException exception){
