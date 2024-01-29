@@ -43,13 +43,14 @@ public class DiaryService {
     public void updateDiary(User user, Long diaryId, DiaryRequest request) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
+        validateModifyDiary(diary, user);
         //TODO: check user has authority on pet space
         //TODO: upload files to S3
         diary.update(request.getTitle(), request.getContent(), request.getDate());
     }
 
     private void validateModifyDiary(Diary diary, User user) {
-        if (Objects.equals(diary.getUser().getId(), user.getId()))
+        if (!Objects.equals(diary.getUser().getId(), user.getId()))
             throw new DiaryException(NOT_DIARY_OWNER);
     }
 
