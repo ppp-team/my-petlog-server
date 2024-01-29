@@ -3,15 +3,15 @@ package com.ppp.api.auth.exception;
 import lombok.Getter;
 
 @Getter
-public class TokenException extends RuntimeException{
+public class SigninException extends RuntimeException{
     private final String message;
-    private final String errorCode;
+    private final String code;
     private final int status;
 
-    public TokenException(ErrorCode errorCode){
+    public SigninException(ErrorCode errorCode){
         this.message = errorCode.getMessage();
         this.status = errorCode.getStatus().value();
-        this.errorCode = errorCode.getCode();
+        this.code = errorCode.getCode();
     }
 
     @Override
