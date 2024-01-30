@@ -5,32 +5,22 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.Collections;
 
 public class PrincipalDetails implements UserDetails {
     private User user;
-
-    private Set<GrantedAuthority> grantedAuthorities;
 
     public PrincipalDetails(User user) {
         this.user = user;
     }
 
-    public PrincipalDetails(User user, Set<GrantedAuthority> grantedAuthorities) {
-        this.user = user;
-        this.grantedAuthorities = grantedAuthorities;
+    public User getUser() {
+        return user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = grantedAuthorities;
-//        collection.add(new GrantedAuthority() {
-//            @Override
-//            public String getAuthority() {
-//                return user.getRole();
-//            }
-//        });
-        return collection;
+        return Collections.emptyList();
     }
 
     @Override
