@@ -1,4 +1,4 @@
-package com.ppp.api.user.dto;
+package com.ppp.api.user.dto.response;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,4 +1,4 @@
-package com.ppp.api.user.dto;
+package com.ppp.api.user.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

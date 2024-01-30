@@ -1,6 +1,6 @@
 package com.ppp.common.security.jwt;
 
-import com.ppp.common.security.CustomUserDetailsService;
+import com.ppp.common.security.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +16,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Map;
 
 
 @Slf4j
@@ -25,7 +24,7 @@ import java.util.Map;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -38,9 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = jwtTokenProvider.getJwtFromRequestHeader(request);
 
         // token validation
-        if(StringUtils.hasText(token) && jwtTokenProvider.validateAccessToken(token, request)){
-            Map<String, Object> userInfo = jwtTokenProvider.getUserFromJwt(token);
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername((String)userInfo.get("email"));
+        if(StringUtils.hasText(token) && jwtTokenProvider.validateAccessToken(token)){
+            String email = jwtTokenProvider.getUserEmailFromAccessToken(token);
+            UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
 
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                     userDetails,null,userDetails.getAuthorities()

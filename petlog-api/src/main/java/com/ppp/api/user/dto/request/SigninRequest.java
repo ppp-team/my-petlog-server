@@ -1,4 +1,4 @@
-package com.ppp.api.user.dto;
+package com.ppp.api.user.dto.request;
 
 
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SigninDto {
+public class SigninRequest {
     private String email;
     private String password;
 }

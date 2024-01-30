@@ -3,12 +3,12 @@ package com.ppp.api.auth.exception;
 import lombok.Getter;
 
 @Getter
-public class SigninException extends RuntimeException{
+public class AuthException extends RuntimeException{
     private final String message;
     private final String code;
     private final int status;
 
-    public SigninException(ErrorCode errorCode){
+    public AuthException(ErrorCode errorCode){
         this.message = errorCode.getMessage();
         this.status = errorCode.getStatus().value();
         this.code = errorCode.getCode();
