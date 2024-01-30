@@ -2,7 +2,7 @@ package com.ppp.domain.user;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "profile_image")
 public class ProfileImage {
     @Id
@@ -25,4 +24,10 @@ public class ProfileImage {
 
     private String thumbnailUrl;
 
+    @Builder
+    public ProfileImage(User user, String url, String thumbnailUrl) {
+        this.user = user;
+        this.url = url;
+        this.thumbnailUrl = thumbnailUrl;
+    }
 }
