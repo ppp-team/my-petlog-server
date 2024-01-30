@@ -10,7 +10,6 @@ spring:
     url: jdbc:mysql://localhost:3306/petlog?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
     username: admin
     password: admin
-
   jpa:
     show-sql: true
     properties:
@@ -18,14 +17,16 @@ spring:
         format_sql: true
     hibernate:
       ddl-auto: create
+  data:
+    redis:
+      password: YOUR_PASSWORD
+      timeout: 600ms
 
 application:
   security:
     jwt:
       secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-      expiration: 86400000 # a day
-      #      expiration: 1000
+      expiration: 86400000
       refresh-token:
         secret-key: vwzd6rhhPVr2D3NYWiBMpiB3DX9JbaerzjPBUfN6IhuDa7AEzxZ5ojjZn6ugBNKJ
-        expiration: 604800000 # 7 days
-#        expiration: 30000
+        expiration: 604800000

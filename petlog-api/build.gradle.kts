@@ -34,6 +34,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
     implementation("org.springframework.data:spring-data-elasticsearch:5.1.8")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("com.mysql:mysql-connector-j")
@@ -65,7 +66,8 @@ tasks.jacocoTestReport {
                     )
                 )
             }
-        }))
+        })
+    )
     finalizedBy(tasks.jacocoTestCoverageVerification)
 }
 
@@ -73,19 +75,19 @@ tasks.jacocoTestCoverageVerification {
     dependsOn(tasks.jacocoTestReport)
     violationRules {
         rule {
-			isEnabled = true
-			element = "CLASS"
-			includes = listOf(
-				"com.ppp.**.controller.*",
-				"com.ppp.**.service.*",
-				"com.ppp.**.util.*",
-				"com.ppp.**.interceptor.*"
-			)
+            isEnabled = true
+            element = "CLASS"
+            includes = listOf(
+                "com.ppp.**.controller.*",
+                "com.ppp.**.service.*",
+                "com.ppp.**.util.*",
+                "com.ppp.**.interceptor.*"
+            )
 
             limit {
-				minimum = "0.80".toBigDecimal()
-				counter = "LINE"
-				value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+                counter = "LINE"
+                value = "COVEREDRATIO"
             }
         }
     }
