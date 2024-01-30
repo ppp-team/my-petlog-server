@@ -1,11 +1,14 @@
 package com.ppp.api.exception;
 
 
+import com.ppp.api.auth.exception.AuthException;
 import com.ppp.api.mock.exception.MockException;
+import com.ppp.common.exception.TokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,6 +32,30 @@ public class GlobalExceptionHandler {
                 .build();
         log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<ExceptionResponse> handleAuthException(AuthException exception){
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .status(exception.getStatus())
+                .code(exception.getCode())
+                .message(exception.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(exception.getStatus()));
+    }
+
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<ExceptionResponse> handleTokenException(TokenException exception){
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .status(exception.getStatus())
+                .code(exception.getErrorCode())
+                .message(exception.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(CustomException.class)

@@ -16,13 +16,32 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        show_sql: true
     hibernate:
       ddl-auto: update
   data:
     redis:
       password: YOUR_PASSWORD
       timeout: 600ms
-
+cloud:
+  aws:
+    s3:
+      bucket: BUCKET_NAME
+    credentials:
+      access-key: ACCESSKEY_STRING
+      secret-key: SECRETKEY_STRING
+    region:
+      static: REGIONNAME
+      auto: false
+    stack:
+      auto: false
+logging:
+  level:
+    com:
+      amazons:
+        util:
+          EC2MetadataUtils: ERROR
+          
 application:
   security:
     jwt:
