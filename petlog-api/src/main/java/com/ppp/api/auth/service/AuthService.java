@@ -1,12 +1,11 @@
 package com.ppp.api.auth.service;
 
 
-import com.ppp.api.auth.exception.SigninException;
-import com.ppp.api.user.dto.AuthenticationResponse;
-import com.ppp.api.user.dto.RegisterRequest;
-import com.ppp.api.user.dto.SigninDto;
+import com.ppp.api.auth.exception.AuthException;
+import com.ppp.api.user.dto.response.AuthenticationResponse;
+import com.ppp.api.user.dto.request.RegisterRequest;
+import com.ppp.api.user.dto.request.SigninRequest;
 import com.ppp.api.user.exception.ErrorCode;
-import com.ppp.api.auth.exception.ExistsEmailException;
 import com.ppp.api.user.exception.NotFoundUserException;
 import com.ppp.common.security.jwt.JwtTokenProvider;
 import com.ppp.domain.auth.repository.RefreshToken;
@@ -14,9 +13,9 @@ import com.ppp.domain.auth.repository.RefreshTokenRepository;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.constant.Role;
 import com.ppp.domain.user.repository.UserRepository;
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +31,9 @@ public class AuthService {
 
     final PasswordEncoder passwordEncoder;
 
-    public User signup(RegisterRequest signupDto) {
+    public void signup(RegisterRequest signupDto) {
         if(userRepository.existsByEmail(signupDto.getEmail())) {
-            throw new ExistsEmailException(com.ppp.api.auth.exception.ErrorCode.EXISTS_EMAIL);
+            throw new AuthException(com.ppp.api.auth.exception.ErrorCode.EXISTS_EMAIL);
         }
 
         String rawPwd= signupDto.getPassword();
@@ -46,23 +45,18 @@ public class AuthService {
         newUser.setPassword(encPwd);
         newUser.setRole(Role.USER);
 
-        return userRepository.save(newUser);
+        userRepository.save(newUser);
     }
 
-    /**
-     * 인증 할 때 Access, Refresh 새로 발급
-     */
-    public AuthenticationResponse signin(SigninDto signinDto) {
-        String email = signinDto.getEmail();
-        User user = userRepository.findByEmail(signinDto.getEmail())
+    public AuthenticationResponse signin(SigninRequest signinRequest) {
+        String email = signinRequest.getEmail();
+        User user = userRepository.findByEmail(signinRequest.getEmail())
                 .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
 
-        // 유저가 존재하면, 패스워드 확인
-        if (passwordEncoder.matches(signinDto.getPassword(), user.getPassword())) {
+        if (passwordEncoder.matches(signinRequest.getPassword(), user.getPassword())) {
             String accessToken = jwtTokenProvider.generateAccessToken(user);
             String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
-            // save rt
             RefreshToken persistenceToken = refreshTokenRepository.findByEmail(email)
                     .orElseGet(() -> new RefreshToken(email, refreshToken));
             persistenceToken.setRefreshToken(refreshToken);
@@ -74,20 +68,19 @@ public class AuthService {
                     .build();
         }
 
-        throw new SigninException(com.ppp.api.auth.exception.ErrorCode.NOTMATCH_PASSWORD);
+        throw new AuthException(com.ppp.api.auth.exception.ErrorCode.NOTMATCH_PASSWORD);
     }
 
-    // AT, RT 발급
-    public AuthenticationResponse regenerateToken(String refreshTokenParam) {
-        return generateNewToken(refreshTokenParam);
+    public AuthenticationResponse regenerateToken(String refreshToken) {
+        jwtTokenProvider.validateRefreshToken(refreshToken);
+        return generateNewToken(refreshToken);
     }
 
     private AuthenticationResponse generateNewToken(String refreshToken) {
-        Claims claims = jwtTokenProvider.getUserFromRefreshToken(refreshToken);
-        String email = claims.get("email").toString();
+        String email = jwtTokenProvider.getUserEmailFromRefreshToken(refreshToken);
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
+                .orElseThrow(() -> new UsernameNotFoundException(ErrorCode.NOT_FOUND_USER.getMessage()));
 
         String at = jwtTokenProvider.generateAccessToken(user);
         String rt = jwtTokenProvider.generateRefreshToken(user);
