@@ -10,7 +10,6 @@ spring:
     url: jdbc:mysql://localhost:3306/petlog?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
     username: admin
     password: admin
-
   jpa:
     show-sql: true
     properties:
@@ -18,6 +17,10 @@ spring:
         format_sql: true
     hibernate:
       ddl-auto: create
+  data:
+    redis:
+      password: YOUR_PASSWORD
+      timeout: 600ms
 cloud:
   aws:
     s3:

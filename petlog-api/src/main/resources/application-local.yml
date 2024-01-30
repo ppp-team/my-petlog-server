@@ -19,6 +19,10 @@ spring:
         show_sql: true
     hibernate:
       ddl-auto: update
+  data:
+    redis:
+      password: YOUR_PASSWORD
+      timeout: 600ms
 cloud:
   aws:
     s3:
@@ -37,7 +41,7 @@ logging:
       amazons:
         util:
           EC2MetadataUtils: ERROR
-
+          
 application:
   security:
     jwt:
