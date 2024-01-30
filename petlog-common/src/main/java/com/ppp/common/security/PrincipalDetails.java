@@ -5,10 +5,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 public class PrincipalDetails implements UserDetails {
-    private User user;
+    private final User user;
 
     public PrincipalDetails(User user) {
         this.user = user;
@@ -20,7 +20,8 @@ public class PrincipalDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
+        // ROLE 리스트를 GrantedAuthority 컬렉션 객체로 반환
+        return List.of(()->String.valueOf(user.getRole()));
     }
 
     @Override
