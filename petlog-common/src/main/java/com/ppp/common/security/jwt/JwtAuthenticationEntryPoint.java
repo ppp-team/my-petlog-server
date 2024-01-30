@@ -16,43 +16,9 @@ import java.time.LocalDateTime;
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    // 인증 과정 실패 하거나, 인증헤더를 보내지 않게 되는 경우 401(UnAuthorized)
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-        String exception = (String)request.getAttribute("exception");
-        ErrorCode errorCode;
-
-        log.debug("log: exception: {} ", exception);
-
-        /**
-         * 토큰 없는 경우
-         */
-        if(exception == null) {
-            errorCode = ErrorCode.NOT_FOUND_TOKEN;
-            setResponse(response, errorCode);
-            return;
-        }
-
-        /**
-         * 토큰 만료된 경우
-         */
-        if(exception.equals(ErrorCode.EXPIRED_TOKEN.getCode())) {
-            errorCode = ErrorCode.EXPIRED_TOKEN;
-            setResponse(response, errorCode);
-            return;
-        }
-
-        /**
-         * 토큰 시그니처가 다른 경우
-         */
-        if(exception.equals(ErrorCode.INVALID_SIGNATURE.getCode())) {
-            errorCode = ErrorCode.INVALID_SIGNATURE;
-            setResponse(response, errorCode);
-            return;
-        }
-
-        errorCode = ErrorCode.MALFORMED_TOKEN;
-        setResponse(response, errorCode);
+        setResponse(response, ErrorCode.UNAUTHORIZED);
     }
 
     private void setResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
