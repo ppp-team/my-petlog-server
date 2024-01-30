@@ -1,13 +1,14 @@
 package com.ppp.common.util;
 
-import com.ppp.common.exception.ErrorCode;
-import com.ppp.common.exception.FileException;
 import com.ppp.domain.common.constant.FileDomain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static com.ppp.domain.common.constant.FileDomain.DIARY;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FilePathUtilTest {
     @Test
@@ -27,9 +28,9 @@ class FilePathUtilTest {
         //given
         String fileName = "songsong.jpg";
         //when
-        String extension = FilePathUtil.getFileExtension(fileName);
+        Optional<String> maybeString = FilePathUtil.getFileExtension(fileName);
         //then
-        assertEquals(".jpg", extension);
+        assertEquals(".jpg", maybeString.get());
     }
 
     @Test
@@ -38,10 +39,9 @@ class FilePathUtilTest {
         //given
         String fileName = "songsong";
         //when
-        FileException exception =
-                assertThrows(FileException.class, () -> FilePathUtil.getFileExtension(fileName));
+        Optional<String> maybeString = FilePathUtil.getFileExtension(fileName);
         //then
-        assertEquals(exception.getCode(), ErrorCode.NOT_VALID_EXTENSION.name());
+        assertTrue(maybeString.isEmpty());
     }
 
     @Test
@@ -52,8 +52,8 @@ class FilePathUtilTest {
         //when
         String filePath = FilePathUtil.createFilePath(fileDomain);
         //then
-        assertTrue(filePath.startsWith(DIARY.name()));
-        assertEquals(DIARY.name().length() + "yyyy-MM-dd".length() + 2, filePath.length());
+        assertTrue(filePath.startsWith("/" + DIARY.name()));
+        assertEquals(DIARY.name().length() + "yyyy-MM-dd".length() + 3, filePath.length());
     }
 
 }

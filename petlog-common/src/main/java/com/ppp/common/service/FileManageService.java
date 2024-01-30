@@ -19,19 +19,19 @@ public class FileManageService {
     public static final List<String> ALLOW_IMAGE_CODES = List.of(".jpeg", ".png", ".jpg", ".gif");
 
     public Optional<String> uploadImage(MultipartFile multipartFile, FileDomain domain) {
-        if (!ALLOW_IMAGE_CODES.contains(
-                FilePathUtil.getFileExtension(
-                        Objects.requireNonNull(multipartFile.getOriginalFilename()))))
+        Optional<String> maybeExtension = FilePathUtil.getFileExtension(
+                Objects.requireNonNull(multipartFile.getOriginalFilename()));
+        if (maybeExtension.isEmpty() || !ALLOW_IMAGE_CODES.contains(maybeExtension.get()))
             return Optional.empty();
         return Optional.of(fileStorageClient.upload(multipartFile, domain));
     }
 
     public List<String> uploadImages(List<MultipartFile> multipartFiles, FileDomain domain) {
         return multipartFiles.stream()
-                .filter(multipartFile ->
-                        ALLOW_IMAGE_CODES.contains(
-                                FilePathUtil.getFileExtension(
-                                        Objects.requireNonNull(multipartFile.getOriginalFilename()))))
+                .filter(multipartFile -> {
+                    Optional<String> maybeExtension = FilePathUtil.getFileExtension(
+                                    Objects.requireNonNull(multipartFile.getOriginalFilename()));
+                    return maybeExtension.isPresent() && ALLOW_IMAGE_CODES.contains(maybeExtension.get());})
                 .map(multipartFile -> fileStorageClient.upload(multipartFile, domain))
                 .collect(Collectors.toList());
     }
