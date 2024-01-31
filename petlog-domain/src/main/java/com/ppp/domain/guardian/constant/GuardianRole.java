@@ -1,12 +1,12 @@
 package com.ppp.domain.guardian.constant;
 
-public enum RepStatus {
-    NORMAL("normal"),
-    REPRESENTATIVE("rep");
+public enum GuardianRole {
+    MEMBER("member"),
+    LEADER   ("leader");
 
     private final String value;
 
-    RepStatus(String value) {
+    GuardianRole(String value) {
         this.value = value;
     }
 

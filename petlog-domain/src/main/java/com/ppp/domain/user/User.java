@@ -1,7 +1,6 @@
 package com.ppp.domain.user;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ppp.domain.common.BaseTimeEntity;
 import com.ppp.domain.common.GenerationUtil;
 import com.ppp.domain.invitation.Invitation;
@@ -43,11 +42,9 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Pet> pets = new ArrayList<>();
 
-    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Invitation> invitaionList = new ArrayList<>();
 

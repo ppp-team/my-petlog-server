@@ -1,8 +1,8 @@
 package com.ppp.domain.guardian;
 
 import com.ppp.domain.common.BaseTimeEntity;
+import com.ppp.domain.guardian.constant.GuardianRole;
 import com.ppp.domain.pet.Pet;
-import com.ppp.domain.pet.constant.RepStatus;
 import com.ppp.domain.user.User;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -19,7 +19,7 @@ public class Guardian extends BaseTimeEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private RepStatus repStatus;
+    private GuardianRole guardianRole;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pet_id", nullable = false)
@@ -30,8 +30,8 @@ public class Guardian extends BaseTimeEntity {
     private User user;
 
     @Builder
-    public Guardian(RepStatus repStatus, Pet pet, User user) {
-        this.repStatus = repStatus;
+    public Guardian(GuardianRole guardianRole, Pet pet, User user) {
+        this.guardianRole = guardianRole;
         this.pet = pet;
         this.user = user;
     }
