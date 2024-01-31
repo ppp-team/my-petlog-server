@@ -45,6 +45,7 @@ dependencies {
     runtimeOnly("com.mysql:mysql-connector-j")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation ("org.springframework.security:spring-security-test")
     implementation(project(":petlog-domain"))
     implementation(project(":petlog-common"))
 }
