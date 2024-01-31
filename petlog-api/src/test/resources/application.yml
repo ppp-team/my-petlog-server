@@ -5,7 +5,7 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password: YOUR_PASSWORD
+      password: pwd
   datasource:
     url: jdbc:h2:mem:test
     username: sa
@@ -22,3 +22,20 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
+application:
+  security:
+    jwt:
+      secret-key: secret
+      expiration: 86400000
+      refresh-token:
+        secret-key: secret
+        expiration: 604800000
+cloud:
+  aws:
+    s3:
+      bucket: bucket
+    credentials:
+      access-key: secret
+      secret-key: secret
+    region:
+      static: static

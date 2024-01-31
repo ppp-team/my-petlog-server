@@ -1,6 +1,6 @@
 package com.ppp.common.util;
 
-import com.ppp.domain.common.constant.FileDomain;
+import com.ppp.domain.common.constant.Domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,8 +21,8 @@ public class FilePathUtil {
         return Optional.of(fileName.substring(dotIndex));
     }
 
-    public static String createFilePath(FileDomain fileDomain) {
-        return "/" + fileDomain.name() + "/" + LocalDate.now() + "/";
+    public static String createFilePath(Domain domain) {
+        return "/" + domain.name() + "/" + LocalDate.now() + "/";
     }
 
     private FilePathUtil() {

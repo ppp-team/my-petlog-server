@@ -32,10 +32,10 @@ public class Diary extends BaseTimeEntity {
     @Column(nullable = false)
     private LocalDate date;
 
-    private String thumbnailUrl;
+    private String thumbnailPath;
 
     @Column(columnDefinition = "bit default 0")
-    private Boolean isDeleted;
+    private boolean isDeleted;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "pet_id", nullable = false)
@@ -45,17 +45,28 @@ public class Diary extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "diary")
+    @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DiaryMedia> diaryMedias = new ArrayList<>();
 
-    public void addThumbnail(String thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl;
+    public void deleteDiaryMedias() {
+        diaryMedias.clear();
     }
 
-    public void update(String title, String content, LocalDate date) {
+
+    public void addDiaryMedias(List<DiaryMedia> diaryMedias) {
+        if(this.diaryMedias == null){
+            this.diaryMedias = diaryMedias;
+        } else {
+            this.diaryMedias.clear();
+            this.diaryMedias.addAll(diaryMedias);
+        }
+    }
+
+    public void update(String title, String content, LocalDate date, List<DiaryMedia> diaryMedias) {
         this.title = title;
         this.content = content;
         this.date = date;
+        addDiaryMedias(diaryMedias);
     }
 
     public void delete() {
@@ -63,11 +74,12 @@ public class Diary extends BaseTimeEntity {
     }
 
     @Builder
-    public Diary(String title, String content, LocalDate date, Pet pet, User user) {
+    public Diary(String title, String content, LocalDate date, Pet pet, User user, List<DiaryMedia> diaryMedias) {
         this.title = title;
         this.content = content;
         this.date = date;
         this.pet = pet;
         this.user = user;
+        this.diaryMedias = diaryMedias;
     }
 }

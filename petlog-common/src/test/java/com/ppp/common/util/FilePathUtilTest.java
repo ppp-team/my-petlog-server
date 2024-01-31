@@ -1,12 +1,12 @@
 package com.ppp.common.util;
 
-import com.ppp.domain.common.constant.FileDomain;
+import com.ppp.domain.common.constant.Domain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static com.ppp.domain.common.constant.FileDomain.DIARY;
+import static com.ppp.domain.common.constant.Domain.DIARY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -48,9 +48,9 @@ class FilePathUtilTest {
     @DisplayName("파일 경로 생성-성공")
     void createFilePath_success() {
         //given
-        FileDomain fileDomain = DIARY;
+        Domain domain = DIARY;
         //when
-        String filePath = FilePathUtil.createFilePath(fileDomain);
+        String filePath = FilePathUtil.createFilePath(domain);
         //then
         assertTrue(filePath.startsWith("/" + DIARY.name()));
         assertEquals(DIARY.name().length() + "yyyy-MM-dd".length() + 3, filePath.length());

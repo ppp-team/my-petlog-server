@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.ppp.common.exception.FileException;
 import com.ppp.common.util.FilePathUtil;
-import com.ppp.domain.common.constant.FileDomain;
+import com.ppp.domain.common.constant.Domain;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 import static com.ppp.common.exception.ErrorCode.FILE_UPLOAD_FAILED;
 
@@ -26,8 +27,8 @@ public class S3Client implements FileStorageClient {
     private final AmazonS3 amazonS3;
 
     @Override
-    public String upload(MultipartFile multipartFile, FileDomain domain) {
-        String fileName = FilePathUtil.createFileName(multipartFile.getOriginalFilename());
+    public String upload(MultipartFile multipartFile, Domain domain) {
+        String fileName = FilePathUtil.createFileName(Objects.requireNonNull(multipartFile.getOriginalFilename()));
         String filePath = FilePathUtil.createFilePath(domain);
         try {
             File file = File.createTempFile("file", fileName);
