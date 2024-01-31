@@ -1,32 +1,30 @@
-package com.ppp.domain.user;
-
+package com.ppp.domain.pet;
 
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "profile_image")
-public class ProfileImage {
+@Table(name = "pet_image")
+public class PetImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId")
-    private User user;
+    @JoinColumn(name = "pet_id")
+    private Pet pet;
 
     private String url;
 
     private String thumbnailUrl;
 
     @Builder
-    public ProfileImage(User user, String url, String thumbnailUrl) {
-        this.user = user;
+    public PetImage(Pet pet, String url, String thumbnailUrl) {
+        this.pet = pet;
         this.url = url;
         this.thumbnailUrl = thumbnailUrl;
     }
