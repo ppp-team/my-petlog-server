@@ -2,19 +2,22 @@ package com.ppp.api.diary.controller;
 
 import com.ppp.api.diary.dto.request.DiaryRequest;
 import com.ppp.api.diary.service.DiaryService;
-import com.ppp.domain.user.User;
+import com.ppp.common.security.PrincipalDetails;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
+@Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/vi/pets")
+@RequestMapping("/api/v1/pets")
 public class DiaryController {
     private final DiaryService diaryService;
 
@@ -23,10 +26,8 @@ public class DiaryController {
                                              @Valid @RequestPart DiaryRequest request,
                                              @Valid @RequestPart(required = false)
                                              @Size(max = 10, message = "이미지는 10개 이하로 첨부해주세요.") List<MultipartFile> images,
-                                             @Valid @RequestPart(required = false)
-                                             @Size(max = 1, message = "동영상은 1개 이하로 첨부해주세요.") List<MultipartFile> videos) {
-        request.addMedias(images, videos);
-        diaryService.createDiary(new User(), petId, request);
+                                             @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        diaryService.createDiary(principalDetails.getUser(), petId, request, images);
         return ResponseEntity.ok().build();
     }
 
@@ -35,16 +36,15 @@ public class DiaryController {
                                              @Valid @RequestPart DiaryRequest request,
                                              @Valid @RequestPart(required = false)
                                              @Size(max = 10, message = "이미지는 10개 이하로 첨부해주세요.") List<MultipartFile> images,
-                                             @Valid @RequestPart(required = false)
-                                             @Size(max = 1, message = "동영상은 1개 이하로 첨부해주세요.") List<MultipartFile> videos) {
-        request.addMedias(images, videos);
-        diaryService.updateDiary(new User(), diaryId, request);
+                                             @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        diaryService.updateDiary(principalDetails.getUser(), diaryId, request, images);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/diaries/{diaryId}")
-    private ResponseEntity<Void> deleteDiary(@PathVariable Long diaryId) {
-        diaryService.deleteDiary(new User(), diaryId);
+    private ResponseEntity<Void> deleteDiary(@PathVariable Long diaryId,
+                                             @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        diaryService.deleteDiary(principalDetails.getUser(), diaryId);
         return ResponseEntity.ok().build();
     }
 }

@@ -1,5 +1,6 @@
 package com.ppp.api.config;
 
+import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
 
+import static com.ppp.domain.common.constant.CacheValue.PET_SPACE_AUTHORITY;
+
 @EnableCaching
 @Configuration
 public class CacheConfig {
@@ -24,7 +27,7 @@ public class CacheConfig {
                         RedisCacheConfiguration
                                 .defaultCacheConfig()
                                 .disableCachingNullValues()
-                                .entryTtl(Duration.ofSeconds(3600))
+                                .entryTtl(Duration.ofMinutes(60))
                                 .serializeKeysWith(
                                         RedisSerializationContext.SerializationPair
                                                 .fromSerializer(new StringRedisSerializer()))
@@ -32,5 +35,12 @@ public class CacheConfig {
                                         RedisSerializationContext.SerializationPair
                                                 .fromSerializer(new GenericJackson2JsonRedisSerializer())))
                 .build();
+    }
+
+    @Bean
+    public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
+        return builder -> builder
+                .withCacheConfiguration(PET_SPACE_AUTHORITY.getValue(),
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30)));
     }
 }
