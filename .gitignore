@@ -7,7 +7,7 @@ build/
 !/gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+petlog-api/src/main/resources/jasypt-password.txt
 
 ### STS ###
 .apt_generated
@@ -29,7 +29,6 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-jasypt-encryptor-password.txt
 
 ### NetBeans ###
 /nbproject/private/

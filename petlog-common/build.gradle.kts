@@ -40,6 +40,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation ("org.springframework.boot:spring-boot-starter-data-redis")
     implementation ("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
+    implementation("com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5")
+
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     runtimeOnly("com.mysql:mysql-connector-j")
