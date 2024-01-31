@@ -1,7 +1,7 @@
 package com.ppp.common.service;
 
 import com.ppp.common.client.FileStorageClient;
-import com.ppp.domain.common.constant.FileDomain;
+import com.ppp.domain.common.constant.Domain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +40,7 @@ class FileManageServiceTest {
         given(fileStorageClient.upload(any(), any()))
                 .willReturn(savedPath);
         //when
-        Optional<String> maybeString = fileManageService.uploadImage(file, FileDomain.USER);
+        Optional<String> maybeString = fileManageService.uploadImage(file, Domain.USER);
         //then
         verify(fileStorageClient, times(1)).upload(any(), any());
         assertTrue(maybeString.isPresent());
@@ -54,7 +54,7 @@ class FileManageServiceTest {
         MultipartFile image = new MockMultipartFile("images", "image.webp",
                 MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes());
         //when
-        Optional<String> maybeString = fileManageService.uploadImage(image, FileDomain.USER);
+        Optional<String> maybeString = fileManageService.uploadImage(image, Domain.USER);
         //then
         verify(fileStorageClient, times(0)).upload(any(), any());
         assertTrue(maybeString.isEmpty());
@@ -73,7 +73,7 @@ class FileManageServiceTest {
         given(fileStorageClient.upload(any(), any()))
                 .willReturn(savedPath);
         //when
-        List<String> filePaths = fileManageService.uploadImages(images, FileDomain.USER);
+        List<String> filePaths = fileManageService.uploadImages(images, Domain.USER);
         //then
         verify(fileStorageClient, times(1)).upload(any(), any());
         assertEquals(filePaths.size(), 1);

@@ -1,11 +1,11 @@
 package com.ppp.api.exception;
 
 
+import com.ppp.api.auth.exception.AuthException;
 import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.mock.exception.MockException;
 import com.ppp.api.pet.exception.PetException;
-import com.ppp.api.auth.exception.AuthException;
-import com.ppp.api.mock.exception.MockException;
+import com.ppp.common.exception.ErrorCode;
 import com.ppp.common.exception.TokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -79,7 +79,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthException.class)
-    public ResponseEntity<ExceptionResponse> handleAuthException(AuthException exception){
+    public ResponseEntity<ExceptionResponse> handleAuthException(AuthException exception) {
         ExceptionResponse errorResponse = ExceptionResponse.builder()
                 .status(exception.getStatus())
                 .code(exception.getCode())
@@ -91,7 +91,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(TokenException.class)
-    public ResponseEntity<ExceptionResponse> handleTokenException(TokenException exception){
+    public ResponseEntity<ExceptionResponse> handleTokenException(TokenException exception) {
         ExceptionResponse errorResponse = ExceptionResponse.builder()
                 .status(exception.getStatus())
                 .code(exception.getErrorCode())
