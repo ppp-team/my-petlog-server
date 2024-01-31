@@ -8,8 +8,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/petlog?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
-    username: admin
-    password: admin
+    username: ENC("pClZTC6PxB6oD0/fe1aeJA==")
+    password: ENC("pClZTC6PxB6oD0/fe1aeJA==")
 
   jpa:
     show-sql: true
@@ -45,8 +45,16 @@ logging:
 application:
   security:
     jwt:
-      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      secret-key: ENC("hXAEbSPJT5gr5QcjKJcmm+Hs6CUZaPaTSE8VEUsj+aWLkWXKyomk3nuWX0kZfW99H4sBcFn1BNN0PtBpMppT2vFhnK4vgEYSJPP8qGD9JdA=")
       expiration: 86400000
       refresh-token:
-        secret-key: vwzd6rhhPVr2D3NYWiBMpiB3DX9JbaerzjPBUfN6IhuDa7AEzxZ5ojjZn6ugBNKJ
+        secret-key: ENC("TIBlzwCvpD3HNPv9V/sjJDGni3t2SGk30Hmr5oIY/T3yeyr1dMGHraDLL2vzuFDwNOhYfk96QniY+nmbEIb6397c1PHa70XK1t2/mlOt9As=")
         expiration: 604800000
+
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor
+    algorithm: PBEWithMD5AndDES
+    pool-size: 2
+    string-output-type: base64
+    key-obtention-iterations: 10000
