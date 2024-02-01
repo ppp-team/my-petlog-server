@@ -36,17 +36,17 @@ public class AuthService {
 
     private final RedisService redisService;
 
-    public void signup(RegisterRequest signupDto) {
-        if(userRepository.existsByEmail(signupDto.getEmail())) {
+    public void signup(RegisterRequest registerRequest) {
+        if(userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new AuthException(ErrorCode.EXISTS_EMAIL);
         }
 
-        String rawPwd= signupDto.getPassword();
+        String rawPwd= registerRequest.getPassword();
         String encPwd = passwordEncoder.encode(rawPwd);
 
-        User newUser = User.createUserByEmail(signupDto.getEmail());
-        newUser.setNickname(signupDto.getNickname());
-        newUser.setEmail(signupDto.getEmail());
+        User newUser = User.createUserByEmail(registerRequest.getEmail());
+        newUser.setNickname(registerRequest.getNickname());
+        newUser.setEmail(registerRequest.getEmail());
         newUser.setPassword(encPwd);
         newUser.setRole(Role.USER);
 
