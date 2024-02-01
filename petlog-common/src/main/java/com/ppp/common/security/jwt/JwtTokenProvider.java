@@ -8,14 +8,11 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -29,7 +26,7 @@ public class JwtTokenProvider {
     private long accessExpiration;
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long refreshExpiration;
-    
+
 
     public String generateAccessToken(User user){
         Date expireDate = createExpireDate(accessExpiration);
@@ -60,6 +57,32 @@ public class JwtTokenProvider {
     private Date createExpireDate(long expirationInMs){
         long expireTime = new Date().getTime() + expirationInMs;
         return new Date(expireTime);
+    }
+
+    public Long getAccessExpiration(String accessToken) {
+        // accessToken 남은 유효시간
+        Date expiration = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .build()
+                .parseClaimsJws(accessToken)
+                .getBody()
+                .getExpiration();
+        // 현재 시간
+        Long now = new Date().getTime();
+        return (expiration.getTime() - now);
+    }
+
+    public Long getRefreshExpiration(String refreshToken) {
+        // refreshToken 남은 유효시간
+        Date expiration = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(secretRefreshKey.getBytes()))
+                .build()
+                .parseClaimsJws(refreshToken)
+                .getBody()
+                .getExpiration();
+        // 현재 시간
+        Long now = new Date().getTime();
+        return (expiration.getTime() - now);
     }
 
     public String getUserEmailFromAccessToken(String token){
