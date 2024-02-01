@@ -1,6 +1,8 @@
 package com.ppp.api.diary.service;
 
 import com.ppp.api.diary.dto.request.DiaryRequest;
+import com.ppp.api.diary.dto.response.DiaryDetailResponse;
+import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.service.FileManageService;
@@ -14,10 +16,15 @@ import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -71,17 +78,17 @@ public class DiaryService {
     public void updateDiary(User user, Long diaryId, DiaryRequest request, List<MultipartFile> images) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
-        validateModifyDiary(diary, user, diary.getPet());
+        validateModifyDiary(diary, user);
 
         deleteDiaryMedia(diary);
         diary.update(request.getTitle(), request.getContent(), request.getDate(),
                 uploadAndGetDiaryMedias(images, diary));
     }
 
-    private void validateModifyDiary(Diary diary, User user, Pet pet) {
+    private void validateModifyDiary(Diary diary, User user) {
         if (!Objects.equals(diary.getUser().getId(), user.getId()))
             throw new DiaryException(NOT_DIARY_OWNER);
-        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
+        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), diary.getPet().getId()))
             throw new DiaryException(FORBIDDEN_PET_SPACE);
     }
 
@@ -95,9 +102,53 @@ public class DiaryService {
     public void deleteDiary(User user, Long diaryId) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
-        validateModifyDiary(diary, user, diary.getPet());
+        validateModifyDiary(diary, user);
 
         deleteDiaryMedia(diary);
         diary.delete();
+    }
+
+    public DiaryDetailResponse displayDiary(User user, Long diaryId) {
+        Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
+                .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
+        validateDisplayDiary(user, diary);
+        return DiaryDetailResponse.from(diary, user.getId());
+    }
+
+    private void validateDisplayDiary(User user, Diary diary) {
+        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), diary.getPet().getId()))
+            throw new DiaryException(FORBIDDEN_PET_SPACE);
+    }
+
+    public Slice<DiaryGroupByDateResponse> displayDiaries(User user, Long petId, int page, int size) {
+        validateQueryDiaries(user, petId);
+        return getGroupedDiariesSlice(
+                diaryRepository.findByPetIdAndIsDeletedFalseOrderByIdDesc(petId,
+                        PageRequest.of(page, size)), user.getId());
+    }
+
+    private Slice<DiaryGroupByDateResponse> getGroupedDiariesSlice(Slice<Diary> diarySlice, String userId) {
+        if (diarySlice.getContent().size() == 0)
+            return new SliceImpl<>(new ArrayList<>(), diarySlice.getPageable(), diarySlice.hasNext());
+
+        List<DiaryGroupByDateResponse> content = new ArrayList<>();
+        List<Diary> sameDaysDiaries = new ArrayList<>();
+        LocalDate prevDate = diarySlice.getContent().get(0).getDate();
+        for (Diary diary : diarySlice.getContent()) {
+            if (!prevDate.equals(diary.getDate())) {
+                content.add(DiaryGroupByDateResponse.of(prevDate, sameDaysDiaries, userId));
+                prevDate = diary.getDate();
+                sameDaysDiaries = new ArrayList<>();
+            }
+            sameDaysDiaries.add(diary);
+        }
+        content.add(DiaryGroupByDateResponse.of(prevDate, sameDaysDiaries, userId));
+
+        return new SliceImpl<>(content, diarySlice.getPageable(), diarySlice.hasNext());
+    }
+
+    private void validateQueryDiaries(User user, Long petId) {
+        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
+            throw new DiaryException(FORBIDDEN_PET_SPACE);
     }
 }

@@ -1,10 +1,9 @@
 package com.ppp.api.auth.controller;
 
 import com.ppp.api.auth.service.AuthService;
-import com.ppp.api.user.dto.request.SigninRequest;
-import com.ppp.api.user.dto.response.AuthenticationResponse;
-import com.ppp.api.user.dto.request.RegisterRequest;
-import com.ppp.common.security.jwt.JwtTokenProvider;
+import com.ppp.api.auth.dto.request.SigninRequest;
+import com.ppp.api.auth.dto.response.AuthenticationResponse;
+import com.ppp.api.auth.dto.request.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@RequestBody RegisterRequest registerRequest) {
         authService.signup(registerRequest);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/signin")
@@ -31,9 +30,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout( @RequestHeader("refreshToken") String refreshToken) {
-        // todo: 레디스에서 토큰 삭제
-
+    public ResponseEntity<Void> logout( @RequestHeader("accessToken") String accessToken) {
+        authService.logout(accessToken);
         return ResponseEntity.noContent().build();
     }
 

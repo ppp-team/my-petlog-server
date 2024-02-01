@@ -19,8 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -136,6 +135,30 @@ class DiaryControllerTest {
     @DisplayName("일기 삭제 성공")
     void deleteDiary_success() throws Exception {
         mockMvc.perform(delete("/api/v1/pets/diaries/{diaryId}", 1L)
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("일기 조회 성공")
+    void displayDiary_success() throws Exception {
+        mockMvc.perform(get("/api/v1/pets/diaries/{diaryId}", 1L)
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("일기 리스트 조회 성공")
+    void displayDiaries_success() throws Exception {
+        mockMvc.perform(get("/api/v1/pets/diaries/{diaryId}", 1L)
+                        .param("page", "0")
+                        .param("size", "10")
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
