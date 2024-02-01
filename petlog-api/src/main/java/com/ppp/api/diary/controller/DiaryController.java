@@ -1,6 +1,8 @@
 package com.ppp.api.diary.controller;
 
 import com.ppp.api.diary.dto.request.DiaryRequest;
+import com.ppp.api.diary.dto.response.DiaryDetailResponse;
+import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.api.diary.service.DiaryService;
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.common.security.PrincipalDetails;
@@ -14,6 +16,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -75,5 +78,19 @@ public class DiaryController {
                                              @AuthenticationPrincipal PrincipalDetails principalDetails) {
         diaryService.deleteDiary(principalDetails.getUser(), diaryId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "/diaries/{diaryId}")
+    private ResponseEntity<DiaryDetailResponse> displayDiary(@PathVariable Long diaryId,
+                                                             @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(diaryService.displayDiary(principalDetails.getUser(), diaryId));
+    }
+
+    @GetMapping(value = "/{petId}/diaries")
+    private ResponseEntity<Slice<DiaryGroupByDateResponse>> displayDiaries(@PathVariable Long petId,
+                                                                           @RequestParam(defaultValue = "0") int page,
+                                                                           @RequestParam(defaultValue = "5") int size,
+                                                                           @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(diaryService.displayDiaries(principalDetails.getUser(), petId, page, size));
     }
 }
