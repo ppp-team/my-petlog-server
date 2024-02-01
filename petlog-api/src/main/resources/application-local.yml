@@ -30,12 +30,12 @@ spring:
 cloud:
   aws:
     s3:
-      bucket: BUCKET_NAME
+      bucket: ENC("DFq5C1E7ikVMVvEIAocccgRQALrs0lDK")
     credentials:
-      access-key: ACCESSKEY_STRING
-      secret-key: SECRETKEY_STRING
+      access-key: ENC("+RB2HYst5ZTFuVsESnhgCaUKHaAY+JFQIrUQnxmTZt4=")
+      secret-key: ENC("Ci5RcZkKwP6rjLy1JrXfbzBUCh3sIWAEwPG4YnXGI1ivU0M1dZy+JLkVI7vsqSDrdxtXapdoCS0=")
     region:
-      static: REGIONNAME
+      static: ENC("J+EuG/dqH+tZRQWsHMVQLTEplBxbZX6z")
       auto: false
     stack:
       auto: false
