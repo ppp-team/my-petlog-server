@@ -11,10 +11,12 @@ spring:
       max-request-size: 50MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/petlog?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
-    username: admin
-    password: admin
+    url: jdbc:mysql://ENC("jov8u4WoZ2gyhOI7n1fjNdZyXwu+bthSn9Nh7IbGk1Hq9rKPH/HZkCBC7LJGSQxdiwpb4tI5Qa4N2VhzsgGV8oeaQhzafRCQ")/petlog?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
+    username: ENC("uT5Scmzjid/mQarp8Wejpw==")
+    password: ENC("sR4oLGgaxiuRiiOaI2C7An8iyrp6csnM")
   jpa:
+    defer-datasource-initialization: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     show-sql: true
     properties:
       hibernate:
@@ -28,12 +30,12 @@ spring:
 cloud:
   aws:
     s3:
-      bucket: BUCKETNAME
+      bucket: ENC("DFq5C1E7ikVMVvEIAocccgRQALrs0lDK")
     credentials:
-      access-key: ACCESSKEY_STRING
-      secret-key: SECRETKEY_STRING
+      access-key: ENC("+RB2HYst5ZTFuVsESnhgCaUKHaAY+JFQIrUQnxmTZt4=")
+      secret-key: ENC("Ci5RcZkKwP6rjLy1JrXfbzBUCh3sIWAEwPG4YnXGI1ivU0M1dZy+JLkVI7vsqSDrdxtXapdoCS0=")
     region:
-      static: REGIONNAME
+      static: ENC("J+EuG/dqH+tZRQWsHMVQLTEplBxbZX6z")
       auto: false
     stack:
       auto: false
