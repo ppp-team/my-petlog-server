@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum CacheValue {
-    PET_SPACE_AUTHORITY("petSpaceAuthority");
+    PET_SPACE_AUTHORITY("petSpaceAuthority"),
+    DIARY_COMMENT_COUNT("diaryCommentCount")
+    ;
 
     private final String value;
 }

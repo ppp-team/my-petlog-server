@@ -14,6 +14,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
 
+import static com.ppp.domain.common.constant.CacheValue.DIARY_COMMENT_COUNT;
 import static com.ppp.domain.common.constant.CacheValue.PET_SPACE_AUTHORITY;
 
 @EnableCaching
@@ -41,6 +42,8 @@ public class CacheConfig {
     public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
         return builder -> builder
                 .withCacheConfiguration(PET_SPACE_AUTHORITY.getValue(),
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30)))
+                .withCacheConfiguration(DIARY_COMMENT_COUNT.getValue(),
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30)));
     }
 }

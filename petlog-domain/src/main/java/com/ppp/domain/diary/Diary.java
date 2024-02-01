@@ -34,7 +34,7 @@ public class Diary extends BaseTimeEntity {
 
     private String thumbnailPath;
 
-    @Column(columnDefinition = "bit default 0")
+    @Column(columnDefinition = "bit(1) default 0")
     private boolean isDeleted;
 
     @ManyToOne(fetch = LAZY)
