@@ -1,5 +1,6 @@
 package com.ppp.common.security.jwt;
 
+import com.ppp.common.client.RedisClient;
 import com.ppp.common.security.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
+    private final RedisClient redisClient;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -38,15 +40,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // token validation
         if(StringUtils.hasText(token) && jwtTokenProvider.validateAccessToken(token)){
-            String email = jwtTokenProvider.getUserEmailFromAccessToken(token);
-            UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
+            if (redisClient.getValues(token) == null) {// logout 안한 경우
 
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,null,userDetails.getAuthorities()
-            );
-            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                String email = jwtTokenProvider.getUserEmailFromAccessToken(token);
+                UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
 
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities()
+                );
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
         }
 
         filterChain.doFilter(request, response);

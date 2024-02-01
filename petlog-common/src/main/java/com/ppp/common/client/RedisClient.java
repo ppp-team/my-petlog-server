@@ -2,7 +2,10 @@ package com.ppp.common.client;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
+
+import java.time.Duration;
 
 @Component
 @RequiredArgsConstructor
@@ -27,5 +30,19 @@ public class RedisClient {
 
     public void removeKeyToSet(String key) {
         redisTemplate.opsForSet().pop(key);
+    }
+
+    public void setValues(String key, String data, Duration duration) {
+        ValueOperations<String, String> values = redisTemplate.opsForValue();
+        values.set(key, data, duration);
+    }
+
+    public String getValues(String key) {
+        ValueOperations<String, String> values = redisTemplate.opsForValue();
+        return values.get(key);
+    }
+
+    public void deleteValues(String key) {
+        redisTemplate.delete(key);
     }
 }
