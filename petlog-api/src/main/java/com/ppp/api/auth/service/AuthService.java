@@ -7,8 +7,8 @@ import com.ppp.api.auth.dto.request.RegisterRequest;
 import com.ppp.api.auth.dto.request.SigninRequest;
 import com.ppp.api.auth.exception.ErrorCode;
 import com.ppp.api.user.exception.NotFoundUserException;
+import com.ppp.common.client.RedisClient;
 import com.ppp.common.security.jwt.JwtTokenProvider;
-import com.ppp.common.service.RedisService;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.constant.Role;
 import com.ppp.domain.user.repository.UserRepository;
@@ -34,7 +34,7 @@ public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final RedisService redisService;
+    private final RedisClient redisClient;
 
     public void signup(RegisterRequest registerRequest) {
         if(userRepository.existsByEmail(registerRequest.getEmail())) {
@@ -63,7 +63,7 @@ public class AuthService {
             String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
             // 레디스 토큰 저장
-            redisService.setValues(email, refreshToken, Duration.ofMillis(jwtTokenProvider.getRefreshExpiration(refreshToken)));
+            redisClient.setValues(email, refreshToken, Duration.ofMillis(jwtTokenProvider.getRefreshExpiration(refreshToken)));
 
             return AuthenticationResponse.builder()
                     .accessToken(accessToken)
@@ -82,7 +82,7 @@ public class AuthService {
     private AuthenticationResponse generateNewToken(String refreshToken) {
         String email = jwtTokenProvider.getUserEmailFromRefreshToken(refreshToken);
 
-        String refreshInRedis = redisService.getValues(email);
+        String refreshInRedis = redisClient.getValues(email);
         // 없을 경우 -> 로그아웃된 사용자는 재발급 x
         if (Objects.isNull(refreshInRedis) || !refreshInRedis.equals(refreshToken))
             throw new AuthException(ErrorCode.NOT_FOUND_TOKEN);
@@ -99,8 +99,8 @@ public class AuthService {
     public void logout(String accessToken) {
         Long accessTokenExpiration = jwtTokenProvider.getAccessExpiration(accessToken);
         String email = jwtTokenProvider.getUserEmailFromAccessToken(accessToken);
-        if (redisService.getValues(email) != null) redisService.deleteValues(email);
+        if (redisClient.getValues(email) != null) redisClient.deleteValues(email);
 
-        redisService.setValues(accessToken, "logout", Duration.ofMillis(accessTokenExpiration));
+        redisClient.setValues(accessToken, "logout", Duration.ofMillis(accessTokenExpiration));
     }
 }

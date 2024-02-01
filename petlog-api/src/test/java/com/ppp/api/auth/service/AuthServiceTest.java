@@ -3,8 +3,8 @@ package com.ppp.api.auth.service;
 import com.ppp.api.auth.dto.request.RegisterRequest;
 import com.ppp.api.auth.dto.request.SigninRequest;
 import com.ppp.api.auth.dto.response.AuthenticationResponse;
+import com.ppp.common.client.RedisClient;
 import com.ppp.common.security.jwt.JwtTokenProvider;
-import com.ppp.common.service.RedisService;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +32,7 @@ class AuthServiceTest {
     @Mock
     PasswordEncoder passwordEncoder;
     @Mock
-    RedisService redisService;
+    RedisClient redisClient;
     @InjectMocks
     private AuthService authService;
 
@@ -92,15 +92,15 @@ class AuthServiceTest {
         when(jwtTokenProvider.getAccessExpiration(mockAccessToken)).thenReturn(mockAccessTokenExpiration);
         when(jwtTokenProvider.getUserEmailFromAccessToken(mockAccessToken)).thenReturn(mockUserEmail);
 
-        when(redisService.getValues(mockUserEmail)).thenReturn("mockRefreshToken");
+        when(redisClient.getValues(mockUserEmail)).thenReturn("mockRefreshToken");
 
         //when
         authService.logout(mockAccessToken);
 
         //then
         // 메소드가 1번 호출되었는지
-        verify(redisService, times(1)).deleteValues(mockUserEmail);
-        verify(redisService, times(1)).setValues(mockAccessToken, "logout", Duration.ofMillis(mockAccessTokenExpiration));
+        verify(redisClient, times(1)).deleteValues(mockUserEmail);
+        verify(redisClient, times(1)).setValues(mockAccessToken, "logout", Duration.ofMillis(mockAccessTokenExpiration));
     }
 
 }

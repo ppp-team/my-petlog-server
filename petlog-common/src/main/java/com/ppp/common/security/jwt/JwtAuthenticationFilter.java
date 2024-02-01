@@ -1,7 +1,7 @@
 package com.ppp.common.security.jwt;
 
+import com.ppp.common.client.RedisClient;
 import com.ppp.common.security.UserDetailsServiceImpl;
-import com.ppp.common.service.RedisService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
-    private final RedisService redisService;
+    private final RedisClient redisClient;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -40,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // token validation
         if(StringUtils.hasText(token) && jwtTokenProvider.validateAccessToken(token)){
-            if (redisService.getValues(token) == null) {// logout 안한 경우
+            if (redisClient.getValues(token) == null) {// logout 안한 경우
 
                 String email = jwtTokenProvider.getUserEmailFromAccessToken(token);
                 UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
