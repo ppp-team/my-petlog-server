@@ -7,12 +7,6 @@ import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Configuration
@@ -33,19 +27,10 @@ public class JasyptConfig {
         PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
         encryptor.setPoolSize(poolSize);
         encryptor.setAlgorithm(algorithm);
-        encryptor.setPassword(getJasyptEncryptorPassword());
+        encryptor.setPassword(System.getProperty("jasypt.encryptor.password"));
         encryptor.setStringOutputType(stringOutputType);
         encryptor.setKeyObtentionIterations(keyObtentionIterations);
         return encryptor;
     }
 
-    private String getJasyptEncryptorPassword() {
-        try {
-            ClassPathResource resource = new ClassPathResource("jasypt-password.txt");
-            return Files.readAllLines(Paths.get(resource.getURI())).stream()
-                    .collect(Collectors.joining(""));
-        } catch (IOException e) {
-            throw new RuntimeException("Not found Jasypt password file.");
-        }
-    }
 }
