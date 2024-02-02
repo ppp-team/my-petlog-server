@@ -1,7 +1,9 @@
 package com.ppp.api.diary.service;
 
 import com.ppp.api.diary.dto.request.DiaryCommentRequest;
+import com.ppp.api.diary.dto.response.DiaryCommentResponse;
 import com.ppp.api.diary.exception.DiaryException;
+import com.ppp.common.util.TimeUtil;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryComment;
 import com.ppp.domain.diary.repository.DiaryCommentRepository;
@@ -16,21 +18,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.ppp.api.diary.exception.ErrorCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DiaryCommentServiceTest {
@@ -127,7 +126,7 @@ class DiaryCommentServiceTest {
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.createComment(user, 1L, 1L, request));
         //then
-        assertEquals(DIARY_NOT_FOUND.name(), exception.getCode());
+        assertEquals(DIARY_NOT_FOUND.getCode(), exception.getCode());
     }
 
     @Test
@@ -143,7 +142,7 @@ class DiaryCommentServiceTest {
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.createComment(user, 1L, 1L, request));
         //then
-        assertEquals(FORBIDDEN_PET_SPACE.name(), exception.getCode());
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
     }
 
     @Test
@@ -188,7 +187,7 @@ class DiaryCommentServiceTest {
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.updateComment(user, 1L, 1L, request));
         //then
-        assertEquals(DIARY_COMMENT_NOT_FOUND.name(), exception.getCode());
+        assertEquals(DIARY_COMMENT_NOT_FOUND.getCode(), exception.getCode());
     }
 
     @Test
@@ -210,7 +209,7 @@ class DiaryCommentServiceTest {
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.updateComment(user, 1L, 1L, request));
         //then
-        assertEquals(NOT_DIARY_COMMENT_OWNER.name(), exception.getCode());
+        assertEquals(NOT_DIARY_COMMENT_OWNER.getCode(), exception.getCode());
     }
 
     @Test
@@ -232,7 +231,7 @@ class DiaryCommentServiceTest {
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.updateComment(user, 1L, 1L, request));
         //then
-        assertEquals(FORBIDDEN_PET_SPACE.name(), exception.getCode());
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
     }
 
     @Test
@@ -264,7 +263,7 @@ class DiaryCommentServiceTest {
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.deleteComment(user, 1L, 1L));
         //then
-        assertEquals(DIARY_COMMENT_NOT_FOUND.name(), exception.getCode());
+        assertEquals(DIARY_COMMENT_NOT_FOUND.getCode(), exception.getCode());
     }
 
     @Test
@@ -284,7 +283,7 @@ class DiaryCommentServiceTest {
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.deleteComment(user, 1L, 1L));
         //then
-        assertEquals(NOT_DIARY_COMMENT_OWNER.name(), exception.getCode());
+        assertEquals(NOT_DIARY_COMMENT_OWNER.getCode(), exception.getCode());
     }
 
     @Test
@@ -304,7 +303,59 @@ class DiaryCommentServiceTest {
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.deleteComment(user, 1L, 1L));
         //then
-        assertEquals(FORBIDDEN_PET_SPACE.name(), exception.getCode());
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("다이어리 댓글 조회 성공")
+    void displayComments_success() {
+        //given
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(diary));
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        given(diaryCommentRepository.findByDiaryAndIsDeletedFalse(diary))
+                .willReturn(List.of(
+                        DiaryComment.builder()
+                                .content("우리 체리 귀엽다 ~ ^^")
+                                .diary(diary)
+                                .user(userA)
+                                .taggedUsersIdNicknameMap(taggedUserIdNicknameMap)
+                                .build(),
+                        DiaryComment.builder()
+                                .content("체리짱귀")
+                                .diary(diary)
+                                .user(user)
+                                .taggedUsersIdNicknameMap(new HashMap<>())
+                                .build()));
+        MockedStatic<TimeUtil> mockTimeUtil = mockStatic(TimeUtil.class);
+        mockTimeUtil.when(() -> TimeUtil.calculateTerm(any())).thenReturn("2분");
+        //when
+        List<DiaryCommentResponse> response = diaryCommentService.displayComments(user, 1L, 1L);
+        //then
+        assertEquals(response.get(0).content(), "우리 체리 귀엽다 ~ ^^");
+        assertEquals(response.get(1).content(), "체리짱귀");
+        assertEquals(response.get(0).writer().nickname(), userA.getNickname());
+        assertEquals(response.get(1).writer().nickname(), user.getNickname());
+        assertFalse(response.get(0).writer().isCurrentUser());
+        assertTrue(response.get(1).writer().isCurrentUser());
+        assertFalse(response.get(0).taggedUsers().get(0).isCurrentUser());
+        assertEquals(response.get(0).taggedUsers().get(0).id(), "ljf123");
+        assertEquals(response.get(0).taggedUsers().get(0).nickname(), "둘째누나");
+    }
+
+    @Test
+    @DisplayName("다이어리 댓글 조회 실패-forbidden pet space")
+    void displayComments_fail_FORBIDDEN_PET_SPACE() {
+        //given
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(diary));
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(false);
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.displayComments(user, 1L, 1L));
+        //then
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
     }
 
 }

@@ -88,4 +88,18 @@ class DiaryCommentControllerTest {
                 .andExpect(status().isOk());
         //then
     }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("일기 댓글 조회 성공")
+    void displayDiaryComment_success() throws Exception {
+        //given
+        //when
+        mockMvc.perform(get("/api/v1/pets/{petId}/diaries/{diaryId}/comments", 1L, 1L)
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                ).andDo(print())
+                .andExpect(status().isOk());
+        //then
+    }
 }

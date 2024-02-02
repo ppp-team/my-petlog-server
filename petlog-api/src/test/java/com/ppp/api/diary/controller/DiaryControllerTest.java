@@ -140,4 +140,32 @@ class DiaryControllerTest {
                 ).andDo(print())
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("일기 상세 조회 성공")
+    void displayDiary_success() throws Exception {
+        //given
+        //when
+        mockMvc.perform(get("/api/v1/pets/{petId}/diaries/{diaryId}", 1L, 1L)
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                ).andDo(print())
+                .andExpect(status().isOk());
+        //then
+    }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("일기 리스트 조회 성공")
+    void displayDiaries_success() throws Exception {
+        //given
+        //when
+        mockMvc.perform(get("/api/v1/pets/{petId}/diaries", 1L)
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                ).andDo(print())
+                .andExpect(status().isOk());
+        //then
+    }
 }
