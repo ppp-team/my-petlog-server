@@ -1,11 +1,11 @@
-package com.ppp.common.util;
+package com.ppp.api.user.dto.response;
 
-public class ApiResponse<T> {
+public class UserCommonResponse<T> {
     private String resultCode;
     private String message;
     private T data;
 
-    public ApiResponse(String resultCode, String message, T data) {
+    public UserCommonResponse(String resultCode, String message, T data) {
         this.resultCode = resultCode;
         this.message = message;
         this.data = data;
@@ -24,13 +24,13 @@ public class ApiResponse<T> {
     }
 
     // 편의 메서드: 성공 응답
-    public static <T> ApiResponse<T> success(String resultCode, T data) {
-        return new ApiResponse<>(resultCode, "성공", data);
+    public static <T> UserCommonResponse<T> success(String message, T data) {
+        return new UserCommonResponse<>("success", message, data);
     }
 
     // 편의 메서드: 실패 응답
-    public static <T> ApiResponse<T> fail(String resultCode, String message) {
-        return new ApiResponse<>(resultCode, message, null);
+    public static <T> UserCommonResponse<T> fail(String message,  T data) {
+        return new UserCommonResponse<>("fail", message, data);
     }
 }
 

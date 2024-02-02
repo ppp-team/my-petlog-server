@@ -30,4 +30,16 @@ public class ProfileImage {
         this.url = url;
         this.thumbnailUrl = thumbnailUrl;
     }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
 }
