@@ -26,19 +26,7 @@ public class GlobalExceptionHandler {
     private static final String LOG_FORMAT = "Class : {}, Code : {}, Message : {}";
 
     @ExceptionHandler(DateTimeParseException.class)
-    public ResponseEntity<ExceptionResponse> handleDateTimeParseException(DateTimeParseException exception){
-      ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .code(ErrorCode.REQUEST_ARGUMENT_ERROR.getCode())
-                .status(ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus().value())
-                .message(ErrorCode.REQUEST_ARGUMENT_ERROR.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ExceptionResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception){
+    public ResponseEntity<ExceptionResponse> handleDateTimeParseException(DateTimeParseException exception) {
         ExceptionResponse errorResponse = ExceptionResponse.builder()
                 .code(ErrorCode.REQUEST_ARGUMENT_ERROR.getCode())
                 .status(ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus().value())
@@ -46,7 +34,19 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .build();
         log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ExceptionResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .code(ErrorCode.REQUEST_ARGUMENT_ERROR.getCode())
+                .status(ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus().value())
+                .message(ErrorCode.REQUEST_ARGUMENT_ERROR.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
+        return new ResponseEntity<>(errorResponse, ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -65,19 +65,19 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .build();
         log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus());
     }
 
     @ExceptionHandler(DiaryException.class)
     public ResponseEntity<ExceptionResponse> handleDiaryException(DiaryException exception) {
         ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .status(exception.getStatus())
+                .status(exception.getHttpStatus().value())
                 .code(exception.getCode())
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
         log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
     }
 
     @ExceptionHandler(PetException.class)

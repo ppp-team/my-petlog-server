@@ -297,7 +297,7 @@ class DiaryServiceTest {
     }
 
     @Test
-    @DisplayName("일기 조회 성공")
+    @DisplayName("일기 상세 조회 성공")
     void displayDiary_success() {
         //given
         Diary diary = Diary.builder()
@@ -328,7 +328,7 @@ class DiaryServiceTest {
     }
 
     @Test
-    @DisplayName("일기 조회 실패-diary not found")
+    @DisplayName("일기 상세 조회 실패-diary not found")
     void displayDiary_fail_DIARY_NOT_FOUND() {
         //given
         User otherUser = User.builder()
@@ -342,7 +342,7 @@ class DiaryServiceTest {
     }
 
     @Test
-    @DisplayName("일기 조회 실패-forbidden pet space")
+    @DisplayName("일기 상세 조회 실패-forbidden pet space")
     void displayDiary_fail_FORBIDDEN_PET_SPACE() {
         //given
         User otherUser = User.builder()
@@ -364,7 +364,7 @@ class DiaryServiceTest {
     }
 
     @Test
-    @DisplayName("일기 조회 성공")
+    @DisplayName("일기 리스트 조회 성공")
     void displayDiaries_success() {
         //given
         given(diaryRepository.findByPetIdAndIsDeletedFalseOrderByIdDesc(anyLong(), any()))
