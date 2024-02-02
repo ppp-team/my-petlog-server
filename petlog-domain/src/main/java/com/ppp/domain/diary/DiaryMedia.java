@@ -29,6 +29,13 @@ public class DiaryMedia extends BaseTimeEntity {
     @JoinColumn(name = "diary_id", nullable = false)
     private Diary diary;
 
+    public static DiaryMedia of(Diary diary, String path, DiaryMediaType type) {
+        return DiaryMedia.builder()
+                .diary(diary)
+                .path(path)
+                .type(type).build();
+    }
+
     @Builder
     public DiaryMedia(String path, DiaryMediaType type, Diary diary) {
         this.path = path;

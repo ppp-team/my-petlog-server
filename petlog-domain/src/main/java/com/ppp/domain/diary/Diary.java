@@ -34,7 +34,7 @@ public class Diary extends BaseTimeEntity {
 
     private String thumbnailPath;
 
-    @Column(columnDefinition = "bit default 0")
+    @Column(columnDefinition = "bit(1) default 0")
     private boolean isDeleted;
 
     @ManyToOne(fetch = LAZY)
@@ -54,7 +54,7 @@ public class Diary extends BaseTimeEntity {
 
 
     public void addDiaryMedias(List<DiaryMedia> diaryMedias) {
-        if(this.diaryMedias == null){
+        if (this.diaryMedias.isEmpty()) {
             this.diaryMedias = diaryMedias;
         } else {
             this.diaryMedias.clear();
@@ -74,12 +74,11 @@ public class Diary extends BaseTimeEntity {
     }
 
     @Builder
-    public Diary(String title, String content, LocalDate date, Pet pet, User user, List<DiaryMedia> diaryMedias) {
+    public Diary(String title, String content, LocalDate date, Pet pet, User user) {
         this.title = title;
         this.content = content;
         this.date = date;
         this.pet = pet;
         this.user = user;
-        this.diaryMedias = diaryMedias;
     }
 }

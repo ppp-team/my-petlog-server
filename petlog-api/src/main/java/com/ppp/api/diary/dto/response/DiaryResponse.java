@@ -14,13 +14,14 @@ public record DiaryResponse(
         UserResponse writer,
         int commentCount
 ) {
-    public static DiaryResponse from(Diary diary, String currentUserId) {
+    public static DiaryResponse from(Diary diary, String currentUserId, int commentCount) {
         return DiaryResponse.builder()
                 .diaryId(diary.getId())
                 .title(diary.getTitle())
                 .content(diary.getContent())
                 .thumbnailPath(diary.getThumbnailPath())
                 .writer(UserResponse.from(diary.getUser(), currentUserId))
+                .commentCount(commentCount)
                 .build();
     }
 }

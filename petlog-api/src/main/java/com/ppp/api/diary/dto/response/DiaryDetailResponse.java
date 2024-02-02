@@ -19,13 +19,15 @@ public record DiaryDetailResponse(
         LocalDate date,
         List<String> images,
         boolean isCurrentUserLiked,
-        UserResponse writer
+        UserResponse writer,
+        int commentCount
 ) {
-    public static DiaryDetailResponse from(Diary diary, String currentUserId) {
+    public static DiaryDetailResponse from(Diary diary, String currentUserId, int commentCount) {
         return DiaryDetailResponse.builder()
                 .diaryId(diary.getId())
                 .title(diary.getTitle())
                 .content(diary.getContent())
+                .commentCount(commentCount)
                 .images(diary.getDiaryMedias().stream()
                         .map(DiaryMedia::getPath)
                         .collect(Collectors.toList()))

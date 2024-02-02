@@ -14,12 +14,10 @@ public record DiaryGroupByDateResponse(
         LocalDate date,
         List<DiaryResponse> diaries
 ) {
-    public static DiaryGroupByDateResponse of(LocalDate date, List<Diary> diaries, String currentUserId) {
+    public static DiaryGroupByDateResponse of(LocalDate date, List<DiaryResponse> diaryResponses) {
         return DiaryGroupByDateResponse.builder()
                 .date(date)
-                .diaries(diaries.stream()
-                        .map(diary -> DiaryResponse.from(diary, currentUserId))
-                        .collect(Collectors.toList()))
+                .diaries(diaryResponses)
                 .build();
     }
 }

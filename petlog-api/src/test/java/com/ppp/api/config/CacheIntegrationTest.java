@@ -1,6 +1,7 @@
 package com.ppp.api.config;
 
 import com.ppp.ApiApplication;
+import com.ppp.common.config.JasyptConfig;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
 import com.ppp.domain.guardian.repository.GuardianRepository;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,12 +42,18 @@ public class CacheIntegrationTest {
     @Autowired
     GuardianRepository guardianRepository;
 
-    Pet pet = Pet.builder()
-            .id(1L)
-            .build();
+    @MockBean(JasyptConfig.class)
+    private JasyptConfig jasyptConfig;
 
     User userA = User.builder()
             .id("abcd")
+            .username("abcde")
+            .email("abcde@gmail.com")
+            .build();
+
+    Pet pet = Pet.builder()
+            .id(1L)
+            .user(userA)
             .build();
 
     Guardian guardian = new Guardian(GuardianRole.MEMBER, pet, userA);
