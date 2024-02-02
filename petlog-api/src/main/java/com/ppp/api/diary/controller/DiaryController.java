@@ -35,9 +35,9 @@ public class DiaryController {
 
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", description = "일치하는 리소스 없음.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "403", description = "해당 기록 공간에 대한 권한이 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "500", description = "서버 오류 발생", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+            @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "일치하는 반려동물 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     private ResponseEntity<Void> createDiary(@PathVariable Long petId,
@@ -52,9 +52,10 @@ public class DiaryController {
 
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", description = "일치하는 리소스 없음.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "403", description = "해당 기록 공간에 대한 권한이 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "500", description = "서버 오류 발생", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+            @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "게시물 수정 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "일치하는 반려동물 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PutMapping(value = "/{diaryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     private ResponseEntity<Void> updateDiary(@PathVariable Long petId,
@@ -70,9 +71,9 @@ public class DiaryController {
 
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", description = "일치하는 리소스 없음.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "403", description = "해당 기록 공간에 대한 권한이 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "500", description = "서버 오류 발생", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+            @ApiResponse(responseCode = "400", description = "게시물 삭제 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "일치하는 반려동물 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @DeleteMapping(value = "/{diaryId}")
     private ResponseEntity<Void> deleteDiary(@PathVariable Long petId,
@@ -82,6 +83,11 @@ public class DiaryController {
         return ResponseEntity.ok().build();
     }
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "일치하는 일기 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+    })
     @GetMapping(value = "/{diaryId}")
     private ResponseEntity<DiaryDetailResponse> displayDiary(@PathVariable Long petId,
                                                              @PathVariable Long diaryId,
@@ -89,6 +95,10 @@ public class DiaryController {
         return ResponseEntity.ok(diaryService.displayDiary(principalDetails.getUser(), petId, diaryId));
     }
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+    })
     @GetMapping
     private ResponseEntity<Slice<DiaryGroupByDateResponse>> displayDiaries(@PathVariable Long petId,
                                                                            @RequestParam(defaultValue = "0") int page,
