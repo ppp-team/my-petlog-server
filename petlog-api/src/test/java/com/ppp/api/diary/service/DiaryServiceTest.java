@@ -111,7 +111,7 @@ class DiaryServiceTest {
         //when
         PetException exception = assertThrows(PetException.class, () -> diaryService.createDiary(user, 1L, request, images));
         //then
-        assertEquals(PET_NOT_FOUND.name(), exception.getCode());
+        assertEquals(PET_NOT_FOUND.getCode(), exception.getCode());
     }
 
     @Test
