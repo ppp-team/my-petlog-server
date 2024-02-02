@@ -1,9 +1,8 @@
 package com.ppp.api.test;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.test.context.TestConfiguration;
 
-@Configuration
-@ComponentScan(basePackages = {"com.ppp.common", "com.ppp.domain"})
+@TestConfiguration
 public class TestConfig {
+
 }
