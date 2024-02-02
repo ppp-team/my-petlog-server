@@ -13,30 +13,33 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/pets/diaries")
+@RequestMapping("/api/v1/pets/{petId}/diaries")
 public class DiaryCommentController {
     private final DiaryCommentService diaryCommentService;
 
     @PostMapping(value = "/{diaryId}/comments")
-    private ResponseEntity<Void> createComment(@PathVariable Long diaryId,
+    private ResponseEntity<Void> createComment(@PathVariable Long petId,
+                                               @PathVariable Long diaryId,
                                                @Valid @RequestBody DiaryCommentRequest request,
                                                @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        diaryCommentService.createComment(principalDetails.getUser(), diaryId, request);
+        diaryCommentService.createComment(principalDetails.getUser(), petId, diaryId, request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping(value = "/comments/{commentId}")
-    private ResponseEntity<Void> updateComment(@PathVariable Long commentId,
+    private ResponseEntity<Void> updateComment(@PathVariable Long petId,
+                                               @PathVariable Long commentId,
                                                @Valid @RequestBody DiaryCommentRequest request,
                                                @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        diaryCommentService.updateComment(principalDetails.getUser(), commentId, request);
+        diaryCommentService.updateComment(principalDetails.getUser(), petId, commentId, request);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(value = "/comments/{commentId}")
-    private ResponseEntity<Void> deleteComment(@PathVariable Long commentId,
+    private ResponseEntity<Void> deleteComment(@PathVariable Long petId,
+                                               @PathVariable Long commentId,
                                                @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        diaryCommentService.deleteComment(principalDetails.getUser(), commentId);
+        diaryCommentService.deleteComment(principalDetails.getUser(), petId, commentId);
         return ResponseEntity.ok().build();
     }
 }

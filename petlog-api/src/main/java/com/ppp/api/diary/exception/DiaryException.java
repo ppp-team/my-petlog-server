@@ -9,7 +9,7 @@ public class DiaryException extends RuntimeException {
 
     public DiaryException(ErrorCode errorCode) {
         super(errorCode.getMessage());
-        this.status = errorCode.getHttpStatus().value();
-        this.code = errorCode.name();
+        this.status = errorCode.getStatus().value();
+        this.code = errorCode.getCode();
     }
 }

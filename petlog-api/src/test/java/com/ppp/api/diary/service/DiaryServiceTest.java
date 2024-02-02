@@ -28,7 +28,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +36,8 @@ import static com.ppp.api.pet.exception.ErrorCode.PET_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class DiaryServiceTest {
@@ -49,7 +49,6 @@ class DiaryServiceTest {
 
     @Mock
     private FileManageService fileManageService;
-
     @Mock
     private GuardianRepository guardianRepository;
     @Mock
@@ -154,7 +153,7 @@ class DiaryServiceTest {
                         "/DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
 
         //when
-        diaryService.updateDiary(user, 1L, request, images);
+        diaryService.updateDiary(user, 1L, 1L, request, images);
         //then
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
@@ -171,7 +170,7 @@ class DiaryServiceTest {
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.empty());
         //when
-        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.updateDiary(user, 1L, request, images));
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.updateDiary(user, 1L, 1L, request, images));
         //then
         assertEquals(DIARY_NOT_FOUND.name(), exception.getCode());
     }
@@ -194,7 +193,7 @@ class DiaryServiceTest {
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diary));
         //when
-        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.updateDiary(user, 1L, request, images));
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.updateDiary(user, 1L, 1L, request, images));
         //then
         assertEquals(NOT_DIARY_OWNER.name(), exception.getCode());
     }
@@ -217,7 +216,7 @@ class DiaryServiceTest {
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
                 .willReturn(false);
         //when
-        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.updateDiary(user, 1L, request, images));
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.updateDiary(user, 1L, 1L, request, images));
         //then
         assertEquals(FORBIDDEN_PET_SPACE.name(), exception.getCode());
     }
@@ -238,7 +237,7 @@ class DiaryServiceTest {
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
                 .willReturn(true);
         //when
-        diaryService.deleteDiary(user, 1L);
+        diaryService.deleteDiary(user, 1L, 1L);
         //then
         assertTrue(diary.isDeleted());
     }
@@ -250,7 +249,7 @@ class DiaryServiceTest {
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.empty());
         //when
-        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.deleteDiary(user, 1L));
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.deleteDiary(user, 1L, 1L));
         //then
         assertEquals(DIARY_NOT_FOUND.name(), exception.getCode());
     }
@@ -271,7 +270,7 @@ class DiaryServiceTest {
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diary));
         //when
-        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.deleteDiary(user, 1L));
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.deleteDiary(user, 1L, 1L));
         //then
         assertEquals(NOT_DIARY_OWNER.name(), exception.getCode());
     }
@@ -292,7 +291,7 @@ class DiaryServiceTest {
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(false);
         //when
-        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.deleteDiary(user, 1L));
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.deleteDiary(user, 1L, 1L));
         //then
         assertEquals(FORBIDDEN_PET_SPACE.name(), exception.getCode());
     }
@@ -319,7 +318,7 @@ class DiaryServiceTest {
         given(diaryCommentCountRedisService.getDiaryCommentCountByDiaryId(anyLong()))
                 .willReturn(3);
         //when
-        DiaryDetailResponse response = diaryService.displayDiary(user, 1L);
+        DiaryDetailResponse response = diaryService.displayDiary(user, 1L, 1L);
         //then
         assertEquals(response.title(), diary.getTitle());
         assertEquals(response.content(), diary.getContent());
@@ -337,7 +336,7 @@ class DiaryServiceTest {
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.empty());
         //when
-        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.displayDiary(otherUser, 1L));
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.displayDiary(otherUser, 1L, 1L));
         //then
         assertEquals(DIARY_NOT_FOUND.name(), exception.getCode());
     }
@@ -359,7 +358,7 @@ class DiaryServiceTest {
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(false);
         //when
-        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.displayDiary(otherUser, 1L));
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.displayDiary(otherUser, 1L, 1L));
         //then
         assertEquals(FORBIDDEN_PET_SPACE.name(), exception.getCode());
     }
