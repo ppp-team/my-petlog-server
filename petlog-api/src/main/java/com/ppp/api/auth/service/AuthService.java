@@ -2,14 +2,13 @@ package com.ppp.api.auth.service;
 
 
 import com.ppp.api.auth.exception.AuthException;
-import com.ppp.api.user.dto.response.AuthenticationResponse;
-import com.ppp.api.user.dto.request.RegisterRequest;
-import com.ppp.api.user.dto.request.SigninRequest;
-import com.ppp.api.user.exception.ErrorCode;
+import com.ppp.api.auth.dto.response.AuthenticationResponse;
+import com.ppp.api.auth.dto.request.RegisterRequest;
+import com.ppp.api.auth.dto.request.SigninRequest;
+import com.ppp.api.auth.exception.ErrorCode;
 import com.ppp.api.user.exception.NotFoundUserException;
+import com.ppp.common.client.RedisClient;
 import com.ppp.common.security.jwt.JwtTokenProvider;
-import com.ppp.domain.auth.repository.RefreshToken;
-import com.ppp.domain.auth.repository.RefreshTokenRepository;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.constant.Role;
 import com.ppp.domain.user.repository.UserRepository;
@@ -19,6 +18,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.util.Objects;
+
+import static com.ppp.api.user.exception.ErrorCode.NOT_FOUND_USER;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -27,21 +31,22 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
 
-    final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    public void signup(RegisterRequest signupDto) {
-        if(userRepository.existsByEmail(signupDto.getEmail())) {
-            throw new AuthException(com.ppp.api.auth.exception.ErrorCode.EXISTS_EMAIL);
+    private final RedisClient redisClient;
+
+    public void signup(RegisterRequest registerRequest) {
+        if(userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new AuthException(ErrorCode.EXISTS_EMAIL);
         }
 
-        String rawPwd= signupDto.getPassword();
+        String rawPwd= registerRequest.getPassword();
         String encPwd = passwordEncoder.encode(rawPwd);
 
-        User newUser = User.createUserByEmail(signupDto.getEmail());
-        newUser.setNickname(signupDto.getNickname());
-        newUser.setEmail(signupDto.getEmail());
+        User newUser = User.createUserByEmail(registerRequest.getEmail());
+        newUser.setNickname(registerRequest.getNickname());
+        newUser.setEmail(registerRequest.getEmail());
         newUser.setPassword(encPwd);
         newUser.setRole(Role.USER);
 
@@ -50,17 +55,15 @@ public class AuthService {
 
     public AuthenticationResponse signin(SigninRequest signinRequest) {
         String email = signinRequest.getEmail();
-        User user = userRepository.findByEmail(signinRequest.getEmail())
-                .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundUserException(NOT_FOUND_USER));
 
         if (passwordEncoder.matches(signinRequest.getPassword(), user.getPassword())) {
             String accessToken = jwtTokenProvider.generateAccessToken(user);
             String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
-            RefreshToken persistenceToken = refreshTokenRepository.findByEmail(email)
-                    .orElseGet(() -> new RefreshToken(email, refreshToken));
-            persistenceToken.setRefreshToken(refreshToken);
-            refreshTokenRepository.save(persistenceToken);
+            // 레디스 토큰 저장
+            redisClient.setValues(email, refreshToken, Duration.ofMillis(jwtTokenProvider.getRefreshExpiration(refreshToken)));
 
             return AuthenticationResponse.builder()
                     .accessToken(accessToken)
@@ -68,7 +71,7 @@ public class AuthService {
                     .build();
         }
 
-        throw new AuthException(com.ppp.api.auth.exception.ErrorCode.NOTMATCH_PASSWORD);
+        throw new AuthException(ErrorCode.NOTMATCH_PASSWORD);
     }
 
     public AuthenticationResponse regenerateToken(String refreshToken) {
@@ -79,21 +82,25 @@ public class AuthService {
     private AuthenticationResponse generateNewToken(String refreshToken) {
         String email = jwtTokenProvider.getUserEmailFromRefreshToken(refreshToken);
 
+        String refreshInRedis = redisClient.getValues(email);
+        // 없을 경우 -> 로그아웃된 사용자는 재발급 x
+        if (Objects.isNull(refreshInRedis) || !refreshInRedis.equals(refreshToken))
+            throw new AuthException(ErrorCode.NOT_FOUND_TOKEN);
+
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(ErrorCode.NOT_FOUND_USER.getMessage()));
-
-        String at = jwtTokenProvider.generateAccessToken(user);
-        String rt = jwtTokenProvider.generateRefreshToken(user);
-
-        // save rt
-        RefreshToken persistenceToken = refreshTokenRepository.findByEmail(email)
-                .orElseGet(() -> new RefreshToken(email, refreshToken));
-        persistenceToken.setRefreshToken(rt);
-        refreshTokenRepository.save(persistenceToken);
-
+                .orElseThrow(() -> new UsernameNotFoundException(NOT_FOUND_USER.getMessage()));
+        String accessToken = jwtTokenProvider.generateAccessToken(user);
         return AuthenticationResponse.builder()
-                .accessToken(at)
-                .refreshToken(rt)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
+    }
+
+    public void logout(String accessToken) {
+        Long accessTokenExpiration = jwtTokenProvider.getAccessExpiration(accessToken);
+        String email = jwtTokenProvider.getUserEmailFromAccessToken(accessToken);
+        if (redisClient.getValues(email) != null) redisClient.deleteValues(email);
+
+        redisClient.setValues(accessToken, "logout", Duration.ofMillis(accessTokenExpiration));
     }
 }
