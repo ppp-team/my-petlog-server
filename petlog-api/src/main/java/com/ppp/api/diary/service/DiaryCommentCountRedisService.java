@@ -30,12 +30,12 @@ public class DiaryCommentCountRedisService {
     }
 
     @CachePut(value = "diaryCommentCount", unless = "#result == null")
-    public void increaseDiaryCommentCountByDiaryId(Long diaryId) {
-        redisClient.incrementValue(Domain.DIARY_COMMENT, diaryId);
+    public Long increaseDiaryCommentCountByDiaryId(Long diaryId) {
+        return redisClient.incrementValue(Domain.DIARY_COMMENT, diaryId);
     }
 
     @CachePut(value = "diaryCommentCount", unless = "#result == null")
-    public void decreaseDiaryCommentCountByDiaryId(Long diaryId) {
-        redisClient.decrementValue(Domain.DIARY_COMMENT, diaryId);
+    public Long decreaseDiaryCommentCountByDiaryId(Long diaryId) {
+        return redisClient.decrementValue(Domain.DIARY_COMMENT, diaryId);
     }
 }

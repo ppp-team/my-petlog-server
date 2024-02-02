@@ -8,7 +8,6 @@ import com.ppp.domain.diary.DiaryComment;
 import com.ppp.domain.diary.repository.DiaryCommentRepository;
 import com.ppp.domain.diary.repository.DiaryRepository;
 import com.ppp.domain.guardian.repository.GuardianRepository;
-import com.ppp.domain.pet.Pet;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -19,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.ppp.api.diary.exception.ErrorCode.*;
 
@@ -66,6 +66,7 @@ public class DiaryCommentService {
         DiaryComment comment = diaryCommentRepository.findByIdAndIsDeletedFalse(commentId)
                 .orElseThrow(() -> new DiaryException(DIARY_COMMENT_NOT_FOUND));
         validateModifyComment(comment, user, petId);
+
         comment.update(request.getContent(), getTaggedUsersIdNicknameMap(request));
     }
 
@@ -81,8 +82,23 @@ public class DiaryCommentService {
         DiaryComment comment = diaryCommentRepository.findByIdAndIsDeletedFalse(commentId)
                 .orElseThrow(() -> new DiaryException(DIARY_COMMENT_NOT_FOUND));
         validateModifyComment(comment, user, petId);
+
         comment.delete();
         diaryCommentCountService.decreaseDiaryCommentCountByDiaryId(comment.getDiary().getId());
     }
 
+    public List<DiaryCommentResponse> displayComments(User user, Long petId, Long diaryId) {
+        Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
+                .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
+        validateDisplayComments(user, petId);
+
+        return diaryCommentRepository.findByDiaryAndIsDeletedFalse(diary).stream()
+                .map(comment -> DiaryCommentResponse.from(comment, user.getId()))
+                .collect(Collectors.toList());
+    }
+
+    private void validateDisplayComments(User user, Long petId) {
+        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
+            throw new DiaryException(FORBIDDEN_PET_SPACE);
+    }
 }
