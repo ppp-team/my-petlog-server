@@ -57,7 +57,7 @@ public class DiaryService {
                 .user(user)
                 .pet(pet)
                 .build();
-        diary.addDiaryMedias(uploadAndGetDiaryMedias(images, diary));
+        diary.addDiaryMedias(uploadImagesAndGetDiaryMedias(images, diary));
         diaryRepository.save(diary);
         diaryCommentCountService.setDiaryCommentCountByDiaryId(diary.getId());
     }
@@ -67,16 +67,12 @@ public class DiaryService {
             throw new DiaryException(FORBIDDEN_PET_SPACE);
     }
 
-    private List<DiaryMedia> uploadAndGetDiaryMedias(List<MultipartFile> images, Diary diary) {
+    private List<DiaryMedia> uploadImagesAndGetDiaryMedias(List<MultipartFile> images, Diary diary) {
         if (images == null || images.isEmpty())
             return new ArrayList<>();
         return fileManageService.uploadImages(images, DIARY).stream()
-                .map(uploadedPath -> DiaryMedia.builder()
-                        .path(uploadedPath)
-                        .type(DiaryMediaType.IMAGE)
-                        .diary(diary)
-                        .build()
-                ).collect(Collectors.toList());
+                .map(uploadedPath -> DiaryMedia.of(diary, uploadedPath, DiaryMediaType.IMAGE))
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -87,7 +83,7 @@ public class DiaryService {
 
         deleteDiaryMedia(diary);
         diary.update(request.getTitle(), request.getContent(), request.getDate(),
-                uploadAndGetDiaryMedias(images, diary));
+                uploadImagesAndGetDiaryMedias(images, diary));
     }
 
     private void validateModifyDiary(Diary diary, User user) {

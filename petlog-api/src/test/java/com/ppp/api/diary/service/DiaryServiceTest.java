@@ -37,8 +37,7 @@ import static com.ppp.api.pet.exception.ErrorCode.PET_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DiaryServiceTest {
@@ -53,6 +52,8 @@ class DiaryServiceTest {
 
     @Mock
     private GuardianRepository guardianRepository;
+    @Mock
+    private DiaryCommentCountRedisService diaryCommentCountRedisService;
 
     @InjectMocks
     private DiaryService diaryService;
@@ -142,7 +143,6 @@ class DiaryServiceTest {
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
-                .diaryMedias(new ArrayList<>())
                 .pet(pet).build();
 
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
@@ -231,7 +231,6 @@ class DiaryServiceTest {
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
-                .diaryMedias(new ArrayList<>())
                 .pet(pet).build();
 
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
@@ -307,22 +306,25 @@ class DiaryServiceTest {
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
-                .diaryMedias(List.of(
-                        DiaryMedia.builder()
-                                .type(DiaryMediaType.IMAGE)
-                                .path("/DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg")
-                                .build()))
                 .pet(pet).build();
+        diary.addDiaryMedias(List.of(
+                DiaryMedia.builder()
+                        .type(DiaryMediaType.IMAGE)
+                        .path("/DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg")
+                        .build()));
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diary));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
                 .willReturn(true);
+        given(diaryCommentCountRedisService.getDiaryCommentCountByDiaryId(anyLong()))
+                .willReturn(3);
         //when
         DiaryDetailResponse response = diaryService.displayDiary(user, 1L);
         //then
         assertEquals(response.title(), diary.getTitle());
         assertEquals(response.content(), diary.getContent());
         assertEquals(response.images().size(), 1);
+        assertEquals(response.commentCount(), 3);
         assertEquals(response.writer().nickname(), user.getNickname());
     }
 
@@ -351,11 +353,6 @@ class DiaryServiceTest {
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
-                .diaryMedias(List.of(
-                        DiaryMedia.builder()
-                                .type(DiaryMediaType.IMAGE)
-                                .path("/DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg")
-                                .build()))
                 .pet(pet).build();
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diary));
@@ -394,6 +391,8 @@ class DiaryServiceTest {
                 )));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
                 .willReturn(true);
+        given(diaryCommentCountRedisService.getDiaryCommentCountByDiaryId(any()))
+                .willReturn(3);
         //when
         Slice<DiaryGroupByDateResponse> response = diaryService.displayDiaries(user, 1L, 10, 10);
         //then
@@ -401,8 +400,10 @@ class DiaryServiceTest {
         assertEquals(response.getContent().get(0).diaries().size(), 2);
         assertEquals(response.getContent().get(0).diaries().get(0).title(), "우리집 고양이");
         assertEquals(response.getContent().get(0).diaries().get(0).content(), "츄르를 좋아해");
+        assertEquals(response.getContent().get(0).diaries().get(0).commentCount(), 3);
         assertEquals(response.getContent().get(1).diaries().get(0).title(), "우리집 강아지");
         assertEquals(response.getContent().get(1).diaries().get(0).content(), "츄르를 싫어해");
+        assertEquals(response.getContent().get(1).diaries().get(0).commentCount(), 3);
     }
 
     @Test
