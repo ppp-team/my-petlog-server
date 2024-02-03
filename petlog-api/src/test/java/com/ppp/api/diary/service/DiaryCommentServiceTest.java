@@ -42,7 +42,7 @@ class DiaryCommentServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private DiaryCommentCountRedisService diaryCommentCountRedisService;
+    private DiaryCommentRedisService diaryCommentRedisService;
     @InjectMocks
     private DiaryCommentService diaryCommentService;
 
@@ -354,6 +354,66 @@ class DiaryCommentServiceTest {
                 .willReturn(false);
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.displayComments(user, 1L, 1L));
+        //then
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("다이어리 댓글 좋아요 성공-좋아요 등록")
+    void likeComment_success() {
+        //given
+        given(diaryCommentRepository.existsByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(true);
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        given(diaryCommentRedisService.isDiaryCommentLikeExistByCommentIdAndUserId(anyLong(), anyString()))
+                .willReturn(false);
+
+        //when
+        diaryCommentService.likeComment(user, 1L, 1L);
+        //then
+        verify(diaryCommentRedisService, times(1)).registerLikeByCommentIdAndUserId(anyLong(), anyString());
+    }
+
+    @Test
+    @DisplayName("다이어리 댓글 좋아요 성공-좋아요 취소")
+    void likeComment_success_WhenLikeAlreadyExists() {
+        //given
+        given(diaryCommentRepository.existsByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(true);
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        given(diaryCommentRedisService.isDiaryCommentLikeExistByCommentIdAndUserId(anyLong(), anyString()))
+                .willReturn(true);
+
+        //when
+        diaryCommentService.likeComment(user, 1L, 1L);
+        //then
+        verify(diaryCommentRedisService, times(1)).cancelLikeByCommentIdAndUserId(anyLong(), anyString());
+    }
+
+    @Test
+    @DisplayName("다이어리 댓글 좋아요 실패-diary comment not found")
+    void likeComment_fail_DIARY_COMMENT_NOT_FOUND() {
+        //given
+        given(diaryCommentRepository.existsByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(false);
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.likeComment(user, 1L, 1L));
+        //then
+        assertEquals(DIARY_COMMENT_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("다이어리 댓글 좋아요 실패-forbidden pet space")
+    void likeComment_fail_FORBIDDEN_PET_SPACE() {
+        //given
+        given(diaryCommentRepository.existsByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(true);
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(false);
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.likeComment(user, 1L, 1L));
         //then
         assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
     }

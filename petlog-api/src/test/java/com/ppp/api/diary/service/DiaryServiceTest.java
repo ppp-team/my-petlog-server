@@ -43,17 +43,16 @@ import static org.mockito.Mockito.verify;
 class DiaryServiceTest {
     @Mock
     private DiaryRepository diaryRepository;
-
     @Mock
     private PetRepository petRepository;
-
     @Mock
     private FileManageService fileManageService;
     @Mock
     private GuardianRepository guardianRepository;
     @Mock
-    private DiaryCommentCountRedisService diaryCommentCountRedisService;
-
+    private DiaryCommentRedisService diaryCommentRedisService;
+    @Mock
+    private DiaryRedisService diaryRedisService;
     @InjectMocks
     private DiaryService diaryService;
 
@@ -315,8 +314,11 @@ class DiaryServiceTest {
                 .willReturn(Optional.of(diary));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
                 .willReturn(true);
-        given(diaryCommentCountRedisService.getDiaryCommentCountByDiaryId(anyLong()))
+        given(diaryCommentRedisService.getDiaryCommentCountByDiaryId(anyLong()))
                 .willReturn(3);
+        given(diaryRedisService.isLikeExistByDiaryIdAndUserId(anyLong(), anyString()))
+                .willReturn(false);
+        given(diaryRedisService.getLikeCountByDiaryId(anyLong())).willReturn(5);
         //when
         DiaryDetailResponse response = diaryService.displayDiary(user, 1L, 1L);
         //then
@@ -325,6 +327,8 @@ class DiaryServiceTest {
         assertEquals(response.images().size(), 1);
         assertEquals(response.commentCount(), 3);
         assertEquals(response.writer().nickname(), user.getNickname());
+        assertFalse(response.isCurrentUserLiked());
+        assertEquals(response.likeCount(), 5);
     }
 
     @Test
@@ -390,7 +394,7 @@ class DiaryServiceTest {
                 )));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
                 .willReturn(true);
-        given(diaryCommentCountRedisService.getDiaryCommentCountByDiaryId(any()))
+        given(diaryCommentRedisService.getDiaryCommentCountByDiaryId(any()))
                 .willReturn(3);
         //when
         Slice<DiaryGroupByDateResponse> response = diaryService.displayDiaries(user, 1L, 10, 10);
