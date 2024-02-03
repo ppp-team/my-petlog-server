@@ -44,6 +44,6 @@ public class CacheConfig {
                 .withCacheConfiguration(PET_SPACE_AUTHORITY.getValue(),
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30)))
                 .withCacheConfiguration(DIARY_COMMENT_COUNT.getValue(),
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30)));
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(60)));
     }
 }

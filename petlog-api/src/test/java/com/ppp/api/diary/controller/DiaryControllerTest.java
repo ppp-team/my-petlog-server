@@ -71,7 +71,7 @@ class DiaryControllerTest {
         DiaryRequest request =
                 new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
         //when
-        mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries", 1L)
+        mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries", 1L, 1L)
                         .file(new MockMultipartFile("request", "json",
                                 MediaType.APPLICATION_JSON_VALUE,
                                 objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8)))
@@ -90,7 +90,7 @@ class DiaryControllerTest {
         DiaryRequest request =
                 new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
         //when
-        mockMvc.perform(multipart("/api/v1/pets/diaries/{diaryId}", 1L)
+        mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries/{diaryId}", 1L, 1L)
                         .file(new MockMultipartFile("request", "json",
                                 MediaType.APPLICATION_JSON_VALUE,
                                 objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8)))
@@ -115,7 +115,7 @@ class DiaryControllerTest {
         DiaryRequest request =
                 new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
         //when
-        mockMvc.perform(multipart("/api/v1/pets/diaries/{diaryId}", 1L)
+        mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries/{diaryId}", 1L, 1L)
                         .file(new MockMultipartFile("request", "json",
                                 MediaType.APPLICATION_JSON_VALUE,
                                 objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8)))
@@ -134,7 +134,7 @@ class DiaryControllerTest {
     @WithMockCustomUser
     @DisplayName("일기 삭제 성공")
     void deleteDiary_success() throws Exception {
-        mockMvc.perform(delete("/api/v1/pets/diaries/{diaryId}", 1L)
+        mockMvc.perform(delete("/api/v1/pets/{petId}/diaries/{diaryId}", 1L, 1L)
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(print())
@@ -143,25 +143,29 @@ class DiaryControllerTest {
 
     @Test
     @WithMockCustomUser
-    @DisplayName("일기 조회 성공")
+    @DisplayName("일기 상세 조회 성공")
     void displayDiary_success() throws Exception {
-        mockMvc.perform(get("/api/v1/pets/diaries/{diaryId}", 1L)
+        //given
+        //when
+        mockMvc.perform(get("/api/v1/pets/{petId}/diaries/{diaryId}", 1L, 1L)
                         .header("Authorization", TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                 ).andDo(print())
                 .andExpect(status().isOk());
+        //then
     }
 
     @Test
     @WithMockCustomUser
     @DisplayName("일기 리스트 조회 성공")
     void displayDiaries_success() throws Exception {
-        mockMvc.perform(get("/api/v1/pets/diaries/{diaryId}", 1L)
-                        .param("page", "0")
-                        .param("size", "10")
+        //given
+        //when
+        mockMvc.perform(get("/api/v1/pets/{petId}/diaries", 1L)
                         .header("Authorization", TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                 ).andDo(print())
                 .andExpect(status().isOk());
+        //then
     }
 }

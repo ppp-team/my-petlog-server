@@ -17,24 +17,11 @@ public class RedisClient {
         redisTemplate.opsForValue().setIfAbsent(domain.name() + key, value);
     }
 
-    public void addValue(Domain domain, Long key, String value) {
-        redisTemplate.opsForValue().setIfAbsent(domain.name() + key, value);
-    }
-
     public void deleteValue(Domain domain, String key) {
         redisTemplate.opsForValue().getAndDelete(domain.name() + key);
     }
 
-    public void deleteValue(Domain domain, Long key) {
-        redisTemplate.opsForValue().getAndDelete(domain.name() + key);
-    }
-
-
     public void incrementValue(Domain domain, String key) {
-        redisTemplate.opsForValue().increment(domain.name() + key);
-    }
-
-    public void incrementValue(Domain domain, Long key) {
         redisTemplate.opsForValue().increment(domain.name() + key);
     }
 
@@ -42,12 +29,24 @@ public class RedisClient {
         redisTemplate.opsForValue().decrement(domain.name() + key);
     }
 
-    public void decrementValue(Domain domain, Long key) {
-        redisTemplate.opsForValue().decrement(domain.name() + key);
-    }
-
     public Optional<String> getValue(Domain domain, String key) {
         return Optional.ofNullable(redisTemplate.opsForValue().get(domain.name() + key));
+    }
+
+    public void addValue(Domain domain, Long key, String value) {
+        redisTemplate.opsForValue().setIfAbsent(domain.name() + key, value);
+    }
+
+    public void deleteValue(Domain domain, Long key) {
+        redisTemplate.opsForValue().getAndDelete(domain.name() + key);
+    }
+
+    public Long incrementValue(Domain domain, Long key) {
+        return redisTemplate.opsForValue().increment(domain.name() + key);
+    }
+
+    public Long decrementValue(Domain domain, Long key) {
+        return redisTemplate.opsForValue().decrement(domain.name() + key);
     }
 
     public Optional<String> getValue(Domain domain, Long key) {
@@ -58,23 +57,12 @@ public class RedisClient {
         redisTemplate.opsForSet().add(domain.name() + key, value);
     }
 
-    public void addValueToSet(Domain domain, Long key, String value) {
-        redisTemplate.opsForSet().add(domain.name() + key, value);
-    }
-
     public void removeValueToSet(Domain domain, String key, String value) {
         redisTemplate.opsForSet().remove(domain.name() + key, value);
     }
 
-    public void removeValueToSet(Domain domain, Long key, String value) {
-        redisTemplate.opsForSet().remove(domain.name() + key, value);
-    }
 
     public boolean isValueExistInSet(Domain domain, String key, String value) {
-        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(domain.name() + key, value));
-    }
-
-    public boolean isValueExistInSet(Domain domain, Long key, String value) {
         return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(domain.name() + key, value));
     }
 
@@ -82,12 +70,26 @@ public class RedisClient {
         return redisTemplate.opsForSet().size(domain.name() + key);
     }
 
-    public Long getSizeOfSet(Domain domain, Long key) {
-        return redisTemplate.opsForSet().size(domain.name() + key);
-    }
 
     public void removeKeyToSet(Domain domain, String key) {
         redisTemplate.opsForSet().pop(domain.name() + key);
+    }
+
+    public void addValueToSet(Domain domain, Long key, String value) {
+        redisTemplate.opsForSet().add(domain.name() + key, value);
+    }
+
+
+    public void removeValueToSet(Domain domain, Long key, String value) {
+        redisTemplate.opsForSet().remove(domain.name() + key, value);
+    }
+
+    public boolean isValueExistInSet(Domain domain, Long key, String value) {
+        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(domain.name() + key, value));
+    }
+
+    public Long getSizeOfSet(Domain domain, Long key) {
+        return redisTemplate.opsForSet().size(domain.name() + key);
     }
 
     public void removeKeyToSet(Domain domain, Long key) {

@@ -12,16 +12,42 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final String LOG_FORMAT = "Class : {}, Code : {}, Message : {}";
+
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<ExceptionResponse> handleDateTimeParseException(DateTimeParseException exception) {
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .code(ErrorCode.REQUEST_ARGUMENT_ERROR.getCode())
+                .status(ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus().value())
+                .message(ErrorCode.REQUEST_ARGUMENT_ERROR.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
+        return new ResponseEntity<>(errorResponse, ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ExceptionResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .code(ErrorCode.REQUEST_ARGUMENT_ERROR.getCode())
+                .status(ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus().value())
+                .message(ErrorCode.REQUEST_ARGUMENT_ERROR.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
+        return new ResponseEntity<>(errorResponse, ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus());
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
@@ -30,28 +56,28 @@ public class GlobalExceptionHandler {
                 .stream()
                 .findFirst()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .orElse(ErrorCode.REQUEST_ARGUMENT_ERROR.name());
+                .orElse(ErrorCode.REQUEST_ARGUMENT_ERROR.getMessage());
 
         ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .code(HttpStatus.BAD_REQUEST.name())
-                .status(HttpStatus.BAD_REQUEST.value())
+                .code(ErrorCode.REQUEST_ARGUMENT_ERROR.getCode())
+                .status(ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus().value())
                 .message(errorMessage)
                 .timestamp(LocalDateTime.now())
                 .build();
         log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus());
     }
 
     @ExceptionHandler(DiaryException.class)
     public ResponseEntity<ExceptionResponse> handleDiaryException(DiaryException exception) {
         ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .status(exception.getStatus())
+                .status(exception.getHttpStatus().value())
                 .code(exception.getCode())
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
         log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
     }
 
     @ExceptionHandler(PetException.class)

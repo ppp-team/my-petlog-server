@@ -49,7 +49,7 @@ class DiaryCommentControllerTest {
         DiaryCommentRequest request =
                 new DiaryCommentRequest("오늘은 김밥을 먹었어요", List.of("abcde553", "qwerty1243"));
         //when
-        mockMvc.perform(post("/api/v1/pets/diaries/{diaryId}/comments", 1L)
+        mockMvc.perform(post("/api/v1/pets/{petId}/diaries/{diaryId}/comments", 1L, 1L)
                         .content(objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8))
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -66,7 +66,7 @@ class DiaryCommentControllerTest {
         DiaryCommentRequest request =
                 new DiaryCommentRequest("오늘은 김밥을 먹었어요", List.of("abcde553", "qwerty1243"));
         //when
-        mockMvc.perform(put("/api/v1/pets/diaries/comments/{commentId}", 1L)
+        mockMvc.perform(put("/api/v1/pets/{petId}/diaries/comments/{commentId}", 1L, 1L)
                         .content(objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8))
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -81,7 +81,21 @@ class DiaryCommentControllerTest {
     void deleteDiaryComment_success() throws Exception {
         //given
         //when
-        mockMvc.perform(delete("/api/v1/pets/diaries/comments/{commentId}", 1L)
+        mockMvc.perform(delete("/api/v1/pets/{petId}/diaries/comments/{commentId}", 1L, 1L)
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                ).andDo(print())
+                .andExpect(status().isOk());
+        //then
+    }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("일기 댓글 조회 성공")
+    void displayDiaryComment_success() throws Exception {
+        //given
+        //when
+        mockMvc.perform(get("/api/v1/pets/{petId}/diaries/{diaryId}/comments", 1L, 1L)
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                 ).andDo(print())

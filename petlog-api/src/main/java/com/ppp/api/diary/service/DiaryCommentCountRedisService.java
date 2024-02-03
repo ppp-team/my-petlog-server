@@ -24,18 +24,18 @@ public class DiaryCommentCountRedisService {
         redisClient.addValue(Domain.DIARY_COMMENT, diaryId, "0");
     }
 
-    @CachePut(value = "diaryCommentCount")
+    @CacheEvict(value = "diaryCommentCount")
     public void deleteDiaryCommentCountByDiaryId(Long diaryId) {
         redisClient.deleteValue(Domain.DIARY_COMMENT, diaryId);
     }
 
-    @CachePut(value = "diaryCommentCount")
-    public void increaseDiaryCommentCountByDiaryId(Long diaryId) {
-        redisClient.incrementValue(Domain.DIARY_COMMENT, diaryId);
+    @CachePut(value = "diaryCommentCount", unless = "#result == null")
+    public Long increaseDiaryCommentCountByDiaryId(Long diaryId) {
+        return redisClient.incrementValue(Domain.DIARY_COMMENT, diaryId);
     }
 
-    @CacheEvict(value = "diaryCommentCount")
-    public void decreaseDiaryCommentCountByDiaryId(Long diaryId) {
-        redisClient.decrementValue(Domain.DIARY_COMMENT, diaryId);
+    @CachePut(value = "diaryCommentCount", unless = "#result == null")
+    public Long decreaseDiaryCommentCountByDiaryId(Long diaryId) {
+        return redisClient.decrementValue(Domain.DIARY_COMMENT, diaryId);
     }
 }

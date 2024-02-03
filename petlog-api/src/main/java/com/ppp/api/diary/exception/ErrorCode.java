@@ -14,7 +14,7 @@ public enum ErrorCode {
     NOT_DIARY_COMMENT_OWNER(HttpStatus.BAD_REQUEST, "DIARY-0005", "댓글 작성자가 아닙니다."),
     ;
 
-    private final HttpStatus httpStatus;
+    private final HttpStatus status;
     private final String code;
     private final String message;
 }
