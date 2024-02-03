@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class DiaryCommentCountRedisService {
+public class DiaryCommentRedisService {
     private final RedisClient redisClient;
 
     @Cacheable(value = "diaryCommentCount")
@@ -37,5 +37,40 @@ public class DiaryCommentCountRedisService {
     @CachePut(value = "diaryCommentCount", unless = "#result == null")
     public Long decreaseDiaryCommentCountByDiaryId(Long diaryId) {
         return redisClient.decrementValue(Domain.DIARY_COMMENT, diaryId);
+    }
+
+    public boolean isDiaryCommentLikeExistByCommentIdAndUserId(Long commentId, String userId) {
+        return redisClient.isValueExistInSet(Domain.DIARY_COMMENT, commentId, userId);
+    }
+
+    @Cacheable(value = "diaryCommentLikeCount")
+    public Integer getLikeCountByCommentId(Long commentId) {
+        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_COMMENT, commentId);
+        assert likeCount != null;
+
+        return likeCount.intValue();
+    }
+
+    @CachePut(value = "diaryCommentLikeCount", key = "#a0")
+    public Integer registerLikeByCommentIdAndUserId(Long commentId, String userId) {
+        redisClient.addValueToSet(Domain.DIARY_COMMENT, commentId, userId);
+        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_COMMENT, commentId);
+        assert likeCount != null;
+
+        return likeCount.intValue();
+    }
+
+    @CachePut(value = "diaryCommentLikeCount", key = "#a0")
+    public Integer cancelLikeByCommentIdAndUserId(Long commentId, String userId) {
+        redisClient.removeValueToSet(Domain.DIARY_COMMENT, commentId, userId);
+        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_COMMENT, commentId);
+        assert likeCount != null;
+
+        return likeCount.intValue();
+    }
+
+    @CacheEvict(value = "diaryCommentLikeCount")
+    public void deleteAllLikeByCommentId(Long commentId) {
+        redisClient.removeKeyToSet(Domain.DIARY_COMMENT, commentId);
     }
 }

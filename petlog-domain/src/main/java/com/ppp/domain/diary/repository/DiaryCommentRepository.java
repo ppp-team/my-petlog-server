@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface DiaryCommentRepository extends JpaRepository<DiaryComment, Long> {
     Optional<DiaryComment> findByIdAndIsDeletedFalse(Long id);
     List<DiaryComment> findByDiaryAndIsDeletedFalse(Diary diary);
+    boolean existsByIdAndIsDeletedFalse(Long id);
 }

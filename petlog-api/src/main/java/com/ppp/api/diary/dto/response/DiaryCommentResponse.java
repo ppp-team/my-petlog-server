@@ -14,17 +14,20 @@ public record DiaryCommentResponse(
         String content,
         String createdAt,
         boolean isCurrentUserLiked,
+        int likeCount,
         UserResponse writer,
         List<UserResponse> taggedUsers
 ) {
-    public static DiaryCommentResponse from(DiaryComment comment, String currentUserId) {
+    public static DiaryCommentResponse from(DiaryComment comment, String currentUserId, boolean isCurrentUserLiked, int likeCount) {
         return DiaryCommentResponse.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
                 .createdAt(TimeUtil.calculateTerm(comment.getCreatedAt()))
                 .writer(UserResponse.from(comment.getUser(), currentUserId))
+                .isCurrentUserLiked(isCurrentUserLiked)
+                .likeCount(likeCount)
                 .taggedUsers(comment.getTaggedUsersIdNicknameMap().keySet()
-                        .stream().map(id -> UserResponse.of(id,
+                        .stream().map(id -> com.ppp.api.user.dto.response.UserResponse.of(id,
                                 comment.getTaggedUsersIdNicknameMap().get(id), currentUserId))
                         .collect(Collectors.toList()))
                 .build();
