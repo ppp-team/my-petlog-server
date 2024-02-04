@@ -20,9 +20,10 @@ public record DiaryDetailResponse(
         List<String> images,
         boolean isCurrentUserLiked,
         UserResponse writer,
-        int commentCount
+        int commentCount,
+        int likeCount
 ) {
-    public static DiaryDetailResponse from(Diary diary, String currentUserId, int commentCount) {
+    public static DiaryDetailResponse from(Diary diary, String currentUserId, int commentCount, boolean isCurrentUserLiked, int likeCount) {
         return DiaryDetailResponse.builder()
                 .diaryId(diary.getId())
                 .title(diary.getTitle())
@@ -32,6 +33,8 @@ public record DiaryDetailResponse(
                         .map(DiaryMedia::getPath)
                         .collect(Collectors.toList()))
                 .date(diary.getDate())
+                .isCurrentUserLiked(isCurrentUserLiked)
+                .likeCount(likeCount)
                 .writer(UserResponse.from(diary.getUser(), currentUserId))
                 .build();
     }

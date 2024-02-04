@@ -10,6 +10,6 @@ public class FileException extends RuntimeException {
     public FileException(ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.status = errorCode.getStatus().value();
-        this.code = errorCode.name();
+        this.code = errorCode.getCode();
     }
 }

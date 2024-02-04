@@ -44,12 +44,12 @@ class DiaryCommentControllerTest {
     @Test
     @WithMockCustomUser
     @DisplayName("일기 댓글 생성 성공")
-    void createDiaryComment_success() throws Exception {
+    void createComment_success() throws Exception {
         //given
         DiaryCommentRequest request =
                 new DiaryCommentRequest("오늘은 김밥을 먹었어요", List.of("abcde553", "qwerty1243"));
         //when
-        mockMvc.perform(post("/api/v1/pets/diaries/{diaryId}/comments", 1L)
+        mockMvc.perform(post("/api/v1/pets/{petId}/diaries/{diaryId}/comments", 1L, 1L)
                         .content(objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8))
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -61,12 +61,12 @@ class DiaryCommentControllerTest {
     @Test
     @WithMockCustomUser
     @DisplayName("일기 댓글 수정 성공")
-    void updateDiaryComment_success() throws Exception {
+    void updateComment_success() throws Exception {
         //given
         DiaryCommentRequest request =
                 new DiaryCommentRequest("오늘은 김밥을 먹었어요", List.of("abcde553", "qwerty1243"));
         //when
-        mockMvc.perform(put("/api/v1/pets/diaries/comments/{commentId}", 1L)
+        mockMvc.perform(put("/api/v1/pets/{petId}/diaries/comments/{commentId}", 1L, 1L)
                         .content(objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8))
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -78,10 +78,38 @@ class DiaryCommentControllerTest {
     @Test
     @WithMockCustomUser
     @DisplayName("일기 댓글 삭제 성공")
-    void deleteDiaryComment_success() throws Exception {
+    void deleteComment_success() throws Exception {
         //given
         //when
-        mockMvc.perform(delete("/api/v1/pets/diaries/comments/{commentId}", 1L)
+        mockMvc.perform(delete("/api/v1/pets/{petId}/diaries/comments/{commentId}", 1L, 1L)
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                ).andDo(print())
+                .andExpect(status().isOk());
+        //then
+    }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("일기 댓글 조회 성공")
+    void displayComment_success() throws Exception {
+        //given
+        //when
+        mockMvc.perform(get("/api/v1/pets/{petId}/diaries/{diaryId}/comments", 1L, 1L)
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                ).andDo(print())
+                .andExpect(status().isOk());
+        //then
+    }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("일기 댓글 좋아요 성공")
+    void likeComment_success() throws Exception {
+        //given
+        //when
+        mockMvc.perform(post("/api/v1/pets/{petId}/diaries/comments/{commentId}/like", 1L, 1L)
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                 ).andDo(print())

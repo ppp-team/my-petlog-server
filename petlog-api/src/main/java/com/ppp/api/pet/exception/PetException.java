@@ -10,6 +10,6 @@ public class PetException extends RuntimeException {
     public PetException(ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.status = errorCode.getHttpStatus().value();
-        this.code = errorCode.name();
+        this.code = errorCode.getCode();
     }
 }

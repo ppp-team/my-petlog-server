@@ -16,12 +16,12 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class DiaryCommentCountRedisServiceTest {
+class DiaryCommentRedisServiceTest {
     @Mock
     private RedisClient redisClient;
 
     @InjectMocks
-    private DiaryCommentCountRedisService diaryCommentCountRedisService;
+    private DiaryCommentRedisService diaryCommentRedisService;
 
     @Test
     @DisplayName("다이어리 댓글 개수 조회 성공")
@@ -30,7 +30,7 @@ class DiaryCommentCountRedisServiceTest {
         given(redisClient.getValue(any(), anyLong()))
                 .willReturn(Optional.of("3"));
         //when
-        Integer result = diaryCommentCountRedisService.getDiaryCommentCountByDiaryId(1L);
+        Integer result = diaryCommentRedisService.getDiaryCommentCountByDiaryId(1L);
         //then
         assertEquals(result, 3);
     }
@@ -42,7 +42,7 @@ class DiaryCommentCountRedisServiceTest {
         given(redisClient.getValue(any(), anyLong()))
                 .willReturn(Optional.empty());
         //when
-        Integer result = diaryCommentCountRedisService.getDiaryCommentCountByDiaryId(1L);
+        Integer result = diaryCommentRedisService.getDiaryCommentCountByDiaryId(1L);
         //then
         assertEquals(result, 0);
     }
