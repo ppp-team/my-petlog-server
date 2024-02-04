@@ -106,4 +106,12 @@ public class DiaryController {
                                                                            @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(diaryService.displayDiaries(principalDetails.getUser(), petId, page, size));
     }
+
+    @PostMapping(value = "/{diaryId}/like")
+    private ResponseEntity<Void> likeComment(@PathVariable Long petId,
+                                             @PathVariable Long diaryId,
+                                             @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        diaryService.likeDiary(principalDetails.getUser(), petId, diaryId);
+        return ResponseEntity.ok().build();
+    }
 }

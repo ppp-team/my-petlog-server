@@ -32,15 +32,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(classes = ApiApplication.class)
 public class CacheIntegrationTest {
     @Autowired
-    CacheManager cacheManager;
+    private CacheManager cacheManager;
 
     @Autowired
-    PetRepository petRepository;
+    private PetRepository petRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+
     @Autowired
-    GuardianRepository guardianRepository;
+    private GuardianRepository guardianRepository;
 
     @MockBean(JasyptConfig.class)
     private JasyptConfig jasyptConfig;

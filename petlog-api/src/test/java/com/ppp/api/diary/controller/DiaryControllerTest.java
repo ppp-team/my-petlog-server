@@ -168,4 +168,15 @@ class DiaryControllerTest {
                 .andExpect(status().isOk());
         //then
     }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("일기 좋아요 성공")
+    void likeDiary_success() throws Exception {
+        mockMvc.perform(post("/api/v1/pets/{petId}/diaries/{diaryId}/like", 1L, 1L)
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
 }

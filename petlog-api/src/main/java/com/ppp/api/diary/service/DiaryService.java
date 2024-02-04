@@ -42,7 +42,8 @@ public class DiaryService {
     private final PetRepository petRepository;
     private final GuardianRepository guardianRepository;
     private final FileManageService fileManageService;
-    private final DiaryCommentCountRedisService diaryCommentCountService;
+    private final DiaryCommentRedisService diaryCommentRedisService;
+    private final DiaryRedisService diaryRedisService;
 
     @Transactional
     public void createDiary(User user, Long petId, DiaryRequest request, List<MultipartFile> images) {
@@ -59,7 +60,7 @@ public class DiaryService {
                 .build();
         diary.addDiaryMedias(uploadImagesAndGetDiaryMedias(images, diary));
         diaryRepository.save(diary);
-        diaryCommentCountService.setDiaryCommentCountByDiaryId(diary.getId());
+        diaryCommentRedisService.setDiaryCommentCountByDiaryId(diary.getId());
     }
 
     private void validateCreateDiary(Long petId, User user) {
@@ -107,7 +108,8 @@ public class DiaryService {
 
         deleteDiaryMedia(diary);
         diary.delete();
-        diaryCommentCountService.deleteDiaryCommentCountByDiaryId(diaryId);
+        diaryCommentRedisService.deleteDiaryCommentCountByDiaryId(diaryId);
+        diaryRedisService.deleteAllLikeByDiaryId(diaryId);
     }
 
     public DiaryDetailResponse displayDiary(User user, Long petId, Long diaryId) {
@@ -115,7 +117,9 @@ public class DiaryService {
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateDisplayDiary(user, petId);
         return DiaryDetailResponse.from(diary, user.getId(),
-                diaryCommentCountService.getDiaryCommentCountByDiaryId(diaryId));
+                diaryCommentRedisService.getDiaryCommentCountByDiaryId(diaryId),
+                diaryRedisService.isLikeExistByDiaryIdAndUserId(diaryId, user.getId()),
+                diaryRedisService.getLikeCountByDiaryId(diaryId));
     }
 
     private void validateDisplayDiary(User user, Long petId) {
@@ -145,7 +149,7 @@ public class DiaryService {
             }
             sameDaysDiaries.add(
                     DiaryResponse.from(diary, userId,
-                            diaryCommentCountService.getDiaryCommentCountByDiaryId(diary.getId())));
+                            diaryCommentRedisService.getDiaryCommentCountByDiaryId(diary.getId())));
         }
         content.add(DiaryGroupByDateResponse.of(prevDate, sameDaysDiaries));
 
@@ -153,6 +157,22 @@ public class DiaryService {
     }
 
     private void validateQueryDiaries(User user, Long petId) {
+        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
+            throw new DiaryException(FORBIDDEN_PET_SPACE);
+    }
+
+    public void likeDiary(User user, Long petId, Long diaryId) {
+        validateLikeDiary(user, petId, diaryId);
+
+        if (diaryRedisService.isLikeExistByDiaryIdAndUserId(diaryId, user.getId()))
+            diaryRedisService.cancelLikeByDiaryIdAndUserId(diaryId, user.getId());
+        else
+            diaryRedisService.registerLikeByDiaryIdAndUserId(diaryId, user.getId());
+    }
+
+    private void validateLikeDiary(User user, Long petId, Long diaryId) {
+        if (!diaryRepository.existsByIdAndIsDeletedFalse(diaryId))
+            throw new DiaryException(DIARY_NOT_FOUND);
         if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
             throw new DiaryException(FORBIDDEN_PET_SPACE);
     }
