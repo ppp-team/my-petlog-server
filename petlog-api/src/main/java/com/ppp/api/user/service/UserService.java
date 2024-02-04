@@ -1,5 +1,8 @@
 package com.ppp.api.user.service;
 
+import com.ppp.api.auth.exception.AuthException;
+import com.ppp.api.auth.service.AuthService;
+import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.api.user.exception.ErrorCode;
 import com.ppp.api.user.exception.NotFoundUserException;
 import com.ppp.api.user.exception.UserException;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
+import static com.ppp.api.auth.exception.ErrorCode.NOTMATCH_PASSWORD;
 
 @Slf4j
 @Service
@@ -25,6 +29,7 @@ public class UserService {
     private final FileManageService fileManageService;
     private final UserRepository userRepository;
     private final ProfileImageRepository profileImageRepository;
+    private final AuthService authService;
 
     public boolean existsByNickname(String nickname) {
         return userRepository.existsByNickname(nickname);
@@ -42,10 +47,13 @@ public class UserService {
         userFromDB.setNickname(nickname);
 
         // save image
-        if (profileImage != null && !profileImage.isEmpty()) {
-            String path = uploadImageToS3(profileImage);
+        saveProfileImage(user, profileImage);
+    }
 
-            createProfileImage(user, path);
+    public void saveProfileImage(User user, MultipartFile profileImage) {
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String savedPath = uploadImageToS3(profileImage);
+            createProfileImage(user, savedPath);
         }
     }
 
@@ -53,6 +61,7 @@ public class UserService {
         return fileManageService.uploadImage(profileImage, Domain.USER)
                 .orElseThrow(() -> new UserException(ErrorCode.PROFILE_REGISTRATION_FAILED));
     }
+
 
     private void createProfileImage(User user, String path) {
         Optional<ProfileImage> existingImage = profileImageRepository.findByUser(user);
@@ -63,5 +72,41 @@ public class UserService {
             ProfileImage newImage = ProfileImage.builder().user(user).url(path).build();
             profileImageRepository.save(newImage);
         }
+    }
+
+    @Transactional
+    public void updateProfile(User user, MultipartFile profileImage, String nickname, String password) {
+        if (!authService.checkPasswordMatches(password, user.getPassword())) {
+            throw new AuthException(NOTMATCH_PASSWORD);
+        }
+
+        User userFromDb = userRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
+        userFromDb.setNickname(nickname);
+
+        String savedPath = null;
+        if (profileImage != null && !profileImage.isEmpty()) {
+            savedPath = uploadImageToS3(profileImage);
+            createProfileImage(user, savedPath);
+
+            // delete previous image
+            profileImageRepository.findByUser(userFromDb).ifPresent(
+                    image -> fileManageService.deleteImage(image.getUrl()));
+        }
+    }
+
+    public UserResponse displayMe(User user) {
+        User userFromDb = userRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
+
+        String profilePath = profileImageRepository.findByUser(userFromDb)
+                .map(ProfileImage::getUrl)
+                .orElse("");
+        return UserResponse.builder()
+                .id(userFromDb.getId())
+                .nickname(userFromDb.getNickname())
+                .email(userFromDb.getEmail())
+                .profilePath(profilePath)
+                .build();
     }
 }

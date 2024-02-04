@@ -1,7 +1,7 @@
 package com.ppp.api.user.controller;
 
 import com.ppp.api.user.dto.request.CheckRequest;
-import com.ppp.api.user.dto.response.UserCommonResponse;
+import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.api.user.exception.ErrorCode;
 import com.ppp.api.user.exception.UserException;
 import com.ppp.api.user.service.UserService;
@@ -40,12 +40,28 @@ public class UserController {
     }
 
     @PostMapping("/v1/users/profile")
-    public ResponseEntity<UserCommonResponse<String>> createProfile(
-            @RequestParam(required = false, value = "profileImage")MultipartFile profileImage,
+    public ResponseEntity<Void> createProfile(
+            @RequestParam(required = false, value = "profileImage") MultipartFile profileImage,
             @RequestParam("nickname") String nickname,
             @AuthenticationPrincipal PrincipalDetails principalDetails
             ) {
         userService.createProfile(principalDetails.getUser(), profileImage, nickname);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/v1/users/profile")
+    public ResponseEntity<Void> updateProfile(
+            @RequestParam(required = false, value = "profileImage") MultipartFile profileImage,
+            @RequestParam(required = false, value = "nickname") String nickname,
+            @RequestParam(required = false, value = "password") String password,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        userService.updateProfile(principalDetails.getUser(), profileImage, nickname, password);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/v1/users/me")
+    public ResponseEntity<UserResponse> displayMe(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(userService.displayMe(principalDetails.getUser()));
     }
 }

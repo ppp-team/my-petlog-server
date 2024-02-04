@@ -42,7 +42,7 @@ public class AuthService {
         }
 
         String rawPwd= registerRequest.getPassword();
-        String encPwd = passwordEncoder.encode(rawPwd);
+        String encPwd = encodePassword(rawPwd);
 
         User newUser = User.createUserByEmail(registerRequest.getEmail());
         newUser.setNickname(registerRequest.getNickname());
@@ -58,7 +58,7 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundUserException(NOT_FOUND_USER));
 
-        if (passwordEncoder.matches(signinRequest.getPassword(), user.getPassword())) {
+        if (checkPasswordMatches(signinRequest.getPassword(), user.getPassword())) {
             String accessToken = jwtTokenProvider.generateAccessToken(user);
             String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
@@ -102,5 +102,13 @@ public class AuthService {
         if (redisClient.getValues(email) != null) redisClient.deleteValues(email);
 
         redisClient.setValues(accessToken, "logout", Duration.ofMillis(accessTokenExpiration));
+    }
+
+    public boolean checkPasswordMatches(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+
+    public String encodePassword(String rowPassword) {
+        return passwordEncoder.encode(rowPassword);
     }
 }
