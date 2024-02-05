@@ -3,22 +3,22 @@ package com.ppp.common.validator;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-public class DateValidator implements ConstraintValidator<Date, String> {
+public class DateTimeValidator implements ConstraintValidator<DateTime, String> {
     private DateTimeFormatter dateTimeFormatter;
 
     @Override
-    public void initialize(Date constraintAnnotation) {
-        dateTimeFormatter = DateTimeFormatter.ISO_DATE;
+    public void initialize(DateTime constraintAnnotation) {
+        dateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME;
     }
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         try {
-            LocalDate.parse(value, dateTimeFormatter);
+            LocalDateTime.parse(value, dateTimeFormatter);
         } catch (DateTimeParseException e) {
             return false;
         }
