@@ -5,12 +5,12 @@ import com.ppp.api.auth.exception.AuthException;
 import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.mock.exception.MockException;
 import com.ppp.api.pet.exception.PetException;
+import com.ppp.api.user.exception.UserException;
 import com.ppp.common.exception.ErrorCode;
 import com.ppp.common.exception.TokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -83,13 +83,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PetException.class)
     public ResponseEntity<ExceptionResponse> handlePetException(PetException exception) {
         ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .status(exception.getStatus())
+                .status(exception.getHttpStatus().value())
                 .code(exception.getCode())
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
         log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
+    }
+
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<ExceptionResponse> handleUserException(UserException exception) {
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .status(exception.getHttpStatus().value())
+                .code(exception.getCode())
+                .message(exception.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
+        return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
     }
 
     @ExceptionHandler(MockException.class)
@@ -107,37 +119,37 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ExceptionResponse> handleAuthException(AuthException exception) {
         ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .status(exception.getStatus())
+                .status(exception.getHttpStatus().value())
                 .code(exception.getCode())
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
         log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(exception.getStatus()));
+        return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
     }
 
     @ExceptionHandler(TokenException.class)
     public ResponseEntity<ExceptionResponse> handleTokenException(TokenException exception) {
         ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .status(exception.getStatus())
+                .status(exception.getHttpStatus().value())
                 .code(exception.getErrorCode())
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
         log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
     }
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ExceptionResponse> handleCustomException(CustomException exception) {
         ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .status(exception.getStatus())
+                .status(exception.getHttpStatus().value())
                 .code(exception.getCode())
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
         log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
     }
 
     @ExceptionHandler(Exception.class)

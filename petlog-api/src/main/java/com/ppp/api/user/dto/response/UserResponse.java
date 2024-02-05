@@ -11,6 +11,7 @@ import java.util.Objects;
 public record UserResponse(
         String id,
         String nickname,
+        String email,
         String profilePath,
         boolean isCurrentUser
 ) {
