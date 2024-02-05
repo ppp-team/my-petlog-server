@@ -42,6 +42,7 @@ jobs:
         name: petlog
         path: petlog-api/build/libs/
 
+
     # EC2에 배포
     # EC2 SSH 키를 private_key.pem 파일로 저장 ( 위치는 GitHub 서버 )
     # SCP를 사용하여 JAR 파일을 EC2 서버로 복사
