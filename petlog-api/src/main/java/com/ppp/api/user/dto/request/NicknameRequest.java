@@ -3,7 +3,6 @@ package com.ppp.api.user.dto.request;
 import lombok.Data;
 
 @Data
-public class CheckRequest {
+public class NicknameRequest {
     private String nickname;
-    private String email;
 }

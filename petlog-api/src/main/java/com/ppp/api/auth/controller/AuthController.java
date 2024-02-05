@@ -25,6 +25,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @Operation(summary = "회원가입")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "409", description = "이메일 중복", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
@@ -35,6 +36,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "로그인")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content =
                     { @Content(mediaType = "application/json", schema =
@@ -47,6 +49,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.signin(signinRequest));
     }
 
+    @Operation(summary = "로그아웃")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "401", description = "Invalid token", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})

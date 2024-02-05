@@ -1,7 +1,8 @@
 package com.ppp.api.user.controller;
 
 import com.ppp.api.exception.ExceptionResponse;
-import com.ppp.api.user.dto.request.CheckRequest;
+import com.ppp.api.user.dto.request.EmailRequest;
+import com.ppp.api.user.dto.request.NicknameRequest;
 import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.api.user.exception.ErrorCode;
 import com.ppp.api.user.exception.UserException;
@@ -34,8 +35,8 @@ public class UserController {
             @ApiResponse(responseCode = "409", description = "닉네임 중복", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PostMapping("/v1/users/check/nickname")
-    public ResponseEntity<String> checkNickname(@RequestBody CheckRequest checkRequest) {
-        if (userService.existsByNickname(checkRequest.getNickname()))
+    public ResponseEntity<String> checkNickname(@RequestBody NicknameRequest nicknameRequest) {
+        if (userService.existsByNickname(nicknameRequest.getNickname()))
             throw new UserException(ErrorCode.NICKNAME_DUPLICATION);
         return ResponseEntity.ok().build();
     }
@@ -45,12 +46,13 @@ public class UserController {
             @ApiResponse(responseCode = "409", description = "이메일 중복", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PostMapping("/v1/users/check/email")
-    public ResponseEntity<String> checkEmail(@RequestBody CheckRequest checkRequest) {
-        if (userService.existsByEmail(checkRequest.getEmail()))
+    public ResponseEntity<String> checkEmail(@RequestBody EmailRequest emailRequest) {
+        if (userService.existsByEmail(emailRequest.getEmail()))
             throw new UserException(ErrorCode.EMAIL_DUPLICATION);
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "프로필 등록", description = "유저 정보를 등록합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "409", description = "이메일 중복", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
