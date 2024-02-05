@@ -11,7 +11,7 @@ spring:
       max-request-size: 50MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://ENC("jov8u4WoZ2gyhOI7n1fjNdZyXwu+bthSn9Nh7IbGk1Hq9rKPH/HZkCBC7LJGSQxdiwpb4tI5Qa4N2VhzsgGV8oeaQhzafRCQ")/petlog?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul
+    url: ENC("Mv2+qpTLspS24HBCacK6TSrmSOpV8VZceaevMgBAygnFInRFlknva1FWspnDpOWGK2n2VVcbjYlARmwo0M94IJ33BfT57cK1sncYmD/y0zRdQZG6T3ZhQPsnz1Egfb7vNYoDyW+I0fqxyQrw9gGfIxRN2lmjbgWjmhiWH96Wq9p8iC6j9pvjXUUjvGcNgBlqeutqt5kg+lQPr2o7a2Yrh8NxE2gpq2p35ol/z3xEeuQ=")
     username: ENC("uT5Scmzjid/mQarp8Wejpw==")
     password: ENC("sR4oLGgaxiuRiiOaI2C7An8iyrp6csnM")
   jpa:
@@ -22,10 +22,10 @@ spring:
       hibernate:
         format_sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
   data:
     redis:
-      password: YOUR_PASSWORD
+      password: ENC("m9TfKIXK76S38gkq/ZEWVh1x1uCGakwC")
       timeout: 600ms
 cloud:
   aws:
