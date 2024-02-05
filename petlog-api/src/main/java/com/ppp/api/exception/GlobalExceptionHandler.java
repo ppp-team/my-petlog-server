@@ -25,30 +25,6 @@ import java.time.format.DateTimeParseException;
 public class GlobalExceptionHandler {
     private static final String LOG_FORMAT = "Class : {}, Code : {}, Message : {}";
 
-    @ExceptionHandler(DateTimeParseException.class)
-    public ResponseEntity<ExceptionResponse> handleDateTimeParseException(DateTimeParseException exception) {
-        ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .code(ErrorCode.REQUEST_ARGUMENT_ERROR.getCode())
-                .status(ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus().value())
-                .message(ErrorCode.REQUEST_ARGUMENT_ERROR.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus());
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ExceptionResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
-        ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .code(ErrorCode.REQUEST_ARGUMENT_ERROR.getCode())
-                .status(ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus().value())
-                .message(ErrorCode.REQUEST_ARGUMENT_ERROR.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, ErrorCode.REQUEST_ARGUMENT_ERROR.getStatus());
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         String errorMessage = exception.getBindingResult()

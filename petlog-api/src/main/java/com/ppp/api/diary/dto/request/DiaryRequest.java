@@ -1,15 +1,11 @@
 package com.ppp.api.diary.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ppp.common.validator.Date;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.LocalDate;
 
 @Getter
 @AllArgsConstructor
@@ -24,7 +20,7 @@ public class DiaryRequest {
     private String content;
 
     @Schema(description = "날짜", example = "2024-01-31")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDate date;
+    @Date(message = "적합한 날짜를 입력해주세요.")
+    private String date;
 }
 

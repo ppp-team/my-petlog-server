@@ -48,7 +48,7 @@ class DiaryControllerTest {
     void createDiary_success() throws Exception {
         //given
         DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
+                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
         //when
         mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries", 1L)
                         .file(new MockMultipartFile("request", "json",
@@ -69,7 +69,7 @@ class DiaryControllerTest {
     void createDiary_success_FILE_NOT_REQUIRED() throws Exception {
         //given
         DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
+                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
         //when
         mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries", 1L, 1L)
                         .file(new MockMultipartFile("request", "json",
@@ -88,7 +88,7 @@ class DiaryControllerTest {
     void updateDiary_success() throws Exception {
         //given
         DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
+                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
         //when
         mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries/{diaryId}", 1L, 1L)
                         .file(new MockMultipartFile("request", "json",
@@ -113,7 +113,7 @@ class DiaryControllerTest {
     void updateDiary_success_FILE_NOT_REQUIRED() throws Exception {
         //given
         DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
+                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
         //when
         mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries/{diaryId}", 1L, 1L)
                         .file(new MockMultipartFile("request", "json",

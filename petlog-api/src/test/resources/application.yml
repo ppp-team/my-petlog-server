@@ -3,9 +3,7 @@ project:
 spring:
   data:
     redis:
-      host: localhost
-      port: 6379
-      password: pwd
+      password: ${{ secrets.REDIS_TEST_PASSWORD }}
   datasource:
     url: jdbc:h2:mem:test;NON_KEYWORDS=USER
     username: sa
