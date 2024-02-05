@@ -3,6 +3,7 @@ package com.ppp.api.exception;
 
 import com.ppp.api.auth.exception.AuthException;
 import com.ppp.api.diary.exception.DiaryException;
+import com.ppp.api.log.exception.LogException;
 import com.ppp.api.mock.exception.MockException;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.user.exception.UserException;
@@ -12,18 +13,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final String LOG_FORMAT = "Class : {}, Code : {}, Message : {}";
+
+    @ExceptionHandler(LogException.class)
+    public ResponseEntity<ExceptionResponse> handleLogException(LogException exception) {
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .status(exception.getHttpStatus().value())
+                .code(exception.getCode())
+                .message(exception.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
+        return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
