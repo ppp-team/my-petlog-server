@@ -45,7 +45,6 @@ public class AuthService {
         String encPwd = encodePassword(rawPwd);
 
         User newUser = User.createUserByEmail(registerRequest.getEmail());
-        newUser.setNickname(registerRequest.getNickname());
         newUser.setEmail(registerRequest.getEmail());
         newUser.setPassword(encPwd);
         newUser.setRole(Role.USER);
