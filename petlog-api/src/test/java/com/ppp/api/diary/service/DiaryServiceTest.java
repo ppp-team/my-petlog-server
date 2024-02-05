@@ -76,7 +76,7 @@ class DiaryServiceTest {
     void createDiary_success() {
         //given
         DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
+                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
 
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
@@ -92,7 +92,7 @@ class DiaryServiceTest {
         verify(diaryRepository, times(1)).save(diaryCaptor.capture());
         assertEquals(request.getTitle(), diaryCaptor.getValue().getTitle());
         assertEquals(request.getContent(), diaryCaptor.getValue().getContent());
-        assertEquals(request.getDate(), diaryCaptor.getValue().getDate());
+        assertEquals(request.getDate(), diaryCaptor.getValue().getDate().toString());
         assertEquals(user.getId(), diaryCaptor.getValue().getUser().getId());
         assertEquals(pet.getId(), diaryCaptor.getValue().getPet().getId());
         assertEquals(2, diaryCaptor.getValue().getDiaryMedias().size());
@@ -103,7 +103,7 @@ class DiaryServiceTest {
     void createDiary_fail_PET_NOT_FOUND() {
         //given
         DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
+                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
 
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.empty());
@@ -118,7 +118,7 @@ class DiaryServiceTest {
     void createDiary_fail_FORBIDDEN_PET_SPACE() {
         //given
         DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
+                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
 
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
@@ -135,7 +135,7 @@ class DiaryServiceTest {
     void updateDiary_success() {
         //given
         DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
+                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
                 .content("츄르를 좋아해")
@@ -156,7 +156,7 @@ class DiaryServiceTest {
         //then
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
-        assertEquals(request.getDate(), diary.getDate());
+        assertEquals(request.getDate(), diary.getDate().toString());
         assertEquals(2, diary.getDiaryMedias().size());
     }
 
@@ -165,7 +165,7 @@ class DiaryServiceTest {
     void updateDiary_fail_DIARY_NOT_FOUND() {
         //given
         DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
+                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.empty());
         //when
@@ -179,7 +179,7 @@ class DiaryServiceTest {
     void updateDiary_fail_NOT_DIARY_OWNER() {
         //given
         DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
+                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
         User otherUser = User.builder()
                 .id("other-user").build();
         Diary diary = Diary.builder()
@@ -202,7 +202,7 @@ class DiaryServiceTest {
     void updateDiary_fail_FORBIDDEN_PET_SPACE() {
         //given
         DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now());
+                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
                 .content("츄르를 좋아해")

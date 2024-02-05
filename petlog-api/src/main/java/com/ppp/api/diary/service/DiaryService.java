@@ -54,7 +54,7 @@ public class DiaryService {
         Diary diary = Diary.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
-                .date(request.getDate())
+                .date(LocalDate.parse(request.getDate()))
                 .user(user)
                 .pet(pet)
                 .build();
@@ -83,7 +83,7 @@ public class DiaryService {
         validateModifyDiary(diary, user, petId);
 
         deleteDiaryMedia(diary);
-        diary.update(request.getTitle(), request.getContent(), request.getDate(),
+        diary.update(request.getTitle(), request.getContent(), LocalDate.parse(request.getDate()),
                 uploadImagesAndGetDiaryMedias(images, diary));
     }
 

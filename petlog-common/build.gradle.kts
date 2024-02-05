@@ -41,6 +41,7 @@ dependencies {
     implementation ("org.springframework.boot:spring-boot-starter-data-redis")
     implementation ("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
     implementation("com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5")
+    implementation("org.hibernate:hibernate-validator:8.0.1.Final")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
