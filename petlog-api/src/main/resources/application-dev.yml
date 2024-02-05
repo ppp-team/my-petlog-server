@@ -25,7 +25,7 @@ spring:
       ddl-auto: update
   data:
     redis:
-      password: 1234
+      password: ENC("m9TfKIXK76S38gkq/ZEWVh1x1uCGakwC")
       timeout: 600ms
 cloud:
   aws:
