@@ -7,6 +7,7 @@ import com.ppp.api.user.exception.ErrorCode;
 import com.ppp.api.user.exception.UserException;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.log.Log;
+import com.ppp.domain.log.LogLocation;
 import com.ppp.domain.log.constant.LogType;
 import com.ppp.domain.log.repository.LogRepository;
 import com.ppp.domain.pet.Pet;
@@ -18,10 +19,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
-import static com.ppp.api.log.exception.ErrorCode.FORBIDDEN_PET_SPACE;
-import static com.ppp.api.log.exception.ErrorCode.LOG_NOT_FOUND;
+import static com.ppp.api.log.exception.ErrorCode.*;
 import static com.ppp.api.pet.exception.ErrorCode.PET_NOT_FOUND;
+import static com.ppp.domain.log.constant.LogLocationType.CUSTOM;
+import static com.ppp.domain.log.constant.LogLocationType.KAKAO;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,7 @@ public class LogService {
     private final GuardianRepository guardianRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public void createLog(User user, Long petId, LogRequest request) {
         Pet pet = petRepository.findByIdAndIsDeletedFalse(petId)
                 .orElseThrow(() -> new PetException(PET_NOT_FOUND));
@@ -39,24 +44,48 @@ public class LogService {
                 .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
         validateAccessLog(petId, user);
 
-        logRepository.save(Log.builder()
+        Log log = Log.builder()
                 .datetime(LocalDateTime.parse(request.getDatetime()))
-                .type(LogType.valueOf(request.getType()))
-                .subType(request.getSubType())
+                .typeMap(getTypeMap(request))
                 .memo(request.getMemo())
-                .isImportant(request.isImportant())
-                .isComplete(request.isComplete())
+                .isImportant(request.getIsImportant())
+                .isComplete(request.getIsComplete())
                 .memo(request.getMemo())
                 .pet(pet)
                 .manager(mangerUser)
-                .build());
+                .build();
+        log.addLocation(getLocationIfExists(request, log));
+        logRepository.save(log);
     }
 
-
-    private void validateAccessLog(Long petId, User user) {
-        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
-            throw new LogException(FORBIDDEN_PET_SPACE);
+    private LogLocation getLocationIfExists(LogRequest request, Log log) {
+        if (!LogType.WALK.name().equals(request.getType()))
+            return null;
+        if (request.getIsCustomLocation())
+            return LogLocation.builder()
+                    .type(CUSTOM)
+                    .log(log)
+                    .build();
+        else if (request.getKakaoLocationId() == null) {
+            throw new LogException(LOCATION_INCORRECT);
+        }
+        return LogLocation.builder()
+                .type(KAKAO)
+                .mapId(request.getKakaoLocationId())
+                .log(log)
+                .build();
     }
+
+    private Map<String, String> getTypeMap(LogRequest request) {
+        Map<String, String> typeMap = new HashMap<>();
+        LogType type = LogType.valueOf(request.getType());
+        typeMap.put("type", type.name());
+        if (request.getSubType() != null && !request.getSubType().isEmpty()) {
+            typeMap.put("subType", request.getSubType());
+        }
+        return typeMap;
+    }
+
 
     @Transactional
     public void updateLog(User user, Long petId, Long logId, LogRequest request) {
@@ -67,8 +96,8 @@ public class LogService {
                 .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
         validateAccessLog(petId, user);
 
-        log.update(LocalDateTime.parse(request.getDatetime()), LogType.valueOf(request.getType()), request.getSubType(),
-                request.getMemo(), request.isImportant(), request.isComplete(), mangerUser);
+        log.update(LocalDateTime.parse(request.getDatetime()), getTypeMap(request), request.getMemo(),
+                request.getIsImportant(), request.getIsComplete(), mangerUser, getLocationIfExists(request, log));
     }
 
     @Transactional
@@ -78,5 +107,10 @@ public class LogService {
         validateAccessLog(petId, user);
 
         log.delete();
+    }
+
+    private void validateAccessLog(Long petId, User user) {
+        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
+            throw new LogException(FORBIDDEN_PET_SPACE);
     }
 }

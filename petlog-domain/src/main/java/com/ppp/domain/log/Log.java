@@ -1,7 +1,6 @@
 package com.ppp.domain.log;
 
 import com.ppp.domain.common.BaseTimeEntity;
-import com.ppp.domain.log.constant.LogType;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.user.User;
 import jakarta.persistence.*;
@@ -9,10 +8,12 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -27,11 +28,9 @@ public class Log extends BaseTimeEntity {
     @Column(nullable = false)
     private LocalDateTime datetime;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private LogType type;
-
-    private String subType;
+    @Column(name = "type", columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, String> typeMap = new HashMap<>();
 
     @Column(columnDefinition = "blob")
     private String memo;
@@ -53,28 +52,37 @@ public class Log extends BaseTimeEntity {
     @JoinColumn(name = "manager_id", nullable = false)
     private User manager;
 
-    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LogLocation> locations = new ArrayList<>();
+    @OneToOne(mappedBy = "log", cascade = CascadeType.ALL, orphanRemoval = true)
+    private LogLocation location;
+
+    private void deleteLocation() {
+        location = null;
+    }
+
+    public void addLocation(LogLocation location) {
+        this.location = location;
+    }
 
     public void delete() {
         this.isDeleted = true;
+        deleteLocation();
     }
 
-    public void update(LocalDateTime datetime, LogType type, String subType, String memo, boolean isImportant, boolean isComplete, User manager) {
+    public void update(LocalDateTime datetime, Map<String, String> typeMap, String memo, boolean isImportant, boolean isComplete, User manager, LogLocation location) {
         this.datetime = datetime;
-        this.type = type;
-        this.subType = subType;
+        this.typeMap = typeMap;
         this.memo = memo;
         this.isImportant = isImportant;
         this.isComplete = isComplete;
         this.manager = manager;
+        addLocation(location);
+
     }
 
     @Builder
-    public Log(LocalDateTime datetime, LogType type, String subType, String memo, boolean isImportant, boolean isComplete, Pet pet, User manager) {
+    public Log(LocalDateTime datetime, Map<String, String> typeMap, String memo, boolean isImportant, boolean isComplete, Pet pet, User manager) {
         this.datetime = datetime;
-        this.type = type;
-        this.subType = subType;
+        this.typeMap = typeMap;
         this.memo = memo;
         this.isImportant = isImportant;
         this.isComplete = isComplete;
