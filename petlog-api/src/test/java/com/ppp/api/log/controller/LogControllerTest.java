@@ -44,9 +44,25 @@ class LogControllerTest {
     @WithMockCustomUser
     @DisplayName("건강 기록 생성 성공")
     void createLog_success() throws Exception {
+        LogRequest.builder()
+                .type("CUSTOM")
+                .subType("강아지 카페 가기")
+                .isCustomLocation(false)
+                .datetime("2024-02-02T11:11")
+                .isComplete(true)
+                .isImportant(true)
+                .memo("고구마 챙겨가기")
+                .managerId("abcde");
         //given
-        LogRequest request = new LogRequest("CUSTOM", "강아지 카페 가기", "2024-02-02T11:11", true, true, "고구마 챙겨가기", "abcde");
-
+        LogRequest request = LogRequest.builder()
+                .type("CUSTOM")
+                .subType("강아지 카페 가기")
+                .isCustomLocation(false)
+                .datetime("2024-02-02T11:11")
+                .isComplete(true)
+                .isImportant(true)
+                .memo("고구마 챙겨가기")
+                .managerId("abcde").build();
         //when
         mockMvc.perform(post("/api/v1/pets/{petId}/logs", 1L)
                         .content(objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8))
@@ -62,8 +78,15 @@ class LogControllerTest {
     @DisplayName("건강 기록 생성 실패-잘못된 type")
     void createLog_fail_WhenTypeIsWrong() throws Exception {
         //given
-        LogRequest request = new LogRequest("CUSTO", "강아지 카페 가기", "2024-02-02T11:11", true, true, "고구마 챙겨가기", "abcde");
-
+        LogRequest request = LogRequest.builder()
+                .type("CUSTO")
+                .subType("강아지 카페 가기")
+                .isCustomLocation(false)
+                .datetime("2024-02-02T11:11")
+                .isComplete(true)
+                .isImportant(true)
+                .memo("고구마 챙겨가기")
+                .managerId("abcde").build();
         //when
         mockMvc.perform(post("/api/v1/pets/{petId}/logs", 1L)
                         .content(objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8))
@@ -79,8 +102,15 @@ class LogControllerTest {
     @DisplayName("건강 기록 생성 실패-잘못된 datetime")
     void createLog_fail_WhenDatetimeIsWrong() throws Exception {
         //given
-        LogRequest request = new LogRequest("CUSTOM", "강아지 카페 가기", "2024-02-02T11:1", true, true, "고구마 챙겨가기", "abcde");
-
+        LogRequest request = LogRequest.builder()
+                .type("CUSTOM")
+                .subType("강아지 카페 가기")
+                .isCustomLocation(false)
+                .datetime("2024-02-02T11:1")
+                .isComplete(true)
+                .isImportant(true)
+                .memo("고구마 챙겨가기")
+                .managerId("abcde").build();
         //when
         mockMvc.perform(post("/api/v1/pets/{petId}/logs", 1L)
                         .content(objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8))
@@ -96,8 +126,15 @@ class LogControllerTest {
     @DisplayName("건강 기록 수정 성공")
     void updateLog_success() throws Exception {
         //given
-        LogRequest request = new LogRequest("CUSTOM", "강아지 카페 가기", "2024-02-02T11:11", true, true, "고구마 챙겨가기", "abcde");
-
+        LogRequest request = LogRequest.builder()
+                .type("CUSTOM")
+                .subType("강아지 카페 가기")
+                .isCustomLocation(false)
+                .datetime("2024-02-02T11:11")
+                .isComplete(true)
+                .isImportant(true)
+                .memo("고구마 챙겨가기")
+                .managerId("abcde").build();
         //when
         mockMvc.perform(put("/api/v1/pets/{petId}/logs/{logId}", 1L, 1L)
                         .content(objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8))
