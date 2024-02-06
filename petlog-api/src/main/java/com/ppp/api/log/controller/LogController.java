@@ -2,6 +2,7 @@ package com.ppp.api.log.controller;
 
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.log.dto.request.LogRequest;
+import com.ppp.api.log.dto.response.LogDetailResponse;
 import com.ppp.api.log.dto.response.LogGroupByDateResponse;
 import com.ppp.api.log.service.LogService;
 import com.ppp.common.security.PrincipalDetails;
@@ -69,6 +70,13 @@ public class LogController {
                                            @AuthenticationPrincipal PrincipalDetails principalDetails) {
         logService.deleteLog(principalDetails.getUser(), petId, logId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "/{logId}")
+    private ResponseEntity<LogDetailResponse> displayLog(@PathVariable Long petId,
+                                                         @PathVariable Long logId,
+                                                         @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(logService.displayLog(principalDetails.getUser(), petId, logId));
     }
 
     @GetMapping

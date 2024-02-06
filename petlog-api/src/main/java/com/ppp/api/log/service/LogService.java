@@ -1,6 +1,7 @@
 package com.ppp.api.log.service;
 
 import com.ppp.api.log.dto.request.LogRequest;
+import com.ppp.api.log.dto.response.LogDetailResponse;
 import com.ppp.api.log.dto.response.LogGroupByDateResponse;
 import com.ppp.api.log.dto.response.LogResponse;
 import com.ppp.api.log.exception.LogException;
@@ -87,7 +88,7 @@ public class LogService {
         Map<String, String> typeMap = new HashMap<>();
         LogType type = LogType.valueOf(request.getType());
         typeMap.put("type", type.name());
-        if (request.getSubType() != null && !request.getSubType().isEmpty()) {
+        if (request.getSubType() != null && !request.getSubType().isBlank()) {
             typeMap.put("subType", request.getSubType());
         }
         return typeMap;
@@ -119,6 +120,14 @@ public class LogService {
     private void validateAccessLog(Long petId, User user) {
         if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
             throw new LogException(FORBIDDEN_PET_SPACE);
+    }
+
+    public LogDetailResponse displayLog(User user, Long petId, Long logId) {
+        Log log = logRepository.findByIdAndIsDeletedFalse(logId)
+                .orElseThrow(() -> new LogException(LOG_NOT_FOUND));
+        validateAccessLog(petId, user);
+
+        return LogDetailResponse.from(log);
     }
 
     public LogGroupByDateResponse displayLogsByDate(User user, Long petId, int year, int month, int day) {
