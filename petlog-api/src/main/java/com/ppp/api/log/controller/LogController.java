@@ -2,6 +2,7 @@ package com.ppp.api.log.controller;
 
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.log.dto.request.LogRequest;
+import com.ppp.api.log.dto.response.LogGroupByDateResponse;
 import com.ppp.api.log.service.LogService;
 import com.ppp.common.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -67,5 +69,22 @@ public class LogController {
                                            @AuthenticationPrincipal PrincipalDetails principalDetails) {
         logService.deleteLog(principalDetails.getUser(), petId, logId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    private ResponseEntity<LogGroupByDateResponse> displayLogsByDate(@PathVariable Long petId,
+                                                                     @RequestParam int year,
+                                                                     @RequestParam int month,
+                                                                     @RequestParam int day,
+                                                                     @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(logService.displayLogsByDate(principalDetails.getUser(), petId, year, month, day));
+    }
+
+    @GetMapping(value = "/task")
+    private ResponseEntity<Slice<LogGroupByDateResponse>> displayLogsToDo(@PathVariable Long petId,
+                                                                          @RequestParam(defaultValue = "0") int page,
+                                                                          @RequestParam(defaultValue = "5") int size,
+                                                                          @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(logService.displayLogsToDo(principalDetails.getUser(), petId, page, size));
     }
 }
