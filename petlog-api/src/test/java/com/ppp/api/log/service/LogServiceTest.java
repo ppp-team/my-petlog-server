@@ -1,6 +1,7 @@
 package com.ppp.api.log.service;
 
 import com.ppp.api.log.dto.request.LogRequest;
+import com.ppp.api.log.dto.response.LogDetailResponse;
 import com.ppp.api.log.dto.response.LogGroupByDateResponse;
 import com.ppp.api.log.exception.LogException;
 import com.ppp.api.pet.exception.ErrorCode;
@@ -709,6 +710,66 @@ class LogServiceTest {
                 .willReturn(false);
         //when
         LogException exception = assertThrows(LogException.class, () -> logService.displayLogsToDo(user, 1L, 0, 10));
+        //then
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 수첩 상세 조회 성공")
+    void displayLog_success() {
+        //given
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(Log.builder()
+                        .typeMap(Map.of("type", FEED.name(),
+                                "subType", "건식"))
+                        .datetime(LocalDateTime.of(2024, 2, 2, 21, 22))
+                        .isImportant(true)
+                        .isComplete(true)
+                        .memo("엄마 밥 또 주지 마셈")
+                        .manager(user)
+                        .pet(pet)
+                        .build()));
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        //when
+        LogDetailResponse response = logService.displayLog(user, 1L, 1L);
+        //then
+        assertEquals(response.type(), FEED.getTitle());
+        assertEquals(response.subType(), "건식");
+        assertEquals(response.memo(), "엄마 밥 또 주지 마셈");
+    }
+
+    @Test
+    @DisplayName("건강 수첩 상세 조회 실패-log not found")
+    void displayLog_fail_LOG_NOT_FOUND() {
+        //given
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.empty());
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.displayLog(user, 1L, 1L));
+        //then
+        assertEquals(LOG_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 수첩 상세 조회 실패-forbidden pet space")
+    void displayLog_fail_FORBIDDEN_PET_SPACE() {
+        //given
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(Log.builder()
+                        .typeMap(Map.of("type", FEED.name(),
+                                "subType", "건식"))
+                        .datetime(LocalDateTime.of(2024, 2, 2, 21, 22))
+                        .isImportant(true)
+                        .isComplete(true)
+                        .memo("엄마 밥 또 주지 마셈")
+                        .manager(user)
+                        .pet(pet)
+                        .build()));
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(false);
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.displayLog(user, 1L, 1L));
         //then
         assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
     }
