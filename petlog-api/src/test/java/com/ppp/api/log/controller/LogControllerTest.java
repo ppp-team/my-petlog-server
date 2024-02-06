@@ -158,4 +158,37 @@ class LogControllerTest {
                 .andExpect(status().isOk());
         //then
     }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("건강 기록 날짜별 조회 성공 ")
+    void displayLogsByDate_success() throws Exception {
+        //given
+        //when
+        mockMvc.perform(get("/api/v1/pets/{petId}/logs", 1L)
+                        .param("year", "2024")
+                        .param("month","2")
+                        .param("day", "4")
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                ).andDo(print())
+                .andExpect(status().isOk());
+        //then
+    }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("건강 기록 해야할 일 조회 성공 ")
+    void displayLogsToDo_success() throws Exception {
+        //given
+        //when
+        mockMvc.perform(get("/api/v1/pets/{petId}/logs/task", 1L)
+                        .param("page", "0")
+                        .param("size","10")
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                ).andDo(print())
+                .andExpect(status().isOk());
+        //then
+    }
 }
