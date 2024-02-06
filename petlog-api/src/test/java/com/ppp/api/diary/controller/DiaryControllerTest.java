@@ -84,6 +84,25 @@ class DiaryControllerTest {
 
     @Test
     @WithMockCustomUser
+    @DisplayName("일기 생성 실패-잘못된 datetime")
+    void createDiary_fail_WhenDatetimeIsWrong() throws Exception {
+        //given
+        DiaryRequest request =
+                new DiaryRequest("우리 강아지", "너무 귀엽당", "2023-02-1");
+        //when
+        mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries", 1L, 1L)
+                        .file(new MockMultipartFile("request", "json",
+                                MediaType.APPLICATION_JSON_VALUE,
+                                objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8)))
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                ).andDo(print())
+                .andExpect(status().isBadRequest());
+        //then
+    }
+
+    @Test
+    @WithMockCustomUser
     @DisplayName("일기 수정 성공")
     void updateDiary_success() throws Exception {
         //given

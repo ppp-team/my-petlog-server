@@ -30,7 +30,7 @@
 
 | `💻Develop `                                                  |
 |---------------------------------------------------------------|
-| [개발 서버 REST API](http://localhost:8080/swagger-ui/index.html) | 
+| [개발 서버 REST API](http://13.124.44.0:8001/swagger-ui/index.html) | 
 
 
 

@@ -6,6 +6,7 @@ import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.api.diary.service.DiaryService;
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.common.security.PrincipalDetails;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -33,6 +34,7 @@ import java.util.List;
 public class DiaryController {
     private final DiaryService diaryService;
 
+    @Operation(summary = "일기 생성")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
@@ -50,6 +52,7 @@ public class DiaryController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "일기 수정")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
@@ -69,6 +72,7 @@ public class DiaryController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "일기 삭제")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "게시물 삭제 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
@@ -83,6 +87,7 @@ public class DiaryController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "일기 상세 조회")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
@@ -95,6 +100,7 @@ public class DiaryController {
         return ResponseEntity.ok(diaryService.displayDiary(principalDetails.getUser(), petId, diaryId));
     }
 
+    @Operation(summary = "일기 리스트 조회")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
@@ -107,10 +113,16 @@ public class DiaryController {
         return ResponseEntity.ok(diaryService.displayDiaries(principalDetails.getUser(), petId, page, size));
     }
 
+    @Operation(summary = "일기 좋아요")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "일치하는 일기 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+    })
     @PostMapping(value = "/{diaryId}/like")
-    private ResponseEntity<Void> likeComment(@PathVariable Long petId,
-                                             @PathVariable Long diaryId,
-                                             @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    private ResponseEntity<Void> likeDiary(@PathVariable Long petId,
+                                           @PathVariable Long diaryId,
+                                           @AuthenticationPrincipal PrincipalDetails principalDetails) {
         diaryService.likeDiary(principalDetails.getUser(), petId, diaryId);
         return ResponseEntity.ok().build();
     }
