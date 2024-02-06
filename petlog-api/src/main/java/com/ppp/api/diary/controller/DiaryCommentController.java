@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Diary Comment", description = "Diary Comment APIs")
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -45,8 +47,7 @@ public class DiaryCommentController {
     @Operation(summary = "댓글 수정")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "댓글 수정 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "요청 필드 에러, 댓글 수정 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "404", description = "일치하는 댓글 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })

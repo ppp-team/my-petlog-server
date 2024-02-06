@@ -28,8 +28,7 @@ public class LogController {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "404", description = "일치하는 반려동물 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "404", description = "일치하는 유저 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+            @ApiResponse(responseCode = "404", description = "일치하는 반려동물 없음, 일치하는 유저 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PostMapping
     private ResponseEntity<Void> createLog(@PathVariable Long petId,
@@ -44,8 +43,7 @@ public class LogController {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "404", description = "일치하는 기록 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "404", description = "일치하는 유저 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+            @ApiResponse(responseCode = "404", description = "일치하는 기록 없음, 일치하는 유저 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PutMapping(value = "/{logId}")
     private ResponseEntity<Void> updateLog(@PathVariable Long petId,
@@ -56,13 +54,12 @@ public class LogController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "기록 수정")
+    @Operation(summary = "기록 삭제")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "404", description = "일치하는 기록 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "404", description = "일치하는 유저 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+            @ApiResponse(responseCode = "404", description = "일치하는 기록 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @DeleteMapping(value = "/{logId}")
     private ResponseEntity<Void> deleteLog(@PathVariable Long petId,
