@@ -2,7 +2,7 @@ package com.ppp.api.user.service;
 
 import com.ppp.api.auth.exception.AuthException;
 import com.ppp.api.auth.service.AuthService;
-import com.ppp.api.user.dto.response.UserResponse;
+import com.ppp.api.user.dto.response.ProfileResponse;
 import com.ppp.api.user.exception.ErrorCode;
 import com.ppp.api.user.exception.NotFoundUserException;
 import com.ppp.api.user.exception.UserException;
@@ -95,14 +95,14 @@ public class UserService {
         }
     }
 
-    public UserResponse displayMe(User user) {
+    public ProfileResponse displayMe(User user) {
         User userFromDb = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
 
         String profilePath = profileImageRepository.findByUser(userFromDb)
                 .map(ProfileImage::getUrl)
-                .orElse("");
-        return UserResponse.builder()
+                .orElse(null);
+        return ProfileResponse.builder()
                 .id(userFromDb.getId())
                 .nickname(userFromDb.getNickname())
                 .email(userFromDb.getEmail())
