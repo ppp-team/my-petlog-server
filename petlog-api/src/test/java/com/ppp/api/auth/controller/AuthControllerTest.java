@@ -44,7 +44,6 @@ class AuthControllerTest {
     void signup() throws Exception {
         //given
         RegisterRequest registerRequest = RegisterRequest.builder()
-                .nickname("닉네임")
                 .email("j2@gmail.com")
                 .password("password")
                 .build();

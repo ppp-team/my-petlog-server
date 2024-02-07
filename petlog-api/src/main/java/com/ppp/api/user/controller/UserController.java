@@ -3,6 +3,7 @@ package com.ppp.api.user.controller;
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.user.dto.request.EmailRequest;
 import com.ppp.api.user.dto.request.NicknameRequest;
+import com.ppp.api.user.dto.response.ProfileResponse;
 import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.api.user.exception.ErrorCode;
 import com.ppp.api.user.exception.UserException;
@@ -76,8 +77,8 @@ public class UserController {
     @PutMapping("/v1/users/profile")
     public ResponseEntity<Void> updateProfile(
             @RequestParam(required = false, value = "profileImage") MultipartFile profileImage,
-            @RequestParam(required = false, value = "nickname") String nickname,
-            @RequestParam(required = false, value = "password") String password,
+            @RequestParam(value = "nickname") String nickname,
+            @RequestParam(value = "password") String password,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         userService.updateProfile(principalDetails.getUser(), profileImage, nickname, password);
@@ -92,7 +93,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @GetMapping("/v1/users/me")
-    public ResponseEntity<UserResponse> displayMe(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<ProfileResponse> displayMe(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(userService.displayMe(principalDetails.getUser()));
     }
 }
