@@ -1,5 +1,10 @@
 package com.ppp.api.user.service;
 
+import com.ppp.api.auth.service.AuthService;
+import com.ppp.api.user.dto.response.ProfileResponse;
+import com.ppp.common.service.FileManageService;
+import com.ppp.domain.user.User;
+import com.ppp.domain.user.repository.ProfileImageRepository;
 import com.ppp.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,18 +12,31 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
     @Mock
+    private FileManageService fileManageService;
+    @Mock
     private UserRepository userRepository;
+    @Mock
+    private ProfileImageRepository profileImageRepository;
 
     @InjectMocks
     private UserService userService;
+
+
+    @Mock
+    private AuthService authService;
 
     @Test
     @DisplayName("닉네임이 존재할 때")
@@ -48,5 +66,75 @@ class UserServiceTest {
 
         //then
         assertTrue(result,"이메일이 이미 존재하는 경우 테스트 실패");
+    }
+
+    @Test
+    @DisplayName("프로필 등록")
+    void createProfile() {
+        //given
+        User user = User.builder()
+                .id("randomstring")
+                .nickname("닉네임")
+                .build();
+
+        MockMultipartFile file = new MockMultipartFile("profileImage", "test.jpg",
+                "image/jpeg", "test data".getBytes());
+
+        //when
+        when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
+        when(profileImageRepository.findByUser(any())).thenReturn(Optional.empty());
+        given(fileManageService.uploadImage(any(),any()))
+                .willReturn(Optional.of("/USER/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
+
+        userService.createProfile(user,file,"새로운닉네임");
+
+        //then
+        verify(userRepository, times(1)).findByEmail(any());
+        verify(profileImageRepository, times(1)).findByUser(any());
+    }
+
+    @Test
+    @DisplayName("프로필 수정")
+    void updateProfile() {
+        //given
+        String rawPassword = "비밀번호";
+        User user = User.builder()
+                .id("randomstring")
+                .email("test@example.com")
+                .nickname("닉네임")
+                .password("비밀번호")
+                .build();
+
+        MockMultipartFile file = new MockMultipartFile("profileImage", "test.jpg",
+                "image/jpeg", "test data".getBytes());
+
+        //when
+        lenient().when(authService.checkPasswordMatches(rawPassword, user.getPassword())).thenReturn(true);
+        lenient().when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
+        lenient().when(profileImageRepository.findByUser(any())).thenReturn(Optional.empty());
+        lenient().when(fileManageService.uploadImage(any(),any()))
+                .thenReturn(Optional.of("/USER/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
+
+        userService.updateProfile(user,null,user.getNickname(),user.getPassword());
+
+        //then
+        verify(userRepository, times(1)).findByEmail(any());
+
+    }
+
+    @Test
+    @DisplayName("내 정보 조회")
+    void displayMe() {
+        //given
+        User user = User.builder()
+                .id("randomstring")
+                .email("test@example.com")
+                .build();
+
+        when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
+
+        ProfileResponse profileResponse = userService.displayMe(user);
+
+        assertEquals(user.getEmail(), profileResponse.getEmail());
     }
 }
