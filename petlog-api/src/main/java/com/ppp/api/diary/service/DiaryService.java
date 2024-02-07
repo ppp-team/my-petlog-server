@@ -64,8 +64,8 @@ public class DiaryService {
                 .pet(pet)
                 .build();
         diary.addDiaryMedias(uploadImagesAndGetDiaryMedias(images, diary));
-        diaryRepository.save(diary);
-        applicationEventPublisher.publishEvent(new DiaryCreatedEvent(diary.getId()));
+        applicationEventPublisher.publishEvent(
+                new DiaryCreatedEvent(diaryRepository.save(diary).getId()));
     }
 
     private void validateCreateDiary(Long petId, User user) {

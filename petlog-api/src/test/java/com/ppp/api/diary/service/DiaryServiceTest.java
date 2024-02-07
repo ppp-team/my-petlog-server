@@ -21,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
@@ -36,8 +37,7 @@ import static com.ppp.api.pet.exception.ErrorCode.PET_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DiaryServiceTest {
@@ -53,6 +53,8 @@ class DiaryServiceTest {
     private DiaryCommentRedisService diaryCommentRedisService;
     @Mock
     private DiaryRedisService diaryRedisService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
     @InjectMocks
     private DiaryService diaryService;
 
@@ -85,6 +87,9 @@ class DiaryServiceTest {
         given(fileManageService.uploadImages(anyList(), any()))
                 .willReturn(List.of("/DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg",
                         "/DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
+        Diary createdDiary = mock(Diary.class);
+        given(diaryRepository.save(any())).willReturn(createdDiary);
+        given(createdDiary.getId()).willReturn(1L);
         //when
         diaryService.createDiary(user, 1L, request, images);
         ArgumentCaptor<Diary> diaryCaptor = ArgumentCaptor.forClass(Diary.class);
