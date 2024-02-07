@@ -1,13 +1,13 @@
 package com.ppp.api.diary.service;
 
+import com.ppp.api.diary.dto.event.DiaryCreatedEvent;
+import com.ppp.api.diary.dto.event.DiaryDeletedEvent;
+import com.ppp.api.diary.dto.event.DiaryUpdatedEvent;
 import com.ppp.api.diary.dto.request.DiaryRequest;
 import com.ppp.api.diary.dto.response.DiaryDetailResponse;
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.api.diary.dto.response.DiaryResponse;
 import com.ppp.api.diary.exception.DiaryException;
-import com.ppp.api.handler.dto.DiaryCreatedEvent;
-import com.ppp.api.handler.dto.DiaryDeletedEvent;
-import com.ppp.api.handler.dto.DiaryUpdatedEvent;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.service.FileManageService;
 import com.ppp.domain.diary.Diary;
@@ -87,7 +87,7 @@ public class DiaryService {
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateModifyDiary(diary, user, petId);
 
-        applicationEventPublisher.publishEvent(new DiaryUpdatedEvent(diaryId, diary.getDiaryMedias()));
+        applicationEventPublisher.publishEvent(new DiaryUpdatedEvent(diaryId, new ArrayList<>(diary.getDiaryMedias())));
         diary.update(request.getTitle(), request.getContent(), LocalDate.parse(request.getDate()),
                 uploadImagesAndGetDiaryMedias(images, diary));
     }
@@ -106,7 +106,7 @@ public class DiaryService {
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateModifyDiary(diary, user, petId);
 
-        applicationEventPublisher.publishEvent(new DiaryDeletedEvent(diaryId, diary.getDiaryMedias()));
+        applicationEventPublisher.publishEvent(new DiaryDeletedEvent(diaryId, new ArrayList<>(diary.getDiaryMedias())));
         diary.delete();
     }
 

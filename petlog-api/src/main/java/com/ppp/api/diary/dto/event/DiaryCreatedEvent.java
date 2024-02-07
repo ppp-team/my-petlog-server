@@ -1,4 +1,4 @@
-package com.ppp.api.handler.dto;
+package com.ppp.api.diary.dto.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

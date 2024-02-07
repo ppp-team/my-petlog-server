@@ -11,7 +11,6 @@ public record DiaryResponse(
         String title,
         String content,
         String thumbnailPath,
-        boolean isCurrentUserLiked,
         UserResponse writer,
         int commentCount
 ) {

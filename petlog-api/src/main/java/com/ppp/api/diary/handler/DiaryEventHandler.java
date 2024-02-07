@@ -1,11 +1,11 @@
-package com.ppp.api.handler;
+package com.ppp.api.diary.handler;
 
 import com.ppp.api.diary.service.DiaryCommentRedisService;
 import com.ppp.api.diary.service.DiaryRedisService;
 import com.ppp.api.diary.service.DiarySearchService;
-import com.ppp.api.handler.dto.DiaryCreatedEvent;
-import com.ppp.api.handler.dto.DiaryDeletedEvent;
-import com.ppp.api.handler.dto.DiaryUpdatedEvent;
+import com.ppp.api.diary.dto.event.DiaryCreatedEvent;
+import com.ppp.api.diary.dto.event.DiaryDeletedEvent;
+import com.ppp.api.diary.dto.event.DiaryUpdatedEvent;
 import com.ppp.common.service.FileManageService;
 import com.ppp.domain.diary.DiaryMedia;
 import lombok.RequiredArgsConstructor;

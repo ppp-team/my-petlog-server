@@ -55,12 +55,8 @@ public class Diary extends BaseTimeEntity {
 
 
     public void addDiaryMedias(List<DiaryMedia> diaryMedias) {
-        if (this.diaryMedias.isEmpty()) {
-            this.diaryMedias = diaryMedias;
-        } else {
-            this.diaryMedias.clear();
-            this.diaryMedias.addAll(diaryMedias);
-        }
+        this.diaryMedias.clear();
+        this.diaryMedias.addAll(diaryMedias);
     }
 
     public void update(String title, String content, LocalDate date, List<DiaryMedia> diaryMedias) {
