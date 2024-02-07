@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 @Builder
 public record DiaryGroupByDateResponse(
-        @JsonFormat(pattern = "yyyy년 MM월 dd일 E요일")
+        @JsonFormat(pattern = "yyyy년 M월 d일 E요일")
         LocalDate date,
         List<DiaryResponse> diaries
 ) {

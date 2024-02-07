@@ -1,6 +1,9 @@
 package com.ppp.api.log.service;
 
 import com.ppp.api.log.dto.request.LogRequest;
+import com.ppp.api.log.dto.response.LogDetailResponse;
+import com.ppp.api.log.dto.response.LogGroupByDateResponse;
+import com.ppp.api.log.dto.response.LogResponse;
 import com.ppp.api.log.exception.LogException;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.user.exception.ErrorCode;
@@ -16,11 +19,16 @@ import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.ppp.api.log.exception.ErrorCode.*;
 import static com.ppp.api.pet.exception.ErrorCode.PET_NOT_FOUND;
@@ -80,7 +88,7 @@ public class LogService {
         Map<String, String> typeMap = new HashMap<>();
         LogType type = LogType.valueOf(request.getType());
         typeMap.put("type", type.name());
-        if (request.getSubType() != null && !request.getSubType().isEmpty()) {
+        if (request.getSubType() != null && !request.getSubType().isBlank()) {
             typeMap.put("subType", request.getSubType());
         }
         return typeMap;
@@ -112,5 +120,59 @@ public class LogService {
     private void validateAccessLog(Long petId, User user) {
         if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
             throw new LogException(FORBIDDEN_PET_SPACE);
+    }
+
+    public LogDetailResponse displayLog(User user, Long petId, Long logId) {
+        Log log = logRepository.findByIdAndIsDeletedFalse(logId)
+                .orElseThrow(() -> new LogException(LOG_NOT_FOUND));
+        validateAccessLog(petId, user);
+
+        return LogDetailResponse.from(log);
+    }
+
+    public LogGroupByDateResponse displayLogsByDate(User user, Long petId, int year, int month, int day) {
+        LocalDateTime startDateTime;
+        try {
+            startDateTime = LocalDate.of(year, month, day).atStartOfDay();
+        } catch (DateTimeException e) {
+            throw new LogException(INVALID_DATE);
+        }
+        validateAccessLog(petId, user);
+
+        LocalDateTime endDateTime = startDateTime.plusDays(1).minusNanos(1);
+        return LogGroupByDateResponse.of(startDateTime,
+                logRepository.findByPetIdAndAndDatetimeBetweenAndIsDeletedFalse(petId, startDateTime, endDateTime)
+                        .stream().map(log -> LogResponse.from(log, user.getId()))
+                        .collect(Collectors.toList()));
+    }
+
+    public Slice<LogGroupByDateResponse> displayLogsToDo(User user, Long petId, int page, int size) {
+        validateAccessLog(petId, user);
+
+        LocalDateTime today = LocalDate.now().atStartOfDay();
+        return getGroupedLogsSlice(
+                logRepository.findByPetIdAndAndDatetimeAfterAndIsDeletedFalse(petId,
+                        today, PageRequest.of(page, size)), user.getId());
+    }
+
+    private Slice<LogGroupByDateResponse> getGroupedLogsSlice(Slice<Log> logSlice, String userId) {
+        if (logSlice.getContent().isEmpty())
+            return new SliceImpl<>(new ArrayList<>(), logSlice.getPageable(), logSlice.hasNext());
+
+        List<LogGroupByDateResponse> content = new ArrayList<>();
+        List<LogResponse> sameDaysLogs = new ArrayList<>();
+        LocalDateTime prevDate = logSlice.getContent().get(0).getDatetime();
+        for (Log log : logSlice.getContent()) {
+            LocalDateTime currentDate = log.getDatetime();
+            if (!Objects.equals(prevDate.toLocalDate(), currentDate.toLocalDate())) {
+                content.add(LogGroupByDateResponse.of(prevDate, sameDaysLogs));
+                prevDate = currentDate;
+                sameDaysLogs = new ArrayList<>();
+            }
+            sameDaysLogs.add(LogResponse.from(log, userId));
+        }
+        content.add(LogGroupByDateResponse.of(prevDate, sameDaysLogs));
+
+        return new SliceImpl<>(content, logSlice.getPageable(), logSlice.hasNext());
     }
 }

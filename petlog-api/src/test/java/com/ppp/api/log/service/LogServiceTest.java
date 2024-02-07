@@ -1,6 +1,8 @@
 package com.ppp.api.log.service;
 
 import com.ppp.api.log.dto.request.LogRequest;
+import com.ppp.api.log.dto.response.LogDetailResponse;
+import com.ppp.api.log.dto.response.LogGroupByDateResponse;
 import com.ppp.api.log.exception.LogException;
 import com.ppp.api.pet.exception.ErrorCode;
 import com.ppp.api.pet.exception.PetException;
@@ -20,8 +22,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,8 +34,7 @@ import static com.ppp.api.log.exception.ErrorCode.*;
 import static com.ppp.api.user.exception.ErrorCode.NOT_FOUND_USER;
 import static com.ppp.domain.log.constant.LogType.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -387,7 +391,7 @@ class LogServiceTest {
         //given
         Log log = Log.builder()
                 .typeMap(Map.of("type", CUSTOM.name(),
-                        "subtype", "강아지 카페"))
+                        "subType", "강아지 카페"))
                 .datetime(LocalDateTime.of(2024, 2, 2, 22, 22))
                 .isImportant(true)
                 .isComplete(false)
@@ -457,7 +461,7 @@ class LogServiceTest {
         //given
         Log log = Log.builder()
                 .typeMap(Map.of("type", CUSTOM.name(),
-                        "subtype", "강아지 카페"))
+                        "subType", "강아지 카페"))
                 .datetime(LocalDateTime.of(2024, 2, 2, 22, 22))
                 .isImportant(true)
                 .isComplete(false)
@@ -495,7 +499,7 @@ class LogServiceTest {
         //given
         Log log = Log.builder()
                 .typeMap(Map.of("type", CUSTOM.name(),
-                        "subtype", "강아지 카페"))
+                        "subType", "강아지 카페"))
                 .datetime(LocalDateTime.of(2024, 2, 2, 22, 22))
                 .isImportant(true)
                 .isComplete(false)
@@ -532,7 +536,7 @@ class LogServiceTest {
         //given
         Log log = Log.builder()
                 .typeMap(Map.of("type", CUSTOM.name(),
-                        "subtype", "강아지 카페"))
+                        "subType", "강아지 카페"))
                 .datetime(LocalDateTime.of(2024, 2, 2, 22, 22))
                 .isImportant(true)
                 .isComplete(false)
@@ -546,6 +550,226 @@ class LogServiceTest {
                 .willReturn(false);
         //when
         LogException exception = assertThrows(LogException.class, () -> logService.deleteLog(user, 1L, 1L));
+        //then
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 기록 날짜별 조회 성공")
+    void displayLogsByDate_success() {
+        //given
+        int year = 2024;
+        int month = 2;
+        int day = 2;
+        List<Log> logs = List.of(Log.builder()
+                        .typeMap(Map.of("type", FEED.name(),
+                                "subType", "건식"))
+                        .datetime(LocalDateTime.of(2024, 2, 2, 21, 22))
+                        .isImportant(true)
+                        .isComplete(true)
+                        .memo("엄마 밥 또 주지 마셈")
+                        .manager(user)
+                        .pet(pet)
+                        .build(),
+                Log.builder()
+                        .typeMap(Map.of("type", CUSTOM.name(),
+                                "subType", "강아지 카페"))
+                        .datetime(LocalDateTime.of(2024, 2, 2, 22, 22))
+                        .isImportant(false)
+                        .isComplete(false)
+                        .memo("고구마 챙겨가기")
+                        .manager(userA)
+                        .pet(pet)
+                        .build());
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        given(logRepository.findByPetIdAndAndDatetimeBetweenAndIsDeletedFalse(anyLong(), any(), any()))
+                .willReturn(logs);
+        //when
+        LogGroupByDateResponse response = logService.displayLogsByDate(user, 1L, year, month, day);
+        //then
+        assertEquals(response.date(), LocalDateTime.of(2024, 2, 2, 0, 0, 0, 0));
+        assertEquals(response.logs().size(), 2);
+        assertEquals(response.logs().get(0).taskName(), FEED.getTitle());
+        assertTrue(response.logs().get(0).isImportant());
+        assertTrue(response.logs().get(0).isComplete());
+        assertTrue(response.logs().get(0).manager().isCurrentUser());
+        assertEquals(response.logs().get(0).manager().id(), "abcde1234");
+        assertEquals(response.logs().get(0).manager().nickname(), "hi");
+        assertEquals(response.logs().get(0).time(), LocalDateTime.of(2024, 2, 2, 21, 22));
+        assertEquals(response.logs().get(1).taskName(), "강아지 카페");
+        assertFalse(response.logs().get(1).isImportant());
+        assertFalse(response.logs().get(1).isComplete());
+        assertFalse(response.logs().get(1).manager().isCurrentUser());
+        assertEquals(response.logs().get(1).manager().id(), "abc123");
+        assertEquals(response.logs().get(1).manager().nickname(), "첫째누나");
+        assertEquals(response.logs().get(1).time(), LocalDateTime.of(2024, 2, 2, 22, 22));
+    }
+
+    @Test
+    @DisplayName("건강 기록 날짜별 조회 실패_invalid date")
+    void displayLogsByDate_fail_INVALID_DATE() {
+        //given
+        int year = 2024;
+        int month = 2;
+        int day = 31;
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.displayLogsByDate(user, 1L, year, month, day));
+        //then
+        assertEquals(INVALID_DATE.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 기록 날짜별 조회 실패_forbidden pet space")
+    void displayLogsByDate_fail_FORBIDDEN_PET_SPACE() {
+        //given
+        int year = 2024;
+        int month = 2;
+        int day = 2;
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(false);
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.displayLogsByDate(user, 1L, year, month, day));
+        //then
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 수첩 해야할 일 조회 성공")
+    void displayLogsToDo_success() {
+        //given
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        given(logRepository.findByPetIdAndAndDatetimeAfterAndIsDeletedFalse(anyLong(), any(), any()))
+                .willReturn(new SliceImpl<>(List.of(Log.builder()
+                                .typeMap(Map.of("type", FEED.name(),
+                                        "subType", "건식"))
+                                .datetime(LocalDateTime.of(2024, 2, 2, 21, 22))
+                                .isImportant(true)
+                                .isComplete(true)
+                                .memo("엄마 밥 또 주지 마셈")
+                                .manager(user)
+                                .pet(pet)
+                                .build(),
+                        Log.builder()
+                                .typeMap(Map.of("type", CUSTOM.name(),
+                                        "subType", "강아지 카페"))
+                                .datetime(LocalDateTime.of(2024, 2, 2, 22, 22))
+                                .isImportant(false)
+                                .isComplete(false)
+                                .memo("고구마 챙겨가기")
+                                .manager(userA)
+                                .pet(pet)
+                                .build(),
+                        Log.builder()
+                                .typeMap(Map.of("type", WALK.name(),
+                                        "subType", "여의도 공원"))
+                                .datetime(LocalDateTime.of(2024, 3, 3, 22, 22))
+                                .isImportant(false)
+                                .isComplete(false)
+                                .memo("동동이랑")
+                                .manager(user)
+                                .pet(pet)
+                                .build()
+                )));
+        //when
+        Slice<LogGroupByDateResponse> response = logService.displayLogsToDo(user, 1L, 0, 10);
+        //then
+        assertEquals(response.getContent().get(0).date(), LocalDateTime.of(2024, 2, 2, 21, 22));
+        assertEquals(response.getContent().get(0).logs().size(), 2);
+        assertEquals(response.getContent().get(0).logs().get(0).taskName(), FEED.getTitle());
+        assertTrue(response.getContent().get(0).logs().get(0).isImportant());
+        assertTrue(response.getContent().get(0).logs().get(0).isComplete());
+        assertTrue(response.getContent().get(0).logs().get(0).manager().isCurrentUser());
+        assertEquals(response.getContent().get(0).logs().get(0).manager().id(), "abcde1234");
+        assertEquals(response.getContent().get(0).logs().get(0).manager().nickname(), "hi");
+        assertEquals(response.getContent().get(0).logs().get(0).time(), LocalDateTime.of(2024, 2, 2, 21, 22));
+        assertEquals(response.getContent().get(0).logs().get(1).taskName(), "강아지 카페");
+        assertFalse(response.getContent().get(0).logs().get(1).isImportant());
+        assertFalse(response.getContent().get(0).logs().get(1).isComplete());
+        assertFalse(response.getContent().get(0).logs().get(1).manager().isCurrentUser());
+        assertEquals(response.getContent().get(0).logs().get(1).manager().id(), "abc123");
+        assertEquals(response.getContent().get(0).logs().get(1).manager().nickname(), "첫째누나");
+        assertEquals(response.getContent().get(0).logs().get(1).time(), LocalDateTime.of(2024, 2, 2, 22, 22));
+        assertEquals(response.getContent().get(1).date(), LocalDateTime.of(2024, 3, 3, 22, 22));
+        assertEquals(response.getContent().get(1).logs().size(), 1);
+        assertEquals(response.getContent().get(1).logs().get(0).taskName(), WALK.getTitle());
+        assertFalse(response.getContent().get(1).logs().get(0).isImportant());
+        assertFalse(response.getContent().get(1).logs().get(0).isComplete());
+        assertTrue(response.getContent().get(1).logs().get(0).manager().isCurrentUser());
+        assertEquals(response.getContent().get(1).logs().get(0).manager().id(), "abcde1234");
+        assertEquals(response.getContent().get(1).logs().get(0).manager().nickname(), "hi");
+        assertEquals(response.getContent().get(1).logs().get(0).time(), LocalDateTime.of(2024, 3, 3, 22, 22));
+    }
+
+    @Test
+    @DisplayName("건강 수첩 해야할 일 조회 실패_forbidden pet space")
+    void displayLogsToDo_fail_FORBIDDEN_PET_SPACE() {
+        //given
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(false);
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.displayLogsToDo(user, 1L, 0, 10));
+        //then
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 수첩 상세 조회 성공")
+    void displayLog_success() {
+        //given
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(Log.builder()
+                        .typeMap(Map.of("type", FEED.name(),
+                                "subType", "건식"))
+                        .datetime(LocalDateTime.of(2024, 2, 2, 21, 22))
+                        .isImportant(true)
+                        .isComplete(true)
+                        .memo("엄마 밥 또 주지 마셈")
+                        .manager(user)
+                        .pet(pet)
+                        .build()));
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        //when
+        LogDetailResponse response = logService.displayLog(user, 1L, 1L);
+        //then
+        assertEquals(response.type(), FEED.getTitle());
+        assertEquals(response.subType(), "건식");
+        assertEquals(response.memo(), "엄마 밥 또 주지 마셈");
+    }
+
+    @Test
+    @DisplayName("건강 수첩 상세 조회 실패-log not found")
+    void displayLog_fail_LOG_NOT_FOUND() {
+        //given
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.empty());
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.displayLog(user, 1L, 1L));
+        //then
+        assertEquals(LOG_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 수첩 상세 조회 실패-forbidden pet space")
+    void displayLog_fail_FORBIDDEN_PET_SPACE() {
+        //given
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(Log.builder()
+                        .typeMap(Map.of("type", FEED.name(),
+                                "subType", "건식"))
+                        .datetime(LocalDateTime.of(2024, 2, 2, 21, 22))
+                        .isImportant(true)
+                        .isComplete(true)
+                        .memo("엄마 밥 또 주지 마셈")
+                        .manager(user)
+                        .pet(pet)
+                        .build()));
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(false);
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.displayLog(user, 1L, 1L));
         //then
         assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
     }

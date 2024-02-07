@@ -20,6 +20,9 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(indexes = {
+        @Index(name = "idx_pet_id_datetime", columnList = "pet_id, datetime")
+})
 public class Log extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

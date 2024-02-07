@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     FORBIDDEN_PET_SPACE(HttpStatus.FORBIDDEN, "LOG-0001", "해당 기록 공간에 대한 권한이 없습니다."),
     LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "LOG-0002", "일치하는 기록이 없습니다."),
+    INVALID_DATE(HttpStatus.BAD_REQUEST, "LOG-0003", "적합한 날짜인지 확인해주세요."),
     LOCATION_INCORRECT(HttpStatus.BAD_REQUEST, "LOG-0004", "장소 정보가 올바르지 않습니다."),
     ;
 
