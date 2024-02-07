@@ -27,6 +27,11 @@ spring:
     redis:
       password: YOUR_PASSWORD
       timeout: 600ms
+    elasticsearch:
+      repositories:
+        enabled: true
+  elasticsearch:
+    uris: ENC("YDmbn+FWIxxbE1Xh1W0h1KmfYAZR6TQYOGi8P+iIFd8=")
 cloud:
   aws:
     s3:

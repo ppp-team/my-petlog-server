@@ -19,7 +19,7 @@ public class DiaryDocument extends BaseDocument {
     @Field(type = FieldType.Text)
     private String content;
 
-    private LocalDate date;
+    private Long date;
 
     private String thumbnailPath;
 
@@ -29,7 +29,7 @@ public class DiaryDocument extends BaseDocument {
     private long petId;
 
     @Builder
-    public DiaryDocument(String id, String title, String content, LocalDate date, String thumbnailPath, long petId, UserDocument user) {
+    public DiaryDocument(String id, String title, String content, Long date, String thumbnailPath, long petId, UserDocument user) {
         super(id);
         this.title = title;
         this.content = content;
@@ -44,7 +44,7 @@ public class DiaryDocument extends BaseDocument {
                 .id(diary.getId() + "")
                 .content(diary.getContent())
                 .title(diary.getTitle())
-                .date(diary.getDate())
+                .date(diary.getDate().toEpochDay())
                 .thumbnailPath(diary.getThumbnailPath())
                 .petId(diary.getPet().getId())
                 .user(UserDocument.from(diary.getUser()))

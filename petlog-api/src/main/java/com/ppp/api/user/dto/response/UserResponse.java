@@ -2,6 +2,7 @@ package com.ppp.api.user.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ppp.domain.user.User;
+import com.ppp.domain.user.UserDocument;
 import lombok.Builder;
 
 import java.util.Objects;
@@ -20,6 +21,14 @@ public record UserResponse(
                 .id(user.getId())
                 .nickname(user.getNickname())
                 .isCurrentUser(Objects.equals(user.getId(), currentUserId))
+                .build();
+    }
+
+    public static UserResponse from(UserDocument userDocument, String currentUserId) {
+        return UserResponse.builder()
+                .id(userDocument.getId())
+                .nickname(userDocument.getNickname())
+                .isCurrentUser(Objects.equals(userDocument.getId(), currentUserId))
                 .build();
     }
 
