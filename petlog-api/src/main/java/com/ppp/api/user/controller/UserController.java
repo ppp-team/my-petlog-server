@@ -77,8 +77,8 @@ public class UserController {
     @PutMapping("/v1/users/profile")
     public ResponseEntity<Void> updateProfile(
             @RequestParam(required = false, value = "profileImage") MultipartFile profileImage,
-            @RequestParam(value = "nickname") String nickname,
-            @RequestParam(value = "password") String password,
+            @RequestParam(required = false, value = "nickname") String nickname,
+            @RequestParam(required = false, value = "password") String password,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         userService.updateProfile(principalDetails.getUser(), profileImage, nickname, password);
