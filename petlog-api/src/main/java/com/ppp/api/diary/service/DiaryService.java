@@ -5,6 +5,9 @@ import com.ppp.api.diary.dto.response.DiaryDetailResponse;
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.api.diary.dto.response.DiaryResponse;
 import com.ppp.api.diary.exception.DiaryException;
+import com.ppp.api.handler.dto.DiaryCreatedEvent;
+import com.ppp.api.handler.dto.DiaryDeletedEvent;
+import com.ppp.api.handler.dto.DiaryUpdatedEvent;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.service.FileManageService;
 import com.ppp.domain.diary.Diary;
@@ -17,6 +20,7 @@ import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -44,6 +48,7 @@ public class DiaryService {
     private final FileManageService fileManageService;
     private final DiaryCommentRedisService diaryCommentRedisService;
     private final DiaryRedisService diaryRedisService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public void createDiary(User user, Long petId, DiaryRequest request, List<MultipartFile> images) {
@@ -60,7 +65,7 @@ public class DiaryService {
                 .build();
         diary.addDiaryMedias(uploadImagesAndGetDiaryMedias(images, diary));
         diaryRepository.save(diary);
-        diaryCommentRedisService.setDiaryCommentCountByDiaryId(diary.getId());
+        applicationEventPublisher.publishEvent(new DiaryCreatedEvent(diary.getId()));
     }
 
     private void validateCreateDiary(Long petId, User user) {
@@ -82,7 +87,7 @@ public class DiaryService {
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateModifyDiary(diary, user, petId);
 
-        deleteDiaryMedia(diary);
+        applicationEventPublisher.publishEvent(new DiaryUpdatedEvent(diaryId, diary.getDiaryMedias()));
         diary.update(request.getTitle(), request.getContent(), LocalDate.parse(request.getDate()),
                 uploadImagesAndGetDiaryMedias(images, diary));
     }
@@ -94,11 +99,6 @@ public class DiaryService {
             throw new DiaryException(FORBIDDEN_PET_SPACE);
     }
 
-    private void deleteDiaryMedia(Diary diary) {
-        fileManageService.deleteImages(diary.getDiaryMedias().stream().map(DiaryMedia::getPath)
-                .collect(Collectors.toList()));
-        diary.deleteDiaryMedias();
-    }
 
     @Transactional
     public void deleteDiary(User user, Long petId, Long diaryId) {
@@ -106,10 +106,8 @@ public class DiaryService {
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateModifyDiary(diary, user, petId);
 
-        deleteDiaryMedia(diary);
+        applicationEventPublisher.publishEvent(new DiaryDeletedEvent(diaryId, diary.getDiaryMedias()));
         diary.delete();
-        diaryCommentRedisService.deleteDiaryCommentCountByDiaryId(diaryId);
-        diaryRedisService.deleteAllLikeByDiaryId(diaryId);
     }
 
     public DiaryDetailResponse displayDiary(User user, Long petId, Long diaryId) {

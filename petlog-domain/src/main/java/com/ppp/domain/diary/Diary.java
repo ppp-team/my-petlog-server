@@ -71,6 +71,7 @@ public class Diary extends BaseTimeEntity {
 
     public void delete() {
         this.isDeleted = true;
+        deleteDiaryMedias();
     }
 
     @Builder
