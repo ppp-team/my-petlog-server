@@ -52,8 +52,8 @@ class FilePathUtilTest {
         //when
         String filePath = FilePathUtil.createFilePath(domain);
         //then
-        assertTrue(filePath.startsWith("/" + DIARY.name()));
-        assertEquals(DIARY.name().length() + "yyyy-MM-dd".length() + 3, filePath.length());
+        assertTrue(filePath.startsWith(DIARY.name()));
+        assertEquals(DIARY.name().length() + "yyyy-MM-dd".length() + 2, filePath.length());
     }
 
 }

@@ -14,6 +14,7 @@ public class FilePathUtil {
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")) +
                 fileName.substring(fileName.lastIndexOf("."));
     }
+
     public static Optional<String> getFileExtension(String fileName) {
         int dotIndex = fileName.lastIndexOf(".");
         if (dotIndex < 0)
@@ -22,7 +23,7 @@ public class FilePathUtil {
     }
 
     public static String createFilePath(Domain domain) {
-        return "/" + domain.name() + "/" + LocalDate.now() + "/";
+        return domain.name() + "/" + LocalDate.now() + "/";
     }
 
     private FilePathUtil() {
