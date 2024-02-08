@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -43,6 +44,8 @@ class DiaryCommentServiceTest {
     private UserRepository userRepository;
     @Mock
     private DiaryCommentRedisService diaryCommentRedisService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
     @InjectMocks
     private DiaryCommentService diaryCommentService;
 
@@ -238,6 +241,7 @@ class DiaryCommentServiceTest {
     @DisplayName("다이어리 댓글 삭제 성공")
     void deleteComment_success() {
         //given
+        Diary diary = mock(Diary.class);
         DiaryComment diaryComment = DiaryComment.builder()
                 .content("오늘은 바다로 산책을 갔어요")
                 .taggedUsersIdNicknameMap(taggedUserIdNicknameMap)
@@ -248,6 +252,7 @@ class DiaryCommentServiceTest {
                 .willReturn(Optional.of(diaryComment));
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(true);
+        given(diary.getId()).willReturn(1L);
         //when
         diaryCommentService.deleteComment(user, 1L, 1L);
         //then
