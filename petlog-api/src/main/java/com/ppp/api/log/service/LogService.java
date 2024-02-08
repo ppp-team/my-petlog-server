@@ -175,4 +175,13 @@ public class LogService {
 
         return new SliceImpl<>(content, logSlice.getPageable(), logSlice.hasNext());
     }
+
+    @Transactional
+    public void checkComplete(User user, Long petId, Long logId) {
+        Log log = logRepository.findByIdAndIsDeletedFalse(logId)
+                .orElseThrow(() -> new LogException(LOG_NOT_FOUND));
+        validateAccessLog(petId, user);
+
+        log.switchIsComplete();
+    }
 }
