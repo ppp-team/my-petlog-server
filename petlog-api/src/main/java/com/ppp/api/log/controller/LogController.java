@@ -112,4 +112,12 @@ public class LogController {
                                                                           @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(logService.displayLogsToDo(principalDetails.getUser(), petId, page, size));
     }
+
+    @PostMapping(value = "/{logId}/check")
+    private ResponseEntity<Void> checkComplete(@PathVariable Long petId,
+                                               @PathVariable Long logId,
+                                               @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        logService.checkComplete(principalDetails.getUser(), petId, logId);
+        return ResponseEntity.ok().build();
+    }
 }

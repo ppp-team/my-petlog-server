@@ -71,6 +71,10 @@ public class Log extends BaseTimeEntity {
         deleteLocation();
     }
 
+    public void checkComplete() {
+        isComplete = !isComplete;
+    }
+
     public void update(LocalDateTime datetime, Map<String, String> typeMap, String memo, boolean isImportant, boolean isComplete, User manager, LogLocation location) {
         this.datetime = datetime;
         this.typeMap = typeMap;
@@ -79,7 +83,6 @@ public class Log extends BaseTimeEntity {
         this.isComplete = isComplete;
         this.manager = manager;
         addLocation(location);
-
     }
 
     @Builder
