@@ -2,6 +2,7 @@ package com.ppp.common.util;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class TimeUtil {
     private static final int SEC = 60;
@@ -24,6 +25,13 @@ public class TimeUtil {
             return term + "달";
         }
         return term / MONTH + "년";
+    }
+
+    public static String calculateAge(LocalDateTime date){
+        long day = ChronoUnit.DAYS.between(date, LocalDateTime.now());
+        if((day /= DAY) < MONTH)
+            return day + "개월";
+        return day / MONTH + "살";
     }
 
     private TimeUtil() {
