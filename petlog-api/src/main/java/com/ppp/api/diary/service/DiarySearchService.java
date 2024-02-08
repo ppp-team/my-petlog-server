@@ -62,20 +62,20 @@ public class DiarySearchService {
             return new PageImpl<>(new ArrayList<>(), documentPage.getPageable(), documentPage.getTotalPages());
 
         List<DiaryGroupByDateResponse> content = new ArrayList<>();
-        List<DiaryResponse> sameDasDiaries = new ArrayList<>();
+        List<DiaryResponse> sameDaysDiaries = new ArrayList<>();
         LocalDate prevDate = LocalDate.ofEpochDay(documentPage.getContent().get(0).getDate());
         for (DiaryDocument document : documentPage.getContent()) {
             LocalDate currentDate = LocalDate.ofEpochDay(document.getDate());
             if (!prevDate.equals(currentDate)) {
-                content.add(DiaryGroupByDateResponse.of(prevDate, sameDasDiaries));
+                content.add(DiaryGroupByDateResponse.of(prevDate, sameDaysDiaries));
                 prevDate = currentDate;
-                sameDasDiaries = new ArrayList<>();
+                sameDaysDiaries = new ArrayList<>();
             }
-            sameDasDiaries.add(
+            sameDaysDiaries.add(
                     DiaryResponse.from(document, userId,
                             diaryCommentRedisService.getDiaryCommentCountByDiaryId(Long.parseLong(document.getId()))));
         }
-        content.add(DiaryGroupByDateResponse.of(prevDate, sameDasDiaries));
+        content.add(DiaryGroupByDateResponse.of(prevDate, sameDaysDiaries));
         return new PageImpl<>(content, documentPage.getPageable(), documentPage.getTotalPages());
     }
 }
