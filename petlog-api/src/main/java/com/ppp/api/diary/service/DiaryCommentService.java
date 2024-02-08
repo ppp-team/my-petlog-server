@@ -1,5 +1,7 @@
 package com.ppp.api.diary.service;
 
+import com.ppp.api.diary.dto.event.DiaryCommentCreatedEvent;
+import com.ppp.api.diary.dto.event.DiaryCommentDeletedEvent;
 import com.ppp.api.diary.dto.request.DiaryCommentRequest;
 import com.ppp.api.diary.dto.response.DiaryCommentResponse;
 import com.ppp.api.diary.exception.DiaryException;
@@ -13,6 +15,7 @@ import com.ppp.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -33,7 +36,9 @@ public class DiaryCommentService {
     private final GuardianRepository guardianRepository;
     private final UserRepository userRepository;
     private final DiaryCommentRedisService diaryCommentRedisService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
+    @Transactional
     public void createComment(User user, Long petId, Long diaryId, DiaryCommentRequest request) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
@@ -45,7 +50,7 @@ public class DiaryCommentService {
                 .diary(diary)
                 .user(user)
                 .build());
-        diaryCommentRedisService.increaseDiaryCommentCountByDiaryId(diaryId);
+        applicationEventPublisher.publishEvent(new DiaryCommentCreatedEvent(diaryId));
     }
 
     private Map<String, String> getTaggedUsersIdNicknameMap(DiaryCommentRequest request) {
@@ -86,8 +91,7 @@ public class DiaryCommentService {
         validateModifyComment(comment, user, petId);
 
         comment.delete();
-        diaryCommentRedisService.decreaseDiaryCommentCountByDiaryId(comment.getDiary().getId());
-        diaryCommentRedisService.deleteAllLikeByCommentId(commentId);
+        applicationEventPublisher.publishEvent(new DiaryCommentDeletedEvent(comment.getDiary().getId(), commentId));
     }
 
     public List<DiaryCommentResponse> displayComments(User user, Long petId, Long diaryId) {

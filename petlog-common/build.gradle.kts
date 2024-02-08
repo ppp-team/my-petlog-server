@@ -42,6 +42,7 @@ dependencies {
     implementation ("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
     implementation("com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5")
     implementation("org.hibernate:hibernate-validator:8.0.1.Final")
+    implementation("org.springframework.data:spring-data-elasticsearch:5.1.8")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

@@ -1,12 +1,10 @@
 package com.ppp.api.diary.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.ppp.domain.diary.Diary;
 import lombok.Builder;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Builder
 public record DiaryGroupByDateResponse(

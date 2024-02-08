@@ -357,16 +357,6 @@ class LogServiceTest {
     @DisplayName("건강 기록 수정 실패-log not found")
     void updateLog_fail_LOG_NOT_FOUND() {
         //given
-        Log log = Log.builder()
-                .typeMap(Map.of("type", CUSTOM.name(),
-                        "subType", "강아지 카페"))
-                .datetime(LocalDateTime.of(2024, 2, 2, 22, 22))
-                .isImportant(true)
-                .isComplete(false)
-                .memo("고구마 챙겨가기")
-                .manager(user)
-                .pet(pet)
-                .build();
         LogRequest request = LogRequest.builder()
                 .type("FEED")
                 .subType("습식")
