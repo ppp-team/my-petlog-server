@@ -71,7 +71,7 @@ public class Log extends BaseTimeEntity {
         deleteLocation();
     }
 
-    public void checkComplete() {
+    public void switchIsComplete() {
         isComplete = !isComplete;
     }
 

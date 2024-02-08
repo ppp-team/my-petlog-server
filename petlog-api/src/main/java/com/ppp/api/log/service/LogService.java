@@ -182,6 +182,6 @@ public class LogService {
                 .orElseThrow(() -> new LogException(LOG_NOT_FOUND));
         validateAccessLog(petId, user);
 
-        log.checkComplete();
+        log.switchIsComplete();
     }
 }
