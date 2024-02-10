@@ -1,6 +1,7 @@
 package com.ppp.api.diary.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ppp.api.pet.dto.response.PetResponse;
 import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryMedia;
@@ -21,7 +22,8 @@ public record DiaryDetailResponse(
         boolean isCurrentUserLiked,
         UserResponse writer,
         int commentCount,
-        int likeCount
+        int likeCount,
+        PetResponse pet
 ) {
     public static DiaryDetailResponse from(Diary diary, String currentUserId, int commentCount, boolean isCurrentUserLiked, int likeCount) {
         return DiaryDetailResponse.builder()
@@ -36,6 +38,7 @@ public record DiaryDetailResponse(
                 .isCurrentUserLiked(isCurrentUserLiked)
                 .likeCount(likeCount)
                 .writer(UserResponse.from(diary.getUser(), currentUserId))
+                .pet(PetResponse.from(diary.getPet()))
                 .build();
     }
 }

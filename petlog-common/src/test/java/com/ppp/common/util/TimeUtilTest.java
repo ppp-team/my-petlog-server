@@ -31,4 +31,18 @@ class TimeUtilTest {
         assertTrue(minute.contains("분"));
         assertTrue(second.contains("초"));
     }
+
+    @Test
+    void calculateAge_success() {
+        //given
+        LocalDateTime current = LocalDateTime.now();
+        LocalDateTime beforeYears = current.minusMonths(12);
+        LocalDateTime beforeMonths = current.minusMonths(1);
+        //when
+        String year = TimeUtil.calculateAge(beforeYears);
+        String month = TimeUtil.calculateAge(beforeMonths);
+        //then
+        assertTrue(year.contains("살"));
+        assertTrue(month.contains("개월"));
+    }
 }

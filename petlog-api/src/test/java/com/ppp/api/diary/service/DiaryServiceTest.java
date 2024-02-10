@@ -29,6 +29,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,7 +65,9 @@ class DiaryServiceTest {
             .build();
 
     Pet pet = Pet.builder()
-            .id(1L).build();
+            .id(1L)
+            .birth(LocalDateTime.of(2023,2,8,0,0))
+            .build();
 
     List<MultipartFile> images = List.of(
             new MockMultipartFile("images", "image.jpg",
@@ -332,6 +335,7 @@ class DiaryServiceTest {
         assertEquals(response.images().size(), 1);
         assertEquals(response.commentCount(), 3);
         assertEquals(response.writer().nickname(), user.getNickname());
+        assertEquals(response.pet().age(), "1살");
         assertFalse(response.isCurrentUserLiked());
         assertEquals(response.likeCount(), 5);
     }
