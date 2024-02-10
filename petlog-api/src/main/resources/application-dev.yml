@@ -31,7 +31,7 @@ spring:
       repositories:
         enabled: true
   elasticsearch:
-    uris: ENC("Ni736P8boBJLupWuR3zpre27231aakbr24gUKYkMzTA=")
+    uris: ENC("Ah6NLZkkq9wbjHLC6Q/GedvSGso3u2gORXY7WTPAAmPiq2ZlK+dT0w==")
 cloud:
   aws:
     s3:
