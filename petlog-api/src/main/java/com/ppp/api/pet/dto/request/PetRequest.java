@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,10 +17,11 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Schema(description = "Pet 정보 요청 DTO")
 public class PetRequest {
-    @Schema(description = "이름", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank
+    @Schema(description = "이름", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotBlank
@@ -30,24 +32,24 @@ public class PetRequest {
     @Schema(description = "품종", requiredMode = Schema.RequiredMode.REQUIRED)
     private String breed;
 
-    @Schema(description = "성별", allowableValues = {"FEMALE", "MALE"}, requiredMode = Schema.RequiredMode.REQUIRED)
     @EnumValue(enumClass = Gender.class, message = "유효하지 않은 성별입니다.")
+    @Schema(description = "성별", allowableValues = {"FEMALE", "MALE"}, requiredMode = Schema.RequiredMode.REQUIRED)
     private String gender;
 
     @Schema(description = "중성화 여부")
     private Boolean isNeutered;
 
-    @Schema(description = "생일", example = "yy-MM-dd")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @Schema(description = "생년월일(yyyy-MM-dd)")
     private LocalDate birth;
 
-    @Schema(description = "처음 만난 날", example = "yy-MM-dd")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @Schema(description = "처음 만난 날(yyyy-MM-dd)")
     private LocalDate firstMeetDate;
 
-    @Schema(description = "무게")
     @Min(0)
     @Digits(integer = 5, fraction = 2, message = "2자리 소수점으로 구성되어야 합니다.")
+    @Schema(description = "무게")
     private double weight;
 
     @Schema(description = "등록번호")

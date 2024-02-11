@@ -52,16 +52,17 @@ class PetsControllerTest {
         MockMultipartFile file = new MockMultipartFile("petImage", "test.jpg",
                 MediaType.IMAGE_JPEG_VALUE, "test data".getBytes());
 
-        PetRequest petRequest = new PetRequest();
-        petRequest.setName("name");
-        petRequest.setType("type");
-        petRequest.setBreed("breed");
-        petRequest.setGender("MALE");
-        petRequest.setIsNeutered(true);
-        petRequest.setBirth(LocalDate.of(2023, 1, 1));
-        petRequest.setFirstMeetDate(LocalDate.of(2022, 1, 1));
-        petRequest.setWeight(5.0);
-        petRequest.setRegisteredNumber("1234");
+        PetRequest petRequest = PetRequest.builder()
+                .name("name")
+                .type("type")
+                .breed("breed")
+                .gender("MALE")
+                .isNeutered(true)
+                .birth(LocalDate.of(2023, 1, 1))
+                .firstMeetDate(LocalDate.of(2022, 1, 1))
+                .weight(5.0)
+                .registeredNumber("1234")
+                .build();
 
         mockMvc.perform(multipart("/api/v1/my/pets")
                         .file(file)
@@ -81,16 +82,17 @@ class PetsControllerTest {
         MockMultipartFile file = new MockMultipartFile("petImage", "test.jpg",
                 MediaType.IMAGE_JPEG_VALUE, "test data".getBytes());
 
-        PetRequest petRequest = new PetRequest();
-        petRequest.setName("name");
-        petRequest.setType("type");
-        petRequest.setBreed("breed");
-        petRequest.setGender("MALE");
-        petRequest.setIsNeutered(true);
-        petRequest.setBirth(LocalDate.of(2023, 1, 1));
-        petRequest.setFirstMeetDate(LocalDate.of(2022, 1, 1));
-        petRequest.setWeight(5.0);
-        petRequest.setRegisteredNumber("1234");
+        PetRequest petRequest = PetRequest.builder()
+                .name("name")
+                .type("type")
+                .breed("breed")
+                .gender("MALE")
+                .isNeutered(true)
+                .birth(LocalDate.of(2023, 1, 1))
+                .firstMeetDate(LocalDate.of(2022, 1, 1))
+                .weight(5.0)
+                .registeredNumber("1234")
+                .build();
 
         mockMvc.perform(multipart("/api/v1/my/pets/{petId}", 1L)
                         .file(file)
