@@ -10,7 +10,6 @@ import com.ppp.domain.common.GenerationUtil;
 import com.ppp.domain.common.constant.Domain;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
-import com.ppp.domain.pet.constant.Gender;
 import com.ppp.domain.pet.constant.RepStatus;
 import com.ppp.domain.pet.repository.PetImageRepository;
 import com.ppp.domain.pet.repository.PetRepository;
@@ -35,8 +34,6 @@ public class PetsService {
 
     @Transactional
     public void createPet(PetRequest petRequest, User user, MultipartFile petImage) {
-        Gender gender = petRequest.getGender().equals("MALE") ? Gender.MALE : Gender.FEMALE;
-
         String inviteCode = GenerationUtil.generateCode();
 
         Pet pet = Pet.builder()
@@ -44,7 +41,7 @@ public class PetsService {
                 .name(petRequest.getName())
                 .type(petRequest.getType())
                 .breed(petRequest.getBreed())
-                .gender(gender)
+                .gender(petRequest.getToGender())
                 .isNeutered(petRequest.getIsNeutered())
                 .birth(petRequest.convertToBirthLocalDateTime())
                 .firstMeetDate(petRequest.convertToFirstMeetDateLocalDateTime())
