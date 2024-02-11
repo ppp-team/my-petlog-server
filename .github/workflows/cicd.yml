@@ -29,13 +29,29 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-
+    env:
+      AWS_INSTANCE_SG_ID: ${{ secrets.AWS_SG_ID }}
     steps:
     - name: Download build artifact
       uses: actions/download-artifact@v2
       with:
         name: petlog
         path: petlog-api/build/libs/
+
+    - name: configure aws credential
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+        aws-region: ap-northeast-2
+
+    - name: get runner ip addresses
+      id: ip
+      uses: haythem/public-ip@v1.2
+
+    - name: whitelist runner ip address
+      run: |
+        aws ec2 authorize-security-group-ingress --group-id $AWS_INSTANCE_SG_ID --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
 
     - name: Deploy to EC2
       run: |
@@ -44,3 +60,7 @@ jobs:
         scp -i private_key.pem -o StrictHostKeyChecking=no petlog-api/build/libs/petlog-api-0.0.1-SNAPSHOT.jar ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/${{ secrets.USERNAME }}/petlog-api.jar
         ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} "kill -9 `ps -ef | grep "Dspring" | grep -v grep | awk '{print $2}'`; nohup java -jar -Dspring.profiles.active=dev -Djasypt.encryptor.password=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }} /home/${{ secrets.USERNAME }}/petlog-api.jar > app.log 2>&1 &"
         rm -f private_key.pem
+
+    - name: revoke runner ip address
+      run: |
+        aws ec2 revoke-security-group-ingress --group-id $AWS_INSTANCE_SG_ID --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32 
