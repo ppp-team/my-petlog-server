@@ -55,7 +55,7 @@ public class PetsController {
             @Valid @RequestPart PetRequest petRequest,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        petsService.updatePet(petId, petRequest, petImage, principalDetails.getUser());
+        petsService.updatePet(petId, petRequest, principalDetails.getUser(), petImage);
         return ResponseEntity.ok().build();
     }
 

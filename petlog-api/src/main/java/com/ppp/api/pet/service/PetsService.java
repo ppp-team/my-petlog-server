@@ -101,7 +101,7 @@ public class PetsService {
     }
 
     @Transactional
-    public void updatePet(Long petId, PetRequest petRequest, MultipartFile petImage, User user) {
+    public void updatePet(Long petId, PetRequest petRequest, User user, MultipartFile petImage) {
         Pet pet = petRepository.findMyPetById(petId, user.getId())
                 .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
         updateByRequest(pet, petRequest);
