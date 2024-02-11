@@ -17,7 +17,7 @@ class FilePathUtilTest {
         //given
         String originalName = "songsong.jpg";
         //when
-        String generatedName = FilePathUtil.createFileName(originalName);
+        String generatedName = FilePathUtil.getFileNameAndExtension(originalName);
         //then
         assertEquals(32 + "yyyyMMddHHmmssSSS".length() + ".jpg".length(), generatedName.length());
     }
