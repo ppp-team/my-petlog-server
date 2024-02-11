@@ -16,13 +16,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.ppp.api.diary.exception.ErrorCode.*;
 
@@ -94,16 +95,15 @@ public class DiaryCommentService {
         applicationEventPublisher.publishEvent(new DiaryCommentDeletedEvent(comment.getDiary().getId(), commentId));
     }
 
-    public List<DiaryCommentResponse> displayComments(User user, Long petId, Long diaryId) {
+    public Slice<DiaryCommentResponse> displayComments(User user, Long petId, Long diaryId, int page, int size) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateDisplayComments(user, petId);
 
-        return diaryCommentRepository.findByDiaryAndIsDeletedFalse(diary).stream()
+        return diaryCommentRepository.findByDiaryAndIsDeletedFalse(diary, PageRequest.of(page, size))
                 .map(comment -> DiaryCommentResponse.from(comment, user.getId(),
                         diaryCommentRedisService.isDiaryCommentLikeExistByCommentIdAndUserId(comment.getId(), user.getId()),
-                        diaryCommentRedisService.getLikeCountByCommentId(comment.getId())))
-                .collect(Collectors.toList());
+                        diaryCommentRedisService.getLikeCountByCommentId(comment.getId())));
     }
 
     private void validateDisplayComments(User user, Long petId) {
