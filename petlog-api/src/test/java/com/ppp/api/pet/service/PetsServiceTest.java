@@ -1,8 +1,8 @@
 package com.ppp.api.pet.service;
 
 import com.ppp.api.pet.dto.request.PetRequest;
-import com.ppp.api.pet.dto.response.PetResponse;
-import com.ppp.api.pet.dto.response.PetsResponse;
+import com.ppp.api.pet.dto.response.MyPetResponse;
+import com.ppp.api.pet.dto.response.MyPetsResponse;
 import com.ppp.common.service.FileManageService;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.constant.RepStatus;
@@ -103,9 +103,9 @@ class PetsServiceTest {
     void displayPetTest() {
         when(petRepository.findMyPetById(1L, user.getId())).thenReturn(Optional.of(pet));
 
-        PetResponse petResponse = petsService.findMyPetById(1L, user);
+        MyPetResponse myPetResponse = petsService.findMyPetById(1L, user);
 
-        Assertions.assertThat(petResponse).isNotNull();
+        Assertions.assertThat(myPetResponse).isNotNull();
     }
 
     @Test
@@ -116,9 +116,9 @@ class PetsServiceTest {
 
         when(petRepository.findAllByUserId(user.getId())).thenReturn(myPets);
 
-        PetsResponse PetsResponse = petsService.findMyPets(user);
+        MyPetsResponse MyPetsResponse = petsService.findMyPets(user);
 
-        Assertions.assertThat(PetsResponse).isNotNull();
+        Assertions.assertThat(MyPetsResponse).isNotNull();
     }
 
     @Test

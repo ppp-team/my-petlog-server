@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PetResponse {
+public class MyPetResponse {
     @Schema(description = "펫 고유 id")
     private Long petId;
 
@@ -62,8 +62,8 @@ public class PetResponse {
     @Schema(description = "반려동물 경로")
     private String petImageUrl;
 
-    public static PetResponse from(Pet pet, PetImage petImage) {
-        return PetResponse.builder()
+    public static MyPetResponse from(Pet pet, PetImage petImage) {
+        return MyPetResponse.builder()
                 .petId(pet.getId())
                 .ownerId(pet.getUser().getId())
                 .inviteCode(pet.getInvitedCode())

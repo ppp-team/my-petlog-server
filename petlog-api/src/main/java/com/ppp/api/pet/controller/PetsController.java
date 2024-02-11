@@ -2,8 +2,8 @@ package com.ppp.api.pet.controller;
 
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.pet.dto.request.PetRequest;
-import com.ppp.api.pet.dto.response.PetResponse;
-import com.ppp.api.pet.dto.response.PetsResponse;
+import com.ppp.api.pet.dto.response.MyPetResponse;
+import com.ppp.api.pet.dto.response.MyPetsResponse;
 import com.ppp.api.pet.service.PetsService;
 import com.ppp.common.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,11 +61,11 @@ public class PetsController {
 
     @Operation(summary = "반려동물 조회", description = "반려동물를 조회합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = PetResponse.class))}),
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = MyPetResponse.class))}),
             @ApiResponse(responseCode = "404", description = "반려동물을 찾을 수 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
     @GetMapping("/v1/my/pets/{petId}")
-    public ResponseEntity<PetResponse> displayPet(
+    public ResponseEntity<MyPetResponse> displayPet(
             @PathVariable("petId") Long petId,
             @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(petsService.findMyPetById(petId, principalDetails.getUser()));
@@ -73,10 +73,10 @@ public class PetsController {
 
     @Operation(summary = "반려동물 리스트", description = "자신이 등록한 반려동물 목록을 조회합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = PetsResponse.class))})
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = MyPetsResponse.class))})
     })
     @GetMapping("/v1/my/pets")
-    public ResponseEntity<PetsResponse> displayPets(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<MyPetsResponse> displayPets(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(petsService.findMyPets(principalDetails.getUser()));
     }
 

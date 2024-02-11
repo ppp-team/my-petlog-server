@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PetsResponse {
+public class MyPetsResponse {
     private int count;
-    private List<PetResponse> data;
+    private List<MyPetResponse> data;
 }

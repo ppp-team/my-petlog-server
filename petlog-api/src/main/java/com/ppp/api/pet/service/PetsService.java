@@ -1,8 +1,8 @@
 package com.ppp.api.pet.service;
 
 import com.ppp.api.pet.dto.request.PetRequest;
-import com.ppp.api.pet.dto.response.PetResponse;
-import com.ppp.api.pet.dto.response.PetsResponse;
+import com.ppp.api.pet.dto.response.MyPetResponse;
+import com.ppp.api.pet.dto.response.MyPetsResponse;
 import com.ppp.api.pet.exception.ErrorCode;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.service.FileManageService;
@@ -77,24 +77,23 @@ public class PetsService {
         }
     }
 
-    public PetsResponse findMyPets(User user) {
-        List<PetResponse> petResponseList = new ArrayList<>();
+    public MyPetsResponse findMyPets(User user) {
+        List<MyPetResponse> myPetResponseList = new ArrayList<>();
         List<Pet> myPets = petRepository.findAllByUserId(user.getId());
         for (Pet pet : myPets) {
             PetImage petImage = petImageRepository.findByPet(pet)
                     .orElse(new PetImage());
 
-            PetResponse petResponse = PetResponse.from(pet, petImage);
-            petResponseList.add(petResponse);
+            myPetResponseList.add(MyPetResponse.from(pet, petImage));
         }
-        return new PetsResponse(petResponseList.size(), petResponseList);
+        return new MyPetsResponse(myPetResponseList.size(), myPetResponseList);
     }
 
-    public PetResponse findMyPetById(Long petId, User user) {
+    public MyPetResponse findMyPetById(Long petId, User user) {
         Pet pet = petRepository.findMyPetById(petId, user.getId())
                 .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
         PetImage petImage = petImageRepository.findByPet(pet).orElse(new PetImage());
-        return PetResponse.from(pet, petImage);
+        return MyPetResponse.from(pet, petImage);
     }
 
     @Transactional
