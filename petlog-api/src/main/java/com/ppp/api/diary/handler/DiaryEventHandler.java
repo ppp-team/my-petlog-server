@@ -6,7 +6,7 @@ import com.ppp.api.diary.service.DiarySearchService;
 import com.ppp.api.diary.dto.event.DiaryCreatedEvent;
 import com.ppp.api.diary.dto.event.DiaryDeletedEvent;
 import com.ppp.api.diary.dto.event.DiaryUpdatedEvent;
-import com.ppp.common.service.FileManageService;
+import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.diary.DiaryMedia;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
@@ -22,7 +22,7 @@ public class DiaryEventHandler {
     private final DiarySearchService diarySearchService;
     private final DiaryCommentRedisService diaryCommentRedisService;
     private final DiaryRedisService diaryRedisService;
-    private final FileManageService fileManageService;
+    private final FileStorageManageService fileStorageManageService;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -35,7 +35,7 @@ public class DiaryEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDiaryUpdatedEvent(DiaryUpdatedEvent event) {
         diarySearchService.update(event.getDiaryId());
-        fileManageService.deleteImages(event.getDiaryMedias().stream().map(DiaryMedia::getPath)
+        fileStorageManageService.deleteImages(event.getDiaryMedias().stream().map(DiaryMedia::getPath)
                 .collect(Collectors.toList()));
     }
 
@@ -45,7 +45,7 @@ public class DiaryEventHandler {
         diarySearchService.delete(event.getDiaryId());
         diaryCommentRedisService.deleteDiaryCommentCountByDiaryId(event.getDiaryId());
         diaryRedisService.deleteAllLikeByDiaryId(event.getDiaryId());
-        fileManageService.deleteImages(event.getDiaryMedias().stream().map(DiaryMedia::getPath)
+        fileStorageManageService.deleteImages(event.getDiaryMedias().stream().map(DiaryMedia::getPath)
                 .collect(Collectors.toList()));
     }
 }

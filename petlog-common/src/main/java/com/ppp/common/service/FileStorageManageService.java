@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class FileManageService {
+public class FileStorageManageService {
     private final FileStorageClient fileStorageClient;
     public static final List<String> ALLOW_IMAGE_CODES = List.of(".jpeg", ".png", ".jpg", ".gif");
 
