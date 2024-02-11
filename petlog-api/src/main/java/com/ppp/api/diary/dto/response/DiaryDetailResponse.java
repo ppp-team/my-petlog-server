@@ -5,24 +5,37 @@ import com.ppp.api.pet.dto.response.PetResponse;
 import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryMedia;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Schema(description = "육아 일기")
 @Builder
 public record DiaryDetailResponse(
+        @Schema(description = "일기 아이디")
         Long diaryId,
+        @Schema(description = "일기 제목")
         String title,
+        @Schema(description = "일기 내용")
         String content,
+        @Schema(description = "일기 쓴 날짜", example = "2024.02.11")
         @JsonFormat(pattern = "yyyy.MM.dd")
         LocalDate date,
+        @ArraySchema(schema = @Schema(description = "이미지 path"))
         List<String> images,
+        @Schema(description = "유저가 좋아요를 누른 글인지 여부")
         boolean isCurrentUserLiked,
+        @Schema(description = "글쓴이에 대한 정보")
         UserResponse writer,
+        @Schema(description = "댓글 개수")
         int commentCount,
+        @Schema(description = "좋아요 개수")
         int likeCount,
+        @Schema(description = "반려 동물 정보")
         PetResponse pet
 ) {
     public static DiaryDetailResponse from(Diary diary, String currentUserId, int commentCount, boolean isCurrentUserLiked, int likeCount) {
