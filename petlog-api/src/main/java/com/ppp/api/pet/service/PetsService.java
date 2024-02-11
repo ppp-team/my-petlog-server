@@ -54,7 +54,6 @@ public class PetsService {
 
         petRepository.save(pet);
 
-        // save image
         savePetImage(pet, petImage);
     }
 
@@ -100,38 +99,26 @@ public class PetsService {
     public void updatePet(Long petId, PetRequest petRequest, User user, MultipartFile petImage) {
         Pet pet = petRepository.findMyPetById(petId, user.getId())
                 .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
-        updateByRequest(pet, petRequest);
 
-        // save image
+        pet.updatePet(petRequest.getName(), petRequest.getType(), petRequest.getBreed(), petRequest.getGender()
+                , petRequest.getIsNeutered(), petRequest.getBirth(), petRequest.getFirstMeetDate(), petRequest.getWeight(), petRequest.getRegisteredNumber());
+
         savePetImage(pet, petImage);
 
-        // delete previous image
         petImageRepository.findByPet(pet).ifPresent(
                 image -> fileManageService.deleteImage(image.getUrl()));
     }
 
-    private void updateByRequest(Pet pet, PetRequest petRequest) {
-        pet.setName(petRequest.getName());
-        pet.setType(petRequest.getType());
-        pet.setBreed(petRequest.getBreed());
-        pet.setGender(petRequest.getToGender());
-        pet.setNeutered(petRequest.getIsNeutered());
-        pet.setBirth(petRequest.convertToBirthLocalDateTime());
-        pet.setFirstMeetDate(petRequest.convertToFirstMeetDateLocalDateTime());
-        pet.setWeight(petRequest.getWeight());
-        pet.setRegisteredNumber(petRequest.getRegisteredNumber());
-    }
-
     @Transactional
     public void selectRepresentative(Long petId, User user) {
-        // 기존 REP 있다면 NORMAL 로 바꾸고
+        // 기존 REP 있다면 NORMAL 로 바꿉니다.
         petRepository.findRepresentativePet(user.getId()).ifPresent(pet -> {
-                    pet.setRepStatus(RepStatus.NORMAL);
+                    pet.updateRepStatus(RepStatus.NORMAL);
                     petRepository.save(pet);
         });
 
         Pet pet = petRepository.findMyPetById(petId, user.getId())
                 .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
-        pet.setRepStatus(RepStatus.REPRESENTATIVE);
+        pet.updateRepStatus(RepStatus.REPRESENTATIVE);
     }
 }

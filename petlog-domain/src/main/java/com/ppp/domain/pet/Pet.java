@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,51 +66,38 @@ public class Pet extends BaseTimeEntity {
     @OneToMany(mappedBy = "pet")
     private List<Guardian> guardianList = new ArrayList<>();
 
-    public void setUser(User user) {
-        this.user = user;
+    public void updatePet(String name, String type, String breed, String gender, Boolean isNeutered,
+                       LocalDate birth, LocalDate firstMeetDate, double weight, String registeredNumber) {
+        if (name != null) {
+            this.name = name;
+        }
+        if (type != null) {
+            this.type = type;
+        }
+        if (breed != null) {
+            this.breed = breed;
+        }
+        if (gender != null) {
+            this.gender = gender.equals("MALE") ? Gender.MALE : Gender.FEMALE;
+        }
+        if (isNeutered != null) {
+            this.isNeutered = isNeutered;
+        }
+        if (birth != null) {
+            this.birth = birth.atStartOfDay();
+        }
+        if (firstMeetDate != null) {
+            this.firstMeetDate = firstMeetDate.atStartOfDay();
+        }
+        if (weight != 0) {
+            this.weight = weight;
+        }
+        if (registeredNumber != null) {
+            this.registeredNumber = registeredNumber;
+        }
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setBreed(String breed) {
-        this.breed = breed;
-    }
-
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
-
-    public void setNeutered(Boolean neutered) {
-        isNeutered = neutered;
-    }
-
-    public void setBirth(LocalDateTime birth) {
-        this.birth = birth;
-    }
-
-    public void setFirstMeetDate(LocalDateTime firstMeetDate) {
-        this.firstMeetDate = firstMeetDate;
-    }
-
-    public void setWeight(double weight) {
-        this.weight = weight;
-    }
-
-    public void setRegisteredNumber(String registeredNumber) {
-        this.registeredNumber = registeredNumber;
-    }
-
-    public void setRepStatus(RepStatus repStatus) {
+    public void updateRepStatus(RepStatus repStatus) {
         this.repStatus = repStatus;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
     }
 }
