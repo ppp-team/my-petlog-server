@@ -112,4 +112,18 @@ public class LogController {
                                                                           @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(logService.displayLogsToDo(principalDetails.getUser(), petId, page, size));
     }
+
+    @Operation(summary = "기록 태스크 완료 / 미완료 체크")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "일치하는 기록 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+    })
+    @PostMapping(value = "/{logId}/check")
+    private ResponseEntity<Void> checkComplete(@PathVariable Long petId,
+                                               @PathVariable Long logId,
+                                               @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        logService.checkComplete(principalDetails.getUser(), petId, logId);
+        return ResponseEntity.ok().build();
+    }
 }

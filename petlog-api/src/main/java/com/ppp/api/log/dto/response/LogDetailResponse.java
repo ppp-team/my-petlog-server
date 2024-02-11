@@ -1,12 +1,10 @@
 package com.ppp.api.log.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ppp.domain.log.Log;
 import com.ppp.domain.log.constant.LogType;
 import lombok.Builder;
 
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record LogDetailResponse(
         Long logId,
         String type,

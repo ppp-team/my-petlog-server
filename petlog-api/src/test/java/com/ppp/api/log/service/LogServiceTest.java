@@ -357,16 +357,6 @@ class LogServiceTest {
     @DisplayName("건강 기록 수정 실패-log not found")
     void updateLog_fail_LOG_NOT_FOUND() {
         //given
-        Log log = Log.builder()
-                .typeMap(Map.of("type", CUSTOM.name(),
-                        "subType", "강아지 카페"))
-                .datetime(LocalDateTime.of(2024, 2, 2, 22, 22))
-                .isImportant(true)
-                .isComplete(false)
-                .memo("고구마 챙겨가기")
-                .manager(user)
-                .pet(pet)
-                .build();
         LogRequest request = LogRequest.builder()
                 .type("FEED")
                 .subType("습식")
@@ -770,6 +760,90 @@ class LogServiceTest {
                 .willReturn(false);
         //when
         LogException exception = assertThrows(LogException.class, () -> logService.displayLog(user, 1L, 1L));
+        //then
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 수첩 완료 체크 성공-미완료 상태")
+    void checkComplete_success_WhenIsCompleteFalse() {
+        //given
+        Log log = Log.builder()
+                .typeMap(Map.of("type", FEED.name(),
+                        "subType", "건식"))
+                .datetime(LocalDateTime.of(2024, 2, 2, 21, 22))
+                .isImportant(true)
+                .isComplete(false)
+                .memo("엄마 밥 또 주지 마셈")
+                .manager(user)
+                .pet(pet)
+                .build();
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(log));
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        //when
+        logService.checkComplete(user, 1L, 1L);
+        //then
+        assertTrue(log.isComplete());
+    }
+
+    @Test
+    @DisplayName("건강 수첩 완료 체크 성공-미완료 상태")
+    void checkComplete_success_WhenIsCompleteTrue() {
+        //given
+        Log log = Log.builder()
+                .typeMap(Map.of("type", FEED.name(),
+                        "subType", "건식"))
+                .datetime(LocalDateTime.of(2024, 2, 2, 21, 22))
+                .isImportant(true)
+                .isComplete(true)
+                .memo("엄마 밥 또 주지 마셈")
+                .manager(user)
+                .pet(pet)
+                .build();
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(log));
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        //when
+        logService.checkComplete(user, 1L, 1L);
+        //then
+        assertFalse(log.isComplete());
+    }
+
+    @Test
+    @DisplayName("건강 수첩 완료 체크 실패-log not found")
+    void checkComplete_success_LOG_NOT_FOUND() {
+        //given
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.empty());
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.checkComplete(user, 1L, 1L));
+        //then
+        assertEquals(LOG_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 수첩 완료 체크 실패-forbidden pet space")
+    void checkComplete_success_FORBIDDEN_PET_SPACE() {
+        //given
+        Log log = Log.builder()
+                .typeMap(Map.of("type", FEED.name(),
+                        "subType", "건식"))
+                .datetime(LocalDateTime.of(2024, 2, 2, 21, 22))
+                .isImportant(true)
+                .isComplete(true)
+                .memo("엄마 밥 또 주지 마셈")
+                .manager(user)
+                .pet(pet)
+                .build();
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(log));
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(false);
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.checkComplete(user, 1L, 1L));
         //then
         assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
     }

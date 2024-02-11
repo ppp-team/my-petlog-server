@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.FetchType.LAZY;
 
 @Getter
@@ -41,7 +42,7 @@ public class Diary extends BaseTimeEntity {
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -54,12 +55,8 @@ public class Diary extends BaseTimeEntity {
 
 
     public void addDiaryMedias(List<DiaryMedia> diaryMedias) {
-        if (this.diaryMedias.isEmpty()) {
-            this.diaryMedias = diaryMedias;
-        } else {
-            this.diaryMedias.clear();
-            this.diaryMedias.addAll(diaryMedias);
-        }
+        this.diaryMedias.clear();
+        this.diaryMedias.addAll(diaryMedias);
     }
 
     public void update(String title, String content, LocalDate date, List<DiaryMedia> diaryMedias) {
@@ -71,6 +68,7 @@ public class Diary extends BaseTimeEntity {
 
     public void delete() {
         this.isDeleted = true;
+        deleteDiaryMedias();
     }
 
     @Builder
