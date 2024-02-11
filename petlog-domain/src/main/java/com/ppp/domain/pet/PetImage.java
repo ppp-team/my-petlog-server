@@ -28,4 +28,16 @@ public class PetImage {
         this.url = url;
         this.thumbnailUrl = thumbnailUrl;
     }
+
+    public void setPet(Pet pet) {
+        this.pet = pet;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
 }
