@@ -46,17 +46,17 @@ public class DiaryCommentService {
 
         diaryCommentRepository.save(DiaryComment.builder()
                 .content(request.getContent())
-                .taggedUsersIdNicknameMap(getTaggedUsersIdNicknameMap(request))
+                .taggedUsersIdNicknameMap(getTaggedUsersIdNicknameMap(request.getTaggedUserIds()))
                 .diary(diary)
                 .user(user)
                 .build());
         applicationEventPublisher.publishEvent(new DiaryCommentCreatedEvent(diaryId));
     }
 
-    private Map<String, String> getTaggedUsersIdNicknameMap(DiaryCommentRequest request) {
+    private Map<String, String> getTaggedUsersIdNicknameMap(List<String> taggedUsers) {
         Map<String, String> taggedUsersIdNicknameMap = new HashMap<>();
-        for (String id : request.getTaggedUserIds()) {
-            userRepository.findById(id)
+        for (String id : taggedUsers) {
+            userRepository.findByIdAndIsDeletedFalse(id)
                     .ifPresent(taggedUser ->
                             taggedUsersIdNicknameMap.put(id, taggedUser.getNickname()));
         }
@@ -74,7 +74,7 @@ public class DiaryCommentService {
                 .orElseThrow(() -> new DiaryException(DIARY_COMMENT_NOT_FOUND));
         validateModifyComment(comment, user, petId);
 
-        comment.update(request.getContent(), getTaggedUsersIdNicknameMap(request));
+        comment.update(request.getContent(), getTaggedUsersIdNicknameMap(request.getTaggedUserIds()));
     }
 
     private void validateModifyComment(DiaryComment comment, User user, Long petId) {

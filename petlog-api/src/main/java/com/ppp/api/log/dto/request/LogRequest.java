@@ -1,5 +1,6 @@
 package com.ppp.api.log.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ppp.common.validator.DateTime;
 import com.ppp.common.validator.EnumValue;
 import com.ppp.domain.log.constant.LogType;
@@ -11,6 +12,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -49,4 +52,14 @@ public class LogRequest {
     @Schema(description = "담당자 유저 아이디", example = "abcde123")
     @NotBlank(message = "담당자 유저 아이디를 입력해주세요.")
     private String managerId;
+
+    @JsonIgnore
+    public LocalDateTime getLocalDatetime() {
+        return LocalDateTime.parse(this.datetime);
+    }
+
+    @JsonIgnore
+    public LogType getLogType() {
+        return LogType.valueOf(this.type);
+    }
 }

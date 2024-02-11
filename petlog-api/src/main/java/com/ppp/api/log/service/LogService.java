@@ -53,7 +53,7 @@ public class LogService {
         validateAccessLog(petId, user);
 
         Log log = Log.builder()
-                .datetime(LocalDateTime.parse(request.getDatetime()))
+                .datetime(request.getLocalDatetime())
                 .typeMap(getTypeMap(request))
                 .memo(request.getMemo())
                 .isImportant(request.getIsImportant())
@@ -67,7 +67,7 @@ public class LogService {
     }
 
     private LogLocation getLocationIfExists(LogRequest request, Log log) {
-        if (!LogType.WALK.name().equals(request.getType()))
+        if (!LogType.WALK.equals(request.getLogType()))
             return null;
         if (request.getIsCustomLocation())
             return LogLocation.builder()
@@ -86,8 +86,7 @@ public class LogService {
 
     private Map<String, String> getTypeMap(LogRequest request) {
         Map<String, String> typeMap = new HashMap<>();
-        LogType type = LogType.valueOf(request.getType());
-        typeMap.put("type", type.name());
+        typeMap.put("type", request.getLogType().name());
         if (request.getSubType() != null && !request.getSubType().isBlank()) {
             typeMap.put("subType", request.getSubType());
         }
@@ -104,7 +103,7 @@ public class LogService {
                 .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
         validateAccessLog(petId, user);
 
-        log.update(LocalDateTime.parse(request.getDatetime()), getTypeMap(request), request.getMemo(),
+        log.update(request.getLocalDatetime(), getTypeMap(request), request.getMemo(),
                 request.getIsImportant(), request.getIsComplete(), mangerUser, getLocationIfExists(request, log));
     }
 
