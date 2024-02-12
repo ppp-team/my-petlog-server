@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,7 +24,7 @@ public class FileStorageManageService {
     public Optional<String> uploadImage(MultipartFile multipartFile, Domain domain) {
         Optional<String> maybeExtension = FilePathUtil.getFileExtension(
                 Objects.requireNonNull(multipartFile.getOriginalFilename()));
-        if (maybeExtension.isEmpty() || !ALLOW_IMAGE_CODES.contains(maybeExtension.get()))
+        if (maybeExtension.isEmpty() || !ALLOW_IMAGE_CODES.contains(maybeExtension.get().toLowerCase(Locale.ROOT)))
             return Optional.empty();
         return Optional.of(fileStorageClient.upload(multipartFile, domain));
     }

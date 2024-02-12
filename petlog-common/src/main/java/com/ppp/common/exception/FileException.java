@@ -1,15 +1,16 @@
 package com.ppp.common.exception;
 
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 public class FileException extends RuntimeException {
     private final String code;
-    private final int status;
+    private final HttpStatus httpStatus;
 
     public FileException(ErrorCode errorCode) {
         super(errorCode.getMessage());
-        this.status = errorCode.getStatus().value();
+        this.httpStatus = errorCode.getStatus();
         this.code = errorCode.getCode();
     }
 }

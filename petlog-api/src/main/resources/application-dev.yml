@@ -7,8 +7,8 @@ project:
 spring:
   servlet:
     multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
+      max-file-size: 100MB
+      max-request-size: 100MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ENC("Mv2+qpTLspS24HBCacK6TSrmSOpV8VZceaevMgBAygnFInRFlknva1FWspnDpOWGK2n2VVcbjYlARmwo0M94IJ33BfT57cK1sncYmD/y0zRdQZG6T3ZhQPsnz1Egfb7vNYoDyW+I0fqxyQrw9gGfIxRN2lmjbgWjmhiWH96Wq9p8iC6j9pvjXUUjvGcNgBlqeutqt5kg+lQPr2o7a2Yrh8NxE2gpq2p35ol/z3xEeuQ=")
@@ -66,3 +66,5 @@ jasypt:
     pool-size: 2
     string-output-type: base64
     key-obtention-iterations: 10000
+ffmpeg:
+  path: /usr/bin
