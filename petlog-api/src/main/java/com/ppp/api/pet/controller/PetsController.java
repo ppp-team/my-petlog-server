@@ -80,6 +80,17 @@ public class PetsController {
         return ResponseEntity.ok(petsService.findMyPets(principalDetails.getUser()));
     }
 
+    @Operation(summary = "반려동물 삭제")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "400", description = "다른 멤버가 있을 때 반려동물을 삭제할 수 없습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+    })
+    @DeleteMapping("/v1/my/pets/{petId}")
+    public ResponseEntity<Void> deleteMyPet(@PathVariable("petId") Long petId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        petsService.deleteMyPet(petId, principalDetails.getUser());
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "대표 반려동물 지정")
     @PostMapping("/v1/my/pets/{petId}/selectRep")
     public ResponseEntity<Void> selectRepresentative(@PathVariable("petId") Long petId, @AuthenticationPrincipal PrincipalDetails principalDetails) {

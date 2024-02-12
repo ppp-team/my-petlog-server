@@ -1,5 +1,6 @@
 package com.ppp.api.pet.service;
 
+import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
@@ -39,6 +40,9 @@ class PetsServiceTest {
 
     @Mock
     private FileManageService fileManageService;
+
+    @Mock
+    private GuardianService guardianService;
 
     @InjectMocks
     private PetsService petsService;
@@ -121,6 +125,15 @@ class PetsServiceTest {
         MyPetsResponse MyPetsResponse = petsService.findMyPets(user);
 
         Assertions.assertThat(MyPetsResponse).isNotNull();
+    }
+
+    @Test
+    @DisplayName("반려동물 삭제")
+    void deleteMyPet() {
+        Long petId = 1L;
+        petsService.deleteMyPet(petId, user);
+
+        verify(petRepository, times(1)).deleteById(petId);
     }
 
     @Test
