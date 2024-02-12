@@ -8,11 +8,13 @@ import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.common.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
+@MultipartConfig(maxFileSize = 1024 * 1024 * 15)
 @RequestMapping("/api/v1/pets/{petId}/diaries")
 public class DiaryController {
     private final DiaryService diaryService;
@@ -89,7 +92,7 @@ public class DiaryController {
 
     @Operation(summary = "일기 상세 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = DiaryDetailResponse.class))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "404", description = "일치하는 일기 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
@@ -102,7 +105,7 @@ public class DiaryController {
 
     @Operation(summary = "일기 리스트 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "200", content = {@Content(array = @ArraySchema(schema = @Schema(implementation = DiaryGroupByDateResponse.class)))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @GetMapping

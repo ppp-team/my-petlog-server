@@ -96,6 +96,8 @@ class DiaryCommentControllerTest {
         //given
         //when
         mockMvc.perform(get("/api/v1/pets/{petId}/diaries/{diaryId}/comments", 1L, 1L)
+                        .param("page", "0")
+                        .param("size", "10")
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                 ).andDo(print())
