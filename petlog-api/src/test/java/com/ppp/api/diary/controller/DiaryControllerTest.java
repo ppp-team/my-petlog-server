@@ -1,7 +1,8 @@
 package com.ppp.api.diary.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ppp.api.diary.dto.request.DiaryRequest;
+import com.ppp.api.diary.dto.request.DiaryCreateRequest;
+import com.ppp.api.diary.dto.request.DiaryUpdateRequest;
 import com.ppp.api.diary.service.DiaryService;
 import com.ppp.api.test.WithMockCustomUser;
 import com.ppp.common.security.UserDetailsServiceImpl;
@@ -47,15 +48,19 @@ class DiaryControllerTest {
     @DisplayName("일기 생성 성공")
     void createDiary_success() throws Exception {
         //given
-        DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
+        DiaryCreateRequest request = DiaryCreateRequest.builder()
+                .title("우리 강아지")
+                .content("너무 귀엽당")
+                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .date(LocalDate.now().toString())
+                .build();
         //when
         mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries", 1L)
                         .file(new MockMultipartFile("request", "json",
                                 MediaType.APPLICATION_JSON_VALUE,
                                 objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8)))
                         .file(new MockMultipartFile("images", "image.jpg",
-                                MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes()))
+                                MediaType.IMAGE_JPEG_VALUE, "abcde" .getBytes()))
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                 ).andDo(print())
@@ -68,8 +73,12 @@ class DiaryControllerTest {
     @DisplayName("일기 생성 성공-file not required")
     void createDiary_success_FILE_NOT_REQUIRED() throws Exception {
         //given
-        DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
+        DiaryCreateRequest request = DiaryCreateRequest.builder()
+                .title("우리 강아지")
+                .content("너무 귀엽당")
+                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .date(LocalDate.now().toString())
+                .build();
         //when
         mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries", 1L, 1L)
                         .file(new MockMultipartFile("request", "json",
@@ -87,8 +96,12 @@ class DiaryControllerTest {
     @DisplayName("일기 생성 실패-잘못된 datetime")
     void createDiary_fail_WhenDatetimeIsWrong() throws Exception {
         //given
-        DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", "2023-02-1");
+        DiaryCreateRequest request = DiaryCreateRequest.builder()
+                .title("우리 강아지")
+                .content("너무 귀엽당")
+                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .date("2024-03-2")
+                .build();
         //when
         mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries", 1L, 1L)
                         .file(new MockMultipartFile("request", "json",
@@ -106,15 +119,20 @@ class DiaryControllerTest {
     @DisplayName("일기 수정 성공")
     void updateDiary_success() throws Exception {
         //given
-        DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
+        DiaryUpdateRequest request = DiaryUpdateRequest.builder()
+                .title("우리 강아지")
+                .content("너무 귀엽당")
+                .date(LocalDate.now().toString())
+                .isVideoDeleted(true)
+                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .build();
         //when
         mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries/{diaryId}", 1L, 1L)
                         .file(new MockMultipartFile("request", "json",
                                 MediaType.APPLICATION_JSON_VALUE,
                                 objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8)))
                         .file(new MockMultipartFile("images", "image.jpg",
-                                MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes()))
+                                MediaType.IMAGE_JPEG_VALUE, "abcde" .getBytes()))
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .with(httpServletRequest -> {
@@ -131,8 +149,13 @@ class DiaryControllerTest {
     @DisplayName("일기 수정 성공-file not required")
     void updateDiary_success_FILE_NOT_REQUIRED() throws Exception {
         //given
-        DiaryRequest request =
-                new DiaryRequest("우리 강아지", "너무 귀엽당", LocalDate.now().toString());
+        DiaryUpdateRequest request = DiaryUpdateRequest.builder()
+                .title("우리 강아지")
+                .content("너무 귀엽당")
+                .date(LocalDate.now().toString())
+                .isVideoDeleted(true)
+                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .build();
         //when
         mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries/{diaryId}", 1L, 1L)
                         .file(new MockMultipartFile("request", "json",
