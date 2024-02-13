@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,15 +21,12 @@ import java.time.LocalDateTime;
 @Builder
 @Schema(description = "Pet 정보 요청 DTO")
 public class PetRequest {
-    @NotBlank
     @Schema(description = "이름", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
-    @NotBlank
     @Schema(description = "타입", requiredMode = Schema.RequiredMode.REQUIRED)
     private String type;
 
-    @NotBlank
     @Schema(description = "품종", requiredMode = Schema.RequiredMode.REQUIRED)
     private String breed;
 
@@ -54,6 +52,8 @@ public class PetRequest {
 
     @Schema(description = "등록번호")
     private String registeredNumber;
+
+    private MultipartFile petImage;
 
     @Hidden
     public Gender getToGender() {

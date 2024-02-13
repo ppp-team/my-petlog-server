@@ -12,19 +12,22 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+
 
 @Tag(name = "Pets", description = "Pets APIs")
 @Slf4j
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@MultipartConfig(maxFileSize = 1024 * 1024 * 15)
 public class PetController {
     private final PetService petService;
 
@@ -33,13 +36,12 @@ public class PetController {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
-    @PostMapping("/v1/my/pets")
+    @PostMapping(value = "/v1/my/pets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> createPet(
-            @RequestPart(required = false, value = "petImage") MultipartFile petImage,
-            @Valid @RequestPart PetRequest petRequest,
+            @Valid @ModelAttribute() PetRequest petRequest,
             @AuthenticationPrincipal PrincipalDetails principalDetails
             ) {
-        petService.createPet(petRequest, principalDetails.getUser(), petImage);
+        petService.createPet(petRequest, principalDetails.getUser(), petRequest.getPetImage());
         return ResponseEntity.ok().build();
     }
 
@@ -48,14 +50,13 @@ public class PetController {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
-    @PutMapping("/v1/my/pets/{petId}")
+    @PutMapping(value = "/v1/my/pets/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updatePet(
-            @RequestPart(required = false, value = "petImage") MultipartFile petImage,
             @PathVariable("petId") Long petId,
-            @Valid @RequestPart PetRequest petRequest,
+            @Valid @ModelAttribute PetRequest petRequest,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        petService.updatePet(petId, petRequest, principalDetails.getUser(), petImage);
+        petService.updatePet(petId, petRequest, principalDetails.getUser(), petRequest.getPetImage());
         return ResponseEntity.ok().build();
     }
 

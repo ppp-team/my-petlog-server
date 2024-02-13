@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
@@ -82,7 +83,7 @@ public class UserService {
 
         User userFromDb = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
-        userFromDb.setNickname(nickname);
+        if (nickname != null && !nickname.isEmpty()) userFromDb.setNickname(nickname);
 
         String savedPath = null;
         if (profileImage != null && !profileImage.isEmpty()) {
