@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -58,10 +59,10 @@ public class UserController {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "409", description = "이메일 중복", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
-    @PostMapping("/v1/users/profile")
+    @PostMapping(value = "/v1/users/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> createProfile(
-            @RequestParam(required = false, value = "profileImage") MultipartFile profileImage,
-            @RequestParam("nickname") String nickname,
+            @RequestPart(required = false, value = "profileImage") MultipartFile profileImage,
+            @RequestPart("nickname") String nickname,
             @AuthenticationPrincipal PrincipalDetails principalDetails
             ) {
         userService.createProfile(principalDetails.getUser(), profileImage, nickname);
@@ -74,11 +75,11 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "500", description = "Invalid password", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
-    @PutMapping("/v1/users/profile")
+    @PutMapping(value = "/v1/users/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateProfile(
-            @RequestParam(required = false, value = "profileImage") MultipartFile profileImage,
-            @RequestParam(required = false, value = "nickname") String nickname,
-            @RequestParam(required = false, value = "password") String password,
+            @RequestPart(required = false, value = "profileImage") MultipartFile profileImage,
+            @RequestPart(required = false, value = "nickname") String nickname,
+            @RequestPart(required = false, value = "password") String password,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         userService.updateProfile(principalDetails.getUser(), profileImage, nickname, password);
@@ -87,9 +88,7 @@ public class UserController {
 
     @Operation(summary = "내 정보 조회")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", content =
-                    { @Content(mediaType = "application/json", schema =
-                    @Schema(implementation = ProfileResponse.class)) }),
+            @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ProfileResponse.class)) }),
             @ApiResponse(responseCode = "404", description = "User not found", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @GetMapping("/v1/users/me")

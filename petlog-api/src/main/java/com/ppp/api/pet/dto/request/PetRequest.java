@@ -5,30 +5,25 @@ import com.ppp.domain.pet.constant.Gender;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Schema(description = "Pet 정보 요청 DTO")
 public class PetRequest {
-    @NotBlank
     @Schema(description = "이름", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
-    @NotBlank
     @Schema(description = "타입", requiredMode = Schema.RequiredMode.REQUIRED)
     private String type;
 
-    @NotBlank
     @Schema(description = "품종", requiredMode = Schema.RequiredMode.REQUIRED)
     private String breed;
 
