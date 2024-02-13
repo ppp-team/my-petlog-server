@@ -1,12 +1,16 @@
 package com.ppp.api.diary.dto.request;
 
 import com.ppp.common.validator.Date;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -25,7 +29,8 @@ public class DiaryCreateRequest {
     @Date(message = "적합한 날짜를 입력해주세요.")
     private String date;
 
-    @Schema(description = "업로드할 동영상 아이디", example = "c8e8f796-8e29-4067-86c4-0eae419a054e")
-    private String videoId;
+    @ArraySchema(arraySchema = @Schema(description = "임시 비디오 아이디", example = "[\"c8e8f796-8e29-4067-86c4-0eae419a054e\"]"))
+    @Size(max = 1)
+    private List<String> uploadedVideoIds= new ArrayList<>();
 }
 

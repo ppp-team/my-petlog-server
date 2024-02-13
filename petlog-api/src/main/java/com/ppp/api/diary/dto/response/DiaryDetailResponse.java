@@ -27,6 +27,8 @@ public record DiaryDetailResponse(
         LocalDate date,
         @ArraySchema(schema = @Schema(description = "이미지 path"))
         List<String> images,
+        @ArraySchema(schema = @Schema(implementation = DiaryMediaResponse.class))
+        List<DiaryMediaResponse> videos,
         @Schema(description = "유저가 좋아요를 누른 글인지 여부")
         boolean isCurrentUserLiked,
         @Schema(description = "글쓴이에 대한 정보")
@@ -44,8 +46,11 @@ public record DiaryDetailResponse(
                 .title(diary.getTitle())
                 .content(diary.getContent())
                 .commentCount(commentCount)
-                .images(diary.getDiaryMedias().stream()
+                .images(diary.getImageMedias().stream()
                         .map(DiaryMedia::getPath)
+                        .collect(Collectors.toList()))
+                .videos(diary.getVideoMedias().stream()
+                        .map(DiaryMediaResponse::from)
                         .collect(Collectors.toList()))
                 .date(diary.getDate())
                 .isCurrentUserLiked(isCurrentUserLiked)

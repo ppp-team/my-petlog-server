@@ -1,6 +1,7 @@
 package com.ppp.domain.diary;
 
 import com.ppp.domain.common.BaseTimeEntity;
+import com.ppp.domain.diary.constant.DiaryMediaType;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.user.User;
 import jakarta.persistence.*;
@@ -11,7 +12,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.FetchType.LAZY;
@@ -68,6 +71,22 @@ public class Diary extends BaseTimeEntity {
     public void delete() {
         this.isDeleted = true;
         deleteDiaryMedias();
+    }
+
+    public Set<DiaryMedia> getVideoMedias() {
+        Set<DiaryMedia> videos = new HashSet<>();
+        for (int i = diaryMedias.size() - 1; i >= 0; i--) {
+            if (DiaryMediaType.IMAGE.equals(diaryMedias.get(i).getType()))
+                break;
+            videos.add(diaryMedias.get(i));
+        }
+        return videos;
+    }
+
+    public Set<DiaryMedia> getImageMedias() {
+        Set<DiaryMedia> images = new HashSet<>(this.diaryMedias);
+        images.removeAll(getVideoMedias());
+        return images;
     }
 
     @Builder

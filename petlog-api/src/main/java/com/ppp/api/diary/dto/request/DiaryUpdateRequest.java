@@ -1,12 +1,18 @@
 package com.ppp.api.diary.dto.request;
 
 import com.ppp.common.validator.Date;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @AllArgsConstructor
@@ -25,10 +31,11 @@ public class DiaryUpdateRequest {
     @Date(message = "적합한 날짜를 입력해주세요.")
     private String date;
 
-    @Schema(description = "업로드했던 동영상을 삭제하는지 여부")
-    private boolean isVideoDeleted;
+    @ArraySchema(arraySchema = @Schema(description = "육아 일기 미디어 중 동영상 타입의 아이디", example = "[1, 2]"))
+    private Set<Long> deletedVideoIds = new HashSet<>();
 
-    @Schema(description = "업로드할 동영상 아이디", example = "c8e8f796-8e29-4067-86c4-0eae419a054e")
-    private String videoId;
+    @ArraySchema(arraySchema = @Schema(description = "임시 동영상 아이디", example = "[\"c8e8f796-8e29-4067-86c4-0eae419a054e\"]"))
+    @Size(max = 1)
+    private List<String> uploadedVideoIds = new ArrayList<>();
 }
 
