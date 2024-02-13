@@ -66,14 +66,14 @@ class DiaryServiceTest {
 
     Pet pet = Pet.builder()
             .id(1L)
-            .birth(LocalDateTime.of(2023, 2, 8, 0, 0))
+            .birth(LocalDateTime.of(2023,2,8,0,0))
             .build();
 
     List<MultipartFile> images = List.of(
             new MockMultipartFile("images", "image.jpg",
-                    MediaType.IMAGE_JPEG_VALUE, "abcde" .getBytes()),
+                    MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes()),
             new MockMultipartFile("images", "image.jpg",
-                    MediaType.IMAGE_JPEG_VALUE, "abcde" .getBytes())
+                    MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes())
     );
 
     @Test

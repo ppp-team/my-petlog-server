@@ -1,8 +1,6 @@
 package com.ppp.api.config;
 
 import com.ppp.ApiApplication;
-import com.ppp.common.client.FfmpegClient;
-import com.ppp.common.config.FfmpegConfig;
 import com.ppp.common.config.JasyptConfig;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
@@ -45,14 +43,8 @@ public class CacheIntegrationTest {
     @Autowired
     private GuardianRepository guardianRepository;
 
-    @MockBean
+    @MockBean(JasyptConfig.class)
     private JasyptConfig jasyptConfig;
-
-    @MockBean
-    private FfmpegConfig ffmpegConfig;
-
-    @MockBean
-    private FfmpegClient ffmpegClient;
 
     User userA = User.builder()
             .id("abcd")
