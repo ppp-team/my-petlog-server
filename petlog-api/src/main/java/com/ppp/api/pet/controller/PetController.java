@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Tag(name = "Pets", description = "Pets APIs")
@@ -38,10 +39,11 @@ public class PetController {
     })
     @PostMapping(value = "/v1/my/pets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> createPet(
-            @Valid @ModelAttribute() PetRequest petRequest,
+            @Valid @RequestPart PetRequest petRequest,
+            @RequestPart(required = false) MultipartFile petImage,
             @AuthenticationPrincipal PrincipalDetails principalDetails
             ) {
-        petService.createPet(petRequest, principalDetails.getUser(), petRequest.getPetImage());
+        petService.createPet(petRequest, principalDetails.getUser(), petImage);
         return ResponseEntity.ok().build();
     }
 
@@ -53,10 +55,11 @@ public class PetController {
     @PutMapping(value = "/v1/my/pets/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updatePet(
             @PathVariable("petId") Long petId,
-            @Valid @ModelAttribute PetRequest petRequest,
+            @Valid @RequestPart PetRequest petRequest,
+            @RequestPart(required = false) MultipartFile petImage,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        petService.updatePet(petId, petRequest, principalDetails.getUser(), petRequest.getPetImage());
+        petService.updatePet(petId, petRequest, principalDetails.getUser(), petImage);
         return ResponseEntity.ok().build();
     }
 

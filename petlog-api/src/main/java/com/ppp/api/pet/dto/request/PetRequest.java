@@ -5,17 +5,14 @@ import com.ppp.domain.pet.constant.Gender;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -52,8 +49,6 @@ public class PetRequest {
 
     @Schema(description = "등록번호")
     private String registeredNumber;
-
-    private MultipartFile petImage;
 
     @Hidden
     public Gender getToGender() {
