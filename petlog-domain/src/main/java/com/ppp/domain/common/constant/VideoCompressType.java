@@ -5,9 +5,8 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Domain {
-    USER(false),
-    DIARY(true),
-    DIARY_COMMENT(false);
-    private final boolean hasVideo;
+public enum VideoCompressType {
+    LOW(480),
+    MEDIUM(540);
+    private final int resolution;
 }

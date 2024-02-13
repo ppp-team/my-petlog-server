@@ -2,6 +2,7 @@ package com.ppp.common.client;
 
 import com.ppp.common.exception.FileException;
 import com.ppp.common.util.FilePathUtil;
+import com.ppp.domain.common.constant.VideoCompressType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bramp.ffmpeg.FFmpegExecutor;
@@ -25,7 +26,7 @@ public class FfmpegClient implements VideoConvertClient {
     private final FFmpegExecutor fFmpegExecutor;
 
     @Override
-    public String compress(MultipartFile file) {
+    public String compress(MultipartFile file, VideoCompressType compressType) {
         try {
             File dirToBeSaved = new File(DEFAULT_PATH + "/" + LocalDateTime.now().format(dateTimeFormatter));
             if (!dirToBeSaved.exists()) dirToBeSaved.mkdirs();
@@ -39,7 +40,7 @@ public class FfmpegClient implements VideoConvertClient {
                             .overrideOutputFiles(true)
                             .setInput(inputPath.toString())
                             .addOutput(outputPath.toString())
-                            .addExtraArgs("-vf", "scale=-1:480")
+                            .addExtraArgs("-vf", "scale=-1:" + compressType.getResolution())
                             .done(), progress -> log.info(getClass() + " : resolution proceeding " + progress)).run();
             Files.delete(inputPath);
 
