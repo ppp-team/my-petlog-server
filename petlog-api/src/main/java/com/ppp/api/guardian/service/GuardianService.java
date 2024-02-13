@@ -79,11 +79,11 @@ public class GuardianService {
     }
 
     private boolean isReaderGuardian(Guardian guardian) {
-        return GuardianRole.LEADER.name().equals(guardian.getGuardianRole().name());
+        return GuardianRole.LEADER.equals(guardian.getGuardianRole());
     }
 
     public void deleteReaderGuardian(Guardian guardian, Long petId) {
-        if (guardianRepository.existsGuardianOfMember(petId)) {
+        if (guardianRepository.existsByPetIdAndGuardianRole(petId, GuardianRole.MEMBER)) {
             throw new GuardianException(ErrorCode.NOT_ALLOWED_DELETE_LEADER);
         }
         guardianRepository.deleteById(guardian.getId());
