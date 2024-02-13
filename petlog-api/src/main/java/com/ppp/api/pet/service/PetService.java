@@ -6,7 +6,7 @@ import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
 import com.ppp.api.pet.exception.ErrorCode;
 import com.ppp.api.pet.exception.PetException;
-import com.ppp.common.service.FileManageService;
+import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.common.GenerationUtil;
 import com.ppp.domain.common.constant.Domain;
 import com.ppp.domain.guardian.Guardian;
@@ -33,7 +33,7 @@ import java.util.Optional;
 public class PetService {
     private final PetRepository petRepository;
     private final PetImageRepository petImageRepository;
-    private final FileManageService fileManageService;
+    private final FileStorageManageService fileStorageManageService;
     private final GuardianService guardianService;
 
     @Transactional
@@ -64,7 +64,7 @@ public class PetService {
 
     private void savePetImage(Pet pet, MultipartFile petImage) {
         if (petImage != null && !petImage.isEmpty()) {
-            String savedPath = fileManageService.uploadImage(petImage, Domain.PET)
+            String savedPath = fileStorageManageService.uploadImage(petImage, Domain.PET)
                     .orElseThrow(() -> new PetException(ErrorCode.PET_IMAGE_REGISTRATION_FAILED));
             uploadPetImage(pet, savedPath);
         }
@@ -111,15 +111,15 @@ public class PetService {
         savePetImage(pet, petImage);
 
         petImageRepository.findByPet(pet).ifPresent(
-                image -> fileManageService.deleteImage(image.getUrl()));
+                image -> fileStorageManageService.deleteImage(image.getUrl()));
     }
 
     @Transactional
     public void selectRepresentative(Long petId, User user) {
         // 기존 REP 있다면 NORMAL 로 바꿉니다.
         petRepository.findRepresentativePet(user.getId()).ifPresent(pet -> {
-                    pet.updateRepStatus(RepStatus.NORMAL);
-                    petRepository.save(pet);
+            pet.updateRepStatus(RepStatus.NORMAL);
+            petRepository.save(pet);
         });
 
         Pet pet = petRepository.findMyPetById(petId, user.getId())

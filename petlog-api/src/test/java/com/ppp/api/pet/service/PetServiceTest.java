@@ -4,7 +4,7 @@ import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
-import com.ppp.common.service.FileManageService;
+import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.constant.RepStatus;
 import com.ppp.domain.pet.repository.PetImageRepository;
@@ -39,7 +39,7 @@ class PetServiceTest {
     private PetImageRepository petImageRepository;
 
     @Mock
-    private FileManageService fileManageService;
+    private FileStorageManageService fileStorageManageService;
 
     @Mock
     private GuardianService guardianService;
@@ -58,7 +58,7 @@ class PetServiceTest {
                 .nickname("nickname")
                 .build();
         file = new MockMultipartFile("petImage", "test.jpg",
-                MediaType.IMAGE_JPEG_VALUE, "test data".getBytes());
+                MediaType.IMAGE_JPEG_VALUE, "test data" .getBytes());
         pet = Pet.builder().id(1L).user(user).isNeutered(false).build();
     }
 
@@ -143,7 +143,7 @@ class PetServiceTest {
         Pet pet2 = Pet.builder().id(2L).user(user).repStatus(RepStatus.NORMAL).isNeutered(false).build();
 
         when(petRepository.findRepresentativePet(user.getId())).thenReturn(Optional.of(pet1));
-        when(petRepository.findMyPetById(2L,user.getId())).thenReturn(Optional.of(pet2));
+        when(petRepository.findMyPetById(2L, user.getId())).thenReturn(Optional.of(pet2));
 
         petService.selectRepresentative(pet2.getId(), user);
 
