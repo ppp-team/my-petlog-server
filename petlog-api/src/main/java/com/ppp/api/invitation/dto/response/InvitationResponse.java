@@ -12,9 +12,8 @@ import lombok.NoArgsConstructor;
 public class InvitationResponse {
     private Long invitationId;
     private Long petId;
-    private String inviterName;
     private String inviteStatus;
     private String petName;
-    private String profilePath;
+    private String petImageUrl;
     private String invitedAt;
 }

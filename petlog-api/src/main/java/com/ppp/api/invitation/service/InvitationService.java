@@ -12,10 +12,9 @@ import com.ppp.domain.invitation.Invitation;
 import com.ppp.domain.invitation.constant.InviteStatus;
 import com.ppp.domain.invitation.repository.InvitationRepository;
 import com.ppp.domain.pet.Pet;
-import com.ppp.domain.user.ProfileImage;
+import com.ppp.domain.pet.PetImage;
+import com.ppp.domain.pet.repository.PetImageRepository;
 import com.ppp.domain.user.User;
-import com.ppp.domain.user.repository.ProfileImageRepository;
-import com.ppp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,9 +29,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InvitationService {
     private final InvitationRepository invitationRepository;
-    private final UserRepository userRepository;
-    private final ProfileImageRepository profileImageRepository;
     private final GuardianRepository guardianRepository;
+    private final PetImageRepository petImageRepository;
 
     @Transactional(readOnly = true)
     public List<InvitationResponse> displayInvitations(User user) {
@@ -40,9 +38,7 @@ public class InvitationService {
         List<Invitation> invitations = invitationRepository.findByInviteeIdAndInviteStatus(user.getId(), InviteStatus.PENDING);
         for (Invitation invitation : invitations) {
             Pet pet = invitation.getPet();
-            String inviterId = invitation.getInviterId();
-            User inviter = userRepository.findById(inviterId).orElse(new User());
-            ProfileImage profileImage = profileImageRepository.findByUser(inviter).orElse(new ProfileImage());
+            PetImage petImage = petImageRepository.findByPet(pet).orElse(new PetImage());
 
             InvitationResponse invitationResponse = InvitationResponse.builder()
                     .invitationId(invitation.getId())
@@ -50,8 +46,7 @@ public class InvitationService {
                     .invitedAt(TimeUtil.calculateTerm(invitation.getCreatedAt()))
                     .petId(pet.getId())
                     .petName(pet.getName())
-                    .inviterName(inviter.getNickname())
-                    .profilePath(profileImage.getUrl())
+                    .petImageUrl(petImage.getUrl())
                     .build();
             invitationResponseList.add(invitationResponse);
         }
