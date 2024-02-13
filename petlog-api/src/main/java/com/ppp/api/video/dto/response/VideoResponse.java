@@ -11,12 +11,12 @@ public record VideoResponse(
         String videoId,
         LocalDateTime validUntil
 ) {
-    private final static long tempVideoValidMinutes = TempVideo.class.getAnnotation(RedisHash.class).timeToLive();
+    private final static long tempVideoValidSeconds = TempVideo.class.getAnnotation(RedisHash.class).timeToLive();
 
     public static VideoResponse from(TempVideo tempVideo) {
         return VideoResponse.builder()
                 .videoId(tempVideo.getId())
-                .validUntil(LocalDateTime.now().plusMinutes(tempVideoValidMinutes))
+                .validUntil(LocalDateTime.now().plusSeconds(tempVideoValidSeconds))
                 .build();
     }
 }
