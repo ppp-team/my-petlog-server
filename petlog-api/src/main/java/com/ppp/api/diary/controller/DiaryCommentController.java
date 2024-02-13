@@ -6,6 +6,7 @@ import com.ppp.api.diary.service.DiaryCommentService;
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.common.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,11 +15,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Diary Comment", description = "Diary Comment APIs")
 @RestController
@@ -77,15 +77,17 @@ public class DiaryCommentController {
 
     @Operation(summary = "댓글 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "200", content = {@Content(array = @ArraySchema(schema = @Schema(implementation = DiaryCommentResponse.class)))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @GetMapping(value = "/{diaryId}/comments")
-    private ResponseEntity<List<DiaryCommentResponse>> displayComments(@PathVariable Long petId,
-                                                                       @PathVariable Long diaryId,
-                                                                       @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    private ResponseEntity<Slice<DiaryCommentResponse>> displayComments(@PathVariable Long petId,
+                                                                        @PathVariable Long diaryId,
+                                                                        @RequestParam(defaultValue = "0") int page,
+                                                                        @RequestParam(defaultValue = "5") int size,
+                                                                        @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity
-                .ok(diaryCommentService.displayComments(principalDetails.getUser(), petId, diaryId));
+                .ok(diaryCommentService.displayComments(principalDetails.getUser(), petId, diaryId, page, size));
     }
 
     @Operation(summary = "댓글 좋아요")

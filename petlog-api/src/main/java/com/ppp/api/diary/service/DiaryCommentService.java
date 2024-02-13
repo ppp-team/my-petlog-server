@@ -16,13 +16,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.ppp.api.diary.exception.ErrorCode.*;
 
@@ -46,17 +47,17 @@ public class DiaryCommentService {
 
         diaryCommentRepository.save(DiaryComment.builder()
                 .content(request.getContent())
-                .taggedUsersIdNicknameMap(getTaggedUsersIdNicknameMap(request))
+                .taggedUsersIdNicknameMap(getTaggedUsersIdNicknameMap(request.getTaggedUserIds()))
                 .diary(diary)
                 .user(user)
                 .build());
         applicationEventPublisher.publishEvent(new DiaryCommentCreatedEvent(diaryId));
     }
 
-    private Map<String, String> getTaggedUsersIdNicknameMap(DiaryCommentRequest request) {
+    private Map<String, String> getTaggedUsersIdNicknameMap(List<String> taggedUsers) {
         Map<String, String> taggedUsersIdNicknameMap = new HashMap<>();
-        for (String id : request.getTaggedUserIds()) {
-            userRepository.findById(id)
+        for (String id : taggedUsers) {
+            userRepository.findByIdAndIsDeletedFalse(id)
                     .ifPresent(taggedUser ->
                             taggedUsersIdNicknameMap.put(id, taggedUser.getNickname()));
         }
@@ -74,7 +75,7 @@ public class DiaryCommentService {
                 .orElseThrow(() -> new DiaryException(DIARY_COMMENT_NOT_FOUND));
         validateModifyComment(comment, user, petId);
 
-        comment.update(request.getContent(), getTaggedUsersIdNicknameMap(request));
+        comment.update(request.getContent(), getTaggedUsersIdNicknameMap(request.getTaggedUserIds()));
     }
 
     private void validateModifyComment(DiaryComment comment, User user, Long petId) {
@@ -94,16 +95,15 @@ public class DiaryCommentService {
         applicationEventPublisher.publishEvent(new DiaryCommentDeletedEvent(comment.getDiary().getId(), commentId));
     }
 
-    public List<DiaryCommentResponse> displayComments(User user, Long petId, Long diaryId) {
+    public Slice<DiaryCommentResponse> displayComments(User user, Long petId, Long diaryId, int page, int size) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateDisplayComments(user, petId);
 
-        return diaryCommentRepository.findByDiaryAndIsDeletedFalse(diary).stream()
+        return diaryCommentRepository.findByDiaryAndIsDeletedFalse(diary, PageRequest.of(page, size))
                 .map(comment -> DiaryCommentResponse.from(comment, user.getId(),
                         diaryCommentRedisService.isDiaryCommentLikeExistByCommentIdAndUserId(comment.getId(), user.getId()),
-                        diaryCommentRedisService.getLikeCountByCommentId(comment.getId())))
-                .collect(Collectors.toList());
+                        diaryCommentRedisService.getLikeCountByCommentId(comment.getId())));
     }
 
     private void validateDisplayComments(User user, Long petId) {

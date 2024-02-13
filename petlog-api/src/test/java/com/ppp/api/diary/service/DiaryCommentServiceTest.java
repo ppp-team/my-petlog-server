@@ -21,6 +21,8 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -81,8 +83,8 @@ class DiaryCommentServiceTest {
                 .willReturn(Optional.of(diary));
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(true);
-        given(userRepository.findById("abc123")).willReturn(Optional.of(userA));
-        given(userRepository.findById("dab456")).willReturn(Optional.empty());
+        given(userRepository.findByIdAndIsDeletedFalse("abc123")).willReturn(Optional.of(userA));
+        given(userRepository.findByIdAndIsDeletedFalse("dab456")).willReturn(Optional.empty());
         //when
         diaryCommentService.createComment(user, 1L, 1L, request);
         ArgumentCaptor<DiaryComment> diaryCommentArgumentCaptor = ArgumentCaptor.forClass(DiaryComment.class);
@@ -162,8 +164,8 @@ class DiaryCommentServiceTest {
                 .build();
         given(diaryCommentRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diaryComment));
-        given(userRepository.findById("abc123")).willReturn(Optional.of(userA));
-        given(userRepository.findById("dab456")).willReturn(Optional.empty());
+        given(userRepository.findByIdAndIsDeletedFalse("abc123")).willReturn(Optional.of(userA));
+        given(userRepository.findByIdAndIsDeletedFalse("dab456")).willReturn(Optional.empty());
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(true);
         //when
@@ -319,8 +321,8 @@ class DiaryCommentServiceTest {
                 .willReturn(Optional.of(diary));
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(true);
-        given(diaryCommentRepository.findByDiaryAndIsDeletedFalse(diary))
-                .willReturn(List.of(
+        given(diaryCommentRepository.findByDiaryAndIsDeletedFalse(any(), any()))
+                .willReturn(new SliceImpl<>(List.of(
                         DiaryComment.builder()
                                 .content("우리 체리 귀엽다 ~ ^^")
                                 .diary(diary)
@@ -332,21 +334,21 @@ class DiaryCommentServiceTest {
                                 .diary(diary)
                                 .user(user)
                                 .taggedUsersIdNicknameMap(new HashMap<>())
-                                .build()));
+                                .build())));
         MockedStatic<TimeUtil> mockTimeUtil = mockStatic(TimeUtil.class);
         mockTimeUtil.when(() -> TimeUtil.calculateTerm(any())).thenReturn("2분");
         //when
-        List<DiaryCommentResponse> response = diaryCommentService.displayComments(user, 1L, 1L);
+        Slice<DiaryCommentResponse> response = diaryCommentService.displayComments(user, 1L, 1L, 1, 10);
         //then
-        assertEquals(response.get(0).content(), "우리 체리 귀엽다 ~ ^^");
-        assertEquals(response.get(1).content(), "체리짱귀");
-        assertEquals(response.get(0).writer().nickname(), userA.getNickname());
-        assertEquals(response.get(1).writer().nickname(), user.getNickname());
-        assertFalse(response.get(0).writer().isCurrentUser());
-        assertTrue(response.get(1).writer().isCurrentUser());
-        assertFalse(response.get(0).taggedUsers().get(0).isCurrentUser());
-        assertEquals(response.get(0).taggedUsers().get(0).id(), "ljf123");
-        assertEquals(response.get(0).taggedUsers().get(0).nickname(), "둘째누나");
+        assertEquals(response.getContent().get(0).content(), "우리 체리 귀엽다 ~ ^^");
+        assertEquals(response.getContent().get(1).content(), "체리짱귀");
+        assertEquals(response.getContent().get(0).writer().nickname(), userA.getNickname());
+        assertEquals(response.getContent().get(1).writer().nickname(), user.getNickname());
+        assertFalse(response.getContent().get(0).writer().isCurrentUser());
+        assertTrue(response.getContent().get(1).writer().isCurrentUser());
+        assertFalse(response.getContent().get(0).taggedUsers().get(0).isCurrentUser());
+        assertEquals(response.getContent().get(0).taggedUsers().get(0).id(), "ljf123");
+        assertEquals(response.getContent().get(0).taggedUsers().get(0).nickname(), "둘째누나");
     }
 
     @Test
@@ -358,7 +360,7 @@ class DiaryCommentServiceTest {
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(false);
         //when
-        DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.displayComments(user, 1L, 1L));
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.displayComments(user, 1L, 1L, 1, 10));
         //then
         assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
     }

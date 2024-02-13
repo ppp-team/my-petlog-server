@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum Domain {
     USER(false),
     DIARY(true),
-    DIARY_COMMENT(false);
+    DIARY_COMMENT(false),
+    PET(false);
     private final boolean hasVideo;
 }

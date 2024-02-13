@@ -4,7 +4,6 @@ import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.user.dto.request.EmailRequest;
 import com.ppp.api.user.dto.request.NicknameRequest;
 import com.ppp.api.user.dto.response.ProfileResponse;
-import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.api.user.exception.ErrorCode;
 import com.ppp.api.user.exception.UserException;
 import com.ppp.api.user.service.UserService;
@@ -16,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +36,7 @@ public class UserController {
             @ApiResponse(responseCode = "409", description = "닉네임 중복", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PostMapping("/v1/users/check/nickname")
-    public ResponseEntity<String> checkNickname(@RequestBody NicknameRequest nicknameRequest) {
+    public ResponseEntity<String> checkNickname(@Valid @RequestBody NicknameRequest nicknameRequest) {
         if (userService.existsByNickname(nicknameRequest.getNickname()))
             throw new UserException(ErrorCode.NICKNAME_DUPLICATION);
         return ResponseEntity.ok().build();
@@ -47,7 +47,7 @@ public class UserController {
             @ApiResponse(responseCode = "409", description = "이메일 중복", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PostMapping("/v1/users/check/email")
-    public ResponseEntity<String> checkEmail(@RequestBody EmailRequest emailRequest) {
+    public ResponseEntity<String> checkEmail(@Valid @RequestBody EmailRequest emailRequest) {
         if (userService.existsByEmail(emailRequest.getEmail()))
             throw new UserException(ErrorCode.EMAIL_DUPLICATION);
         return ResponseEntity.ok().build();
@@ -89,7 +89,7 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content =
                     { @Content(mediaType = "application/json", schema =
-                    @Schema(implementation = UserResponse.class)) }),
+                    @Schema(implementation = ProfileResponse.class)) }),
             @ApiResponse(responseCode = "404", description = "User not found", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @GetMapping("/v1/users/me")
