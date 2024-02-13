@@ -1,7 +1,9 @@
 package com.ppp.api.diary.service;
 
 import com.ppp.ApiApplication;
+import com.ppp.common.client.FfmpegClient;
 import com.ppp.common.client.RedisClient;
+import com.ppp.common.config.FfmpegConfig;
 import com.ppp.common.config.JasyptConfig;
 import com.ppp.domain.common.constant.Domain;
 import org.junit.jupiter.api.AfterEach;
@@ -41,6 +43,12 @@ class DiaryCommentRedisServiceIntegrationTest {
 
     @MockBean
     private RedisClient redisClient;
+
+    @MockBean
+    private FfmpegConfig ffmpegConfig;
+
+    @MockBean
+    private FfmpegClient ffmpegClient;
 
     @AfterEach
     void tearDown() {
