@@ -41,6 +41,14 @@ public class S3Client implements FileStorageClient {
     }
 
     @Override
+    public String upload(File file, Domain domain) {
+        String fileName = FilePathUtil.getFileNameAndExtension(file.getName());
+        String filePath = FilePathUtil.createFilePath(domain);
+        amazonS3.putObject(new PutObjectRequest(bucket, filePath + fileName, file));
+        return filePath + fileName;
+    }
+
+    @Override
     public void delete(String filePath) {
         amazonS3.deleteObject(new DeleteObjectRequest(bucket, filePath));
     }

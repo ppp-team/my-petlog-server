@@ -3,12 +3,15 @@ package com.ppp.api.diary.service;
 import com.ppp.api.diary.dto.event.DiaryCreatedEvent;
 import com.ppp.api.diary.dto.event.DiaryDeletedEvent;
 import com.ppp.api.diary.dto.event.DiaryUpdatedEvent;
-import com.ppp.api.diary.dto.request.DiaryRequest;
+import com.ppp.api.diary.dto.request.DiaryCreateRequest;
+import com.ppp.api.diary.dto.request.DiaryUpdateRequest;
 import com.ppp.api.diary.dto.response.DiaryDetailResponse;
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.api.diary.dto.response.DiaryResponse;
 import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.pet.exception.PetException;
+import com.ppp.api.video.exception.ErrorCode;
+import com.ppp.api.video.exception.VideoException;
 import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryMedia;
@@ -18,6 +21,8 @@ import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
+import com.ppp.domain.video.TempVideo;
+import com.ppp.domain.video.repository.TempVideoRedisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,6 +37,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ppp.api.diary.exception.ErrorCode.*;
@@ -49,12 +55,13 @@ public class DiaryService {
     private final DiaryCommentRedisService diaryCommentRedisService;
     private final DiaryRedisService diaryRedisService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final TempVideoRedisRepository tempVideoRedisRepository;
 
     @Transactional
-    public void createDiary(User user, Long petId, DiaryRequest request, List<MultipartFile> images) {
+    public void createDiary(User user, Long petId, DiaryCreateRequest request, List<MultipartFile> images) {
         Pet pet = petRepository.findByIdAndIsDeletedFalse(petId)
                 .orElseThrow(() -> new PetException(PET_NOT_FOUND));
-        validateCreateDiary(petId, user);
+        validateAccessDiary(petId, user);
 
         Diary diary = Diary.builder()
                 .title(request.getTitle())
@@ -63,17 +70,23 @@ public class DiaryService {
                 .user(user)
                 .pet(pet)
                 .build();
-        diary.addDiaryMedias(uploadImagesAndGetDiaryMedias(images, diary));
+        diary.addDiaryMedias(uploadAndGetDiaryMedias(images, request.getVideoId(), diary, user));
         applicationEventPublisher.publishEvent(
                 new DiaryCreatedEvent(diaryRepository.save(diary).getId()));
     }
 
-    private void validateCreateDiary(Long petId, User user) {
+    private void validateAccessDiary(Long petId, User user) {
         if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
             throw new DiaryException(FORBIDDEN_PET_SPACE);
     }
 
-    private List<DiaryMedia> uploadImagesAndGetDiaryMedias(List<MultipartFile> images, Diary diary) {
+    private List<DiaryMedia> uploadAndGetDiaryMedias(List<MultipartFile> images, String videoId, Diary diary, User user) {
+        List<DiaryMedia> diaryMedias = uploadImagesIfNeeded(images, diary);
+        uploadVideoIfNeeded(diaryMedias, videoId, diary, user);
+        return diaryMedias;
+    }
+
+    private List<DiaryMedia> uploadImagesIfNeeded(List<MultipartFile> images, Diary diary) {
         if (images == null || images.isEmpty())
             return new ArrayList<>();
         return fileStorageManageService.uploadImages(images, DIARY).stream()
@@ -81,22 +94,50 @@ public class DiaryService {
                 .collect(Collectors.toList());
     }
 
+    private void uploadVideoIfNeeded(List<DiaryMedia> diaryMedias, String videoId, Diary diary, User user) {
+        if (videoId == null || videoId.isBlank())
+            return;
+        TempVideo tempVideo = tempVideoRedisRepository.findById(videoId).stream()
+                .filter(video -> Objects.equals(video.getUserId(), user.getId())).findFirst()
+                .orElseThrow(() -> new VideoException(ErrorCode.NOT_FOUND_VIDEO));
+
+        fileStorageManageService.uploadVideo(tempVideo, DIARY)
+                .ifPresent(uploadedPath -> diaryMedias.add(DiaryMedia.of(diary, uploadedPath, DiaryMediaType.VIDEO)));
+    }
+
     @Transactional
-    public void updateDiary(User user, Long petId, Long diaryId, DiaryRequest request, List<MultipartFile> images) {
+    public void updateDiary(User user, Long petId, Long diaryId, DiaryUpdateRequest request, List<MultipartFile> images) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateModifyDiary(diary, user, petId);
 
-        applicationEventPublisher.publishEvent(new DiaryUpdatedEvent(diaryId, new ArrayList<>(diary.getDiaryMedias())));
-        diary.update(request.getTitle(), request.getContent(), LocalDate.parse(request.getDate()),
-                uploadImagesAndGetDiaryMedias(images, diary));
+        Optional<DiaryMedia> optionalVideo = diary.getDiaryMedias().stream()
+                .filter(diaryMedia -> DiaryMediaType.VIDEO.equals(diaryMedia.getType()))
+                .findFirst();
+
+        if (isOriginalVideoMaintained(optionalVideo, request.isVideoDeleted()) && request.getVideoId() != null) {
+            throw new DiaryException(MEDIA_UPLOAD_LIMIT_OVER);
+        }
+
+        List<DiaryMedia> diaryMediasToBeDeleted = new ArrayList<>(diary.getDiaryMedias());
+        List<DiaryMedia> diaryMediasToBeUpdated = uploadAndGetDiaryMedias(images, request.getVideoId(), diary, user);
+        if (!request.isVideoDeleted())
+            optionalVideo.ifPresent(video -> {
+                diaryMediasToBeUpdated.add(video);
+                diaryMediasToBeDeleted.remove(video);
+            });
+        diary.update(request.getTitle(), request.getContent(), LocalDate.parse(request.getDate()), diaryMediasToBeUpdated);
+        applicationEventPublisher.publishEvent(new DiaryUpdatedEvent(diaryId, diaryMediasToBeDeleted));
+    }
+
+    private static boolean isOriginalVideoMaintained(Optional<DiaryMedia> video, boolean isVideoDeleted) {
+        return video.isPresent() && !isVideoDeleted;
     }
 
     private void validateModifyDiary(Diary diary, User user, Long petId) {
         if (!Objects.equals(diary.getUser().getId(), user.getId()))
             throw new DiaryException(NOT_DIARY_OWNER);
-        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
-            throw new DiaryException(FORBIDDEN_PET_SPACE);
+        validateAccessDiary(petId, user);
     }
 
 
@@ -113,20 +154,15 @@ public class DiaryService {
     public DiaryDetailResponse displayDiary(User user, Long petId, Long diaryId) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
-        validateDisplayDiary(user, petId);
+        validateAccessDiary(petId, user);
         return DiaryDetailResponse.from(diary, user.getId(),
                 diaryCommentRedisService.getDiaryCommentCountByDiaryId(diaryId),
                 diaryRedisService.isLikeExistByDiaryIdAndUserId(diaryId, user.getId()),
                 diaryRedisService.getLikeCountByDiaryId(diaryId));
     }
 
-    private void validateDisplayDiary(User user, Long petId) {
-        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
-            throw new DiaryException(FORBIDDEN_PET_SPACE);
-    }
-
     public Slice<DiaryGroupByDateResponse> displayDiaries(User user, Long petId, int page, int size) {
-        validateQueryDiaries(user, petId);
+        validateAccessDiary(petId, user);
         return getGroupedDiariesSlice(
                 diaryRepository.findByPetIdAndIsDeletedFalseOrderByIdDesc(petId,
                         PageRequest.of(page, size)), user.getId());
@@ -154,10 +190,6 @@ public class DiaryService {
         return new SliceImpl<>(content, diarySlice.getPageable(), diarySlice.hasNext());
     }
 
-    private void validateQueryDiaries(User user, Long petId) {
-        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
-            throw new DiaryException(FORBIDDEN_PET_SPACE);
-    }
 
     public void likeDiary(User user, Long petId, Long diaryId) {
         validateLikeDiary(user, petId, diaryId);
@@ -171,7 +203,6 @@ public class DiaryService {
     private void validateLikeDiary(User user, Long petId, Long diaryId) {
         if (!diaryRepository.existsByIdAndIsDeletedFalse(diaryId))
             throw new DiaryException(DIARY_NOT_FOUND);
-        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
-            throw new DiaryException(FORBIDDEN_PET_SPACE);
+        validateAccessDiary(petId, user);
     }
 }

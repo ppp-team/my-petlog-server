@@ -53,7 +53,6 @@ public class Diary extends BaseTimeEntity {
         diaryMedias.clear();
     }
 
-
     public void addDiaryMedias(List<DiaryMedia> diaryMedias) {
         this.diaryMedias.clear();
         this.diaryMedias.addAll(diaryMedias);
