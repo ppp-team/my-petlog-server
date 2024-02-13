@@ -19,6 +19,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -51,7 +54,7 @@ class DiaryControllerTest {
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .date(LocalDate.now().toString())
                 .build();
         //when
@@ -76,7 +79,7 @@ class DiaryControllerTest {
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .date(LocalDate.now().toString())
                 .build();
         //when
@@ -99,7 +102,7 @@ class DiaryControllerTest {
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .date("2024-03-2")
                 .build();
         //when
@@ -123,8 +126,8 @@ class DiaryControllerTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .isVideoDeleted(true)
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .deletedVideoIds(Set.of(1L))
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         //when
         mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries/{diaryId}", 1L, 1L)
@@ -153,8 +156,8 @@ class DiaryControllerTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .isVideoDeleted(true)
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .deletedVideoIds(Set.of(1L))
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         //when
         mockMvc.perform(multipart("/api/v1/pets/{petId}/diaries/{diaryId}", 1L, 1L)

@@ -35,8 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.ppp.api.diary.exception.ErrorCode.*;
 import static com.ppp.api.pet.exception.ErrorCode.PET_NOT_FOUND;
@@ -72,6 +71,11 @@ class DiaryServiceTest {
             .nickname("hi")
             .build();
 
+    User userA = User.builder()
+            .id("cherrymommy")
+            .nickname("체리엄마")
+            .build();
+
     Pet pet = Pet.builder()
             .id(1L)
             .birth(LocalDateTime.of(2023, 2, 8, 0, 0))
@@ -85,13 +89,13 @@ class DiaryServiceTest {
     );
 
     @Test
-    @DisplayName("일기 생성 성공")
+    @DisplayName("일기 생성 성공-비디오와 이미지를 업로드")
     void createDiary_success() {
         //given
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .date(LocalDate.now().toString())
                 .build();
 
@@ -104,14 +108,14 @@ class DiaryServiceTest {
                         "DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
         Diary createdDiary = mock(Diary.class);
         given(diaryRepository.save(any())).willReturn(createdDiary);
+        given(createdDiary.getId()).willReturn(1L);
         given(tempVideoRedisRepository.findById(anyString()))
                 .willReturn(Optional.of(TempVideo.builder()
                         .filePath("temp/encoded/2024021313/267d730ad30d4c8da5560e9b3cc0581820240213130549683.mp4")
                         .userId(user.getId())
                         .build()));
-        given(fileStorageManageService.uploadVideo(any(), any()))
-                .willReturn(Optional.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
-        given(createdDiary.getId()).willReturn(1L);
+        given(fileStorageManageService.uploadVideos(any(), any()))
+                .willReturn(List.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
         //when
         diaryService.createDiary(user, 1L, request, images);
         ArgumentCaptor<Diary> diaryCaptor = ArgumentCaptor.forClass(Diary.class);
@@ -126,7 +130,7 @@ class DiaryServiceTest {
     }
 
     @Test
-    @DisplayName("일기 생성 성공-비디오 아이디가 주어지지 않음")
+    @DisplayName("일기 생성 성공-이미지만 업로드")
     void createDiary_success_WhenVideoIdIsNotGiven() {
         //given
         DiaryCreateRequest request = DiaryCreateRequest.builder()
@@ -200,7 +204,7 @@ class DiaryServiceTest {
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .date(LocalDate.now().toString())
                 .build();
 
@@ -211,7 +215,6 @@ class DiaryServiceTest {
         given(fileStorageManageService.uploadImages(anyList(), any()))
                 .willReturn(List.of("DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg",
                         "DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
-
         given(tempVideoRedisRepository.findById(anyString()))
                 .willReturn(Optional.empty());
         //when
@@ -221,13 +224,13 @@ class DiaryServiceTest {
     }
 
     @Test
-    @DisplayName("일기 생성 실패-not found video-비디오 유저 아이디가 다름")
+    @DisplayName("일기 생성 실패-not found video-temp video를 등록한 유저가 아님")
     void createDiary_fail_NOT_FOUND_VIDEO_WhenUserIdNotMatched() {
         //given
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .date(LocalDate.now().toString())
                 .build();
 
@@ -242,7 +245,7 @@ class DiaryServiceTest {
         given(tempVideoRedisRepository.findById(anyString()))
                 .willReturn(Optional.of(TempVideo.builder()
                         .filePath("temp/encoded/2024021313/267d730ad30d4c8da5560e9b3cc0581820240213130549683.mp4")
-                        .userId("123456")
+                        .userId(userA.getId())
                         .build()));
         //when
         VideoException exception = assertThrows(VideoException.class, () -> diaryService.createDiary(user, 1L, request, images));
@@ -251,14 +254,15 @@ class DiaryServiceTest {
     }
 
     @Test
-    @DisplayName("일기 수정 성공-비디오가 삭제되지 않을때")
-    void updateDiary_success_WhenIsVideoDeletedFalse() {
+    @DisplayName("일기 수정 성공-기존 비디오를 삭제")
+    void updateDiary_success_WhenDeleteOldVideoOnly() {
         //given
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
+                .deletedVideoIds(Set.of(1L))
+                .uploadedVideoIds(new ArrayList<>())
                 .date(LocalDate.now().toString())
-                .isVideoDeleted(false)
                 .build();
 
         Diary diary = Diary.builder()
@@ -267,13 +271,10 @@ class DiaryServiceTest {
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
                 .pet(pet).build();
-        diary.addDiaryMedias(List.of(
-                DiaryMedia.builder()
-                        .type(DiaryMediaType.IMAGE)
-                        .build(),
-                DiaryMedia.builder()
-                        .type(DiaryMediaType.VIDEO)
-                        .build()));
+        DiaryMedia diaryMedia = mock(DiaryMedia.class);
+        diary.addDiaryMedias(List.of(diaryMedia));
+
+        given(diaryMedia.getId()).willReturn(1L);
 
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diary));
@@ -291,32 +292,26 @@ class DiaryServiceTest {
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
-        assertEquals(3, diary.getDiaryMedias().size());
+        assertEquals(2, diary.getDiaryMedias().size());
     }
 
     @Test
-    @DisplayName("일기 수정 성공-처음 비디오를 업로드")
-    void updateDiary_success_WhenVideoUploadedFirstTime() {
+    @DisplayName("일기 수정 성공-기존 비디오가 없을 때 비디오를 업로드")
+    void updateDiary_success_WhenNewVideoUploadFirstTime() {
         //given
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
-                .isVideoDeleted(false)
+                .deletedVideoIds(new HashSet<>())
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
-
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
                 .pet(pet).build();
-        diary.addDiaryMedias(List.of(
-                DiaryMedia.builder()
-                        .type(DiaryMediaType.IMAGE)
-                        .build()));
-
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diary));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
@@ -329,14 +324,14 @@ class DiaryServiceTest {
                         .filePath("temp/encoded/2024021313/267d730ad30d4c8da5560e9b3cc0581820240213130549683.mp4")
                         .userId(user.getId())
                         .build()));
-        given(fileStorageManageService.uploadVideo(any(), any()))
-                .willReturn(Optional.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
+        given(fileStorageManageService.uploadVideos(any(), any()))
+                .willReturn(List.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
         //when
         diaryService.updateDiary(user, 1L, 1L, request, images);
         ArgumentCaptor<DiaryUpdatedEvent> captor = ArgumentCaptor.forClass(DiaryUpdatedEvent.class);
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
-        assertEquals(1, captor.getValue().getDiaryMedias().size());
+        assertEquals(0, captor.getValue().getDiaryMedias().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
@@ -344,15 +339,15 @@ class DiaryServiceTest {
     }
 
     @Test
-    @DisplayName("일기 수정 성공-기존 비디오를 삭제하고 비디오를 업로드")
-    void updateDiary_success_WhenVideoIdIsNotGiven() {
+    @DisplayName("일기 수정 성공-기존 비디오를 삭제하고 비디오 업로드")
+    void updateDiary_success_WhenDeleteOldVideoAndUploadNewVideo() {
         //given
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
-                .isVideoDeleted(true)
+                .deletedVideoIds(Set.of(1L))
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
 
         Diary diary = Diary.builder()
@@ -361,15 +356,10 @@ class DiaryServiceTest {
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
                 .pet(pet).build();
-        diary.addDiaryMedias(List.of(
-                DiaryMedia.builder()
-                        .type(DiaryMediaType.IMAGE)
-                        .build(),
-                DiaryMedia.builder()
-                        .type(DiaryMediaType.VIDEO)
-                        .build()));
+        DiaryMedia diaryMedia = mock(DiaryMedia.class);
+        diary.addDiaryMedias(List.of(diaryMedia));
 
-
+        given(diaryMedia.getId()).willReturn(1L);
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diary));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
@@ -382,15 +372,15 @@ class DiaryServiceTest {
                         .filePath("temp/encoded/2024021313/267d730ad30d4c8da5560e9b3cc0581820240213130549683.mp4")
                         .userId(user.getId())
                         .build()));
-        given(fileStorageManageService.uploadVideo(any(), any()))
-                .willReturn(Optional.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
+        given(fileStorageManageService.uploadVideos(any(), any()))
+                .willReturn(List.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
 
         //when
         diaryService.updateDiary(user, 1L, 1L, request, images);
         ArgumentCaptor<DiaryUpdatedEvent> captor = ArgumentCaptor.forClass(DiaryUpdatedEvent.class);
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
-        assertEquals(2, captor.getValue().getDiaryMedias().size());
+        assertEquals(1, captor.getValue().getDiaryMedias().size());
         assertEquals(3, diary.getDiaryMedias().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
@@ -406,7 +396,8 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .isVideoDeleted(false)
+                .deletedVideoIds(Set.of(1L))
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.empty());
@@ -424,8 +415,8 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
-                .isVideoDeleted(false)
+                .deletedVideoIds(new HashSet<>())
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
 
         Diary diary = Diary.builder()
@@ -435,13 +426,10 @@ class DiaryServiceTest {
                 .user(user)
                 .pet(pet).build();
 
-        diary.addDiaryMedias(List.of(
-                DiaryMedia.builder()
-                        .type(DiaryMediaType.IMAGE)
-                        .build(),
-                DiaryMedia.builder()
-                        .type(DiaryMediaType.VIDEO)
-                        .build()));
+        DiaryMedia diaryMedia = mock(DiaryMedia.class);
+        diary.addDiaryMedias(List.of(diaryMedia));
+
+        given(diaryMedia.getId()).willReturn(1L);
 
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diary));
@@ -461,7 +449,8 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .isVideoDeleted(false)
+                .deletedVideoIds(Set.of(1L))
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         User otherUser = User.builder()
                 .id("other-user").build();
@@ -488,7 +477,8 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .isVideoDeleted(false)
+                .deletedVideoIds(Set.of(1L))
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
@@ -515,8 +505,8 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .isVideoDeleted(false)
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .deletedVideoIds(Set.of(1L))
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
@@ -545,8 +535,8 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .isVideoDeleted(false)
-                .videoId("c8e8f796-8e29-4067-86c4-0eae419a054e")
+                .deletedVideoIds(Set.of(1L))
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
