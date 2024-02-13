@@ -11,7 +11,7 @@ public record VideoResponse(
         String videoId,
         LocalDateTime validUntil
 ) {
-    private static long tempVideoValidMinutes = TempVideo.class.getAnnotation(RedisHash.class).timeToLive();
+    private final static long tempVideoValidMinutes = TempVideo.class.getAnnotation(RedisHash.class).timeToLive();
 
     public static VideoResponse from(TempVideo tempVideo) {
         return VideoResponse.builder()
