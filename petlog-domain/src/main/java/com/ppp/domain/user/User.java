@@ -3,7 +3,6 @@ package com.ppp.domain.user;
 
 import com.ppp.domain.common.BaseTimeEntity;
 import com.ppp.domain.common.GenerationUtil;
-import com.ppp.domain.invitation.Invitation;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.user.constant.Role;
 import jakarta.persistence.*;
@@ -45,8 +44,6 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user")
     private List<Pet> pets = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<Invitation> invitaionList = new ArrayList<>();
 
     // 팩토리 메소드를 이용한 생성
     public static User createUserByEmail(String email) {

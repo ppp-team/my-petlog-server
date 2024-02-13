@@ -1,5 +1,6 @@
 package com.ppp.api.pet.service;
 
+import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
@@ -30,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PetsServiceTest {
+class PetServiceTest {
     @Mock
     private PetRepository petRepository;
 
@@ -40,8 +41,11 @@ class PetsServiceTest {
     @Mock
     private FileManageService fileManageService;
 
+    @Mock
+    private GuardianService guardianService;
+
     @InjectMocks
-    private PetsService petsService;
+    private PetService petService;
 
     private User user = null;
     private MockMultipartFile file = null;
@@ -73,7 +77,7 @@ class PetsServiceTest {
                 .registeredNumber("1234")
                 .build();
 
-        petsService.createPet(petRequest, user, null);
+        petService.createPet(petRequest, user, null);
 
         verify(petRepository, times(1)).save(any(Pet.class));
     }
@@ -95,7 +99,7 @@ class PetsServiceTest {
 
         when(petRepository.findMyPetById(1L, user.getId())).thenReturn(Optional.of(pet));
 
-        petsService.updatePet(1L, petRequest, user, null);
+        petService.updatePet(1L, petRequest, user, null);
 
         assertEquals("name", pet.getName());
     }
@@ -105,7 +109,7 @@ class PetsServiceTest {
     void displayPetTest() {
         when(petRepository.findMyPetById(1L, user.getId())).thenReturn(Optional.of(pet));
 
-        MyPetResponse myPetResponse = petsService.findMyPetById(1L, user);
+        MyPetResponse myPetResponse = petService.findMyPetById(1L, user);
 
         Assertions.assertThat(myPetResponse).isNotNull();
     }
@@ -118,9 +122,18 @@ class PetsServiceTest {
 
         when(petRepository.findAllByUserId(user.getId())).thenReturn(myPets);
 
-        MyPetsResponse MyPetsResponse = petsService.findMyPets(user);
+        MyPetsResponse MyPetsResponse = petService.findMyPets(user);
 
         Assertions.assertThat(MyPetsResponse).isNotNull();
+    }
+
+    @Test
+    @DisplayName("반려동물 삭제")
+    void deleteMyPet() {
+        Long petId = 1L;
+        petService.deleteMyPet(petId, user);
+
+        verify(petRepository, times(1)).deleteById(petId);
     }
 
     @Test
@@ -132,7 +145,7 @@ class PetsServiceTest {
         when(petRepository.findRepresentativePet(user.getId())).thenReturn(Optional.of(pet1));
         when(petRepository.findMyPetById(2L,user.getId())).thenReturn(Optional.of(pet2));
 
-        petsService.selectRepresentative(pet2.getId(), user);
+        petService.selectRepresentative(pet2.getId(), user);
 
         assertEquals(RepStatus.NORMAL, pet1.getRepStatus());
         assertEquals(RepStatus.REPRESENTATIVE, pet2.getRepStatus());

@@ -2,7 +2,7 @@ package com.ppp.api.pet.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ppp.api.pet.dto.request.PetRequest;
-import com.ppp.api.pet.service.PetsService;
+import com.ppp.api.pet.service.PetService;
 import com.ppp.api.test.WithMockCustomUser;
 import com.ppp.common.security.UserDetailsServiceImpl;
 import com.ppp.common.security.jwt.JwtAuthenticationFilter;
@@ -24,9 +24,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PetsController.class)
+@WebMvcTest(PetController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class PetsControllerTest {
+class PetControllerTest {
 
     @MockBean
     private UserDetailsServiceImpl userDetailsService;
@@ -41,7 +41,7 @@ class PetsControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private PetsService petsService;
+    private PetService petService;
 
     private static final String TOKEN = "Bearer token";
 

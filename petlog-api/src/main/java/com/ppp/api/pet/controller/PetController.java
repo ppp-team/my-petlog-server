@@ -4,7 +4,7 @@ import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
-import com.ppp.api.pet.service.PetsService;
+import com.ppp.api.pet.service.PetService;
 import com.ppp.common.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,8 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-public class PetsController {
-    private final PetsService petsService;
+public class PetController {
+    private final PetService petService;
 
     @Operation(summary = "반려동물 추가")
     @ApiResponses({
@@ -39,7 +39,7 @@ public class PetsController {
             @Valid @RequestPart PetRequest petRequest,
             @AuthenticationPrincipal PrincipalDetails principalDetails
             ) {
-        petsService.createPet(petRequest, principalDetails.getUser(), petImage);
+        petService.createPet(petRequest, principalDetails.getUser(), petImage);
         return ResponseEntity.ok().build();
     }
 
@@ -55,7 +55,7 @@ public class PetsController {
             @Valid @RequestPart PetRequest petRequest,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        petsService.updatePet(petId, petRequest, principalDetails.getUser(), petImage);
+        petService.updatePet(petId, petRequest, principalDetails.getUser(), petImage);
         return ResponseEntity.ok().build();
     }
 
@@ -68,7 +68,7 @@ public class PetsController {
     public ResponseEntity<MyPetResponse> displayPet(
             @PathVariable("petId") Long petId,
             @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        return ResponseEntity.ok(petsService.findMyPetById(petId, principalDetails.getUser()));
+        return ResponseEntity.ok(petService.findMyPetById(petId, principalDetails.getUser()));
     }
 
     @Operation(summary = "반려동물 리스트", description = "자신이 등록한 반려동물 목록을 조회합니다.")
@@ -77,13 +77,24 @@ public class PetsController {
     })
     @GetMapping("/v1/my/pets")
     public ResponseEntity<MyPetsResponse> displayPets(@AuthenticationPrincipal PrincipalDetails principalDetails) {
-        return ResponseEntity.ok(petsService.findMyPets(principalDetails.getUser()));
+        return ResponseEntity.ok(petService.findMyPets(principalDetails.getUser()));
+    }
+
+    @Operation(summary = "반려동물 삭제")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "400", description = "다른 멤버가 있을 때 반려동물을 삭제할 수 없습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+    })
+    @DeleteMapping("/v1/my/pets/{petId}")
+    public ResponseEntity<Void> deleteMyPet(@PathVariable("petId") Long petId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        petService.deleteMyPet(petId, principalDetails.getUser());
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "대표 반려동물 지정")
     @PostMapping("/v1/my/pets/{petId}/selectRep")
     public ResponseEntity<Void> selectRepresentative(@PathVariable("petId") Long petId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        petsService.selectRepresentative(petId, principalDetails.getUser());
+        petService.selectRepresentative(petId, principalDetails.getUser());
         return ResponseEntity.ok().build();
     }
 }

@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum InviteStatus {
-    PENDING("pending"),
-    ACCEPTED("accepted"),
-    REJECTED("rejected");
+    PENDING("대기중"),
+    ACCEPTED("수락"),
+    REJECTED("거절");
 
     @Getter
     private final String value;

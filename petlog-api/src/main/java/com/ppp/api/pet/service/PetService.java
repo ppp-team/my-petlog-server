@@ -1,5 +1,6 @@
 package com.ppp.api.pet.service;
 
+import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
@@ -8,6 +9,8 @@ import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.service.FileManageService;
 import com.ppp.domain.common.GenerationUtil;
 import com.ppp.domain.common.constant.Domain;
+import com.ppp.domain.guardian.Guardian;
+import com.ppp.domain.guardian.constant.GuardianRole;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.constant.RepStatus;
@@ -27,10 +30,11 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PetsService {
+public class PetService {
     private final PetRepository petRepository;
     private final PetImageRepository petImageRepository;
     private final FileManageService fileManageService;
+    private final GuardianService guardianService;
 
     @Transactional
     public void createPet(PetRequest petRequest, User user, MultipartFile petImage) {
@@ -52,7 +56,8 @@ public class PetsService {
                 .invitedCode(inviteCode)
                 .build();
 
-        petRepository.save(pet);
+        Pet savedPet = petRepository.save(pet);
+        guardianService.createGuardian(savedPet, user, GuardianRole.LEADER);
 
         savePetImage(pet, petImage);
     }
@@ -120,5 +125,13 @@ public class PetsService {
         Pet pet = petRepository.findMyPetById(petId, user.getId())
                 .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
         pet.updateRepStatus(RepStatus.REPRESENTATIVE);
+    }
+
+    @Transactional
+    public void deleteMyPet(Long petId, User user) {
+        Guardian guardian = guardianService.findByUserIdAndPetId(user, petId);
+        guardianService.deleteReaderGuardian(guardian, petId);
+
+        petRepository.deleteById(petId);
     }
 }
