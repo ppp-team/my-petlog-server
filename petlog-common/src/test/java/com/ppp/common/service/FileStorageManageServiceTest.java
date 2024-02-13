@@ -23,12 +23,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class FileManageServiceTest {
+class FileStorageManageServiceTest {
     @Mock
     private FileStorageClient fileStorageClient;
 
     @InjectMocks
-    private FileManageService fileManageService;
+    private FileStorageManageService fileStorageManageService;
 
     @Test
     @DisplayName("이미지 업로드-성공")
@@ -40,7 +40,7 @@ class FileManageServiceTest {
         given(fileStorageClient.upload(any(), any()))
                 .willReturn(savedPath);
         //when
-        Optional<String> maybeString = fileManageService.uploadImage(file, Domain.USER);
+        Optional<String> maybeString = fileStorageManageService.uploadImage(file, Domain.USER);
         //then
         verify(fileStorageClient, times(1)).upload(any(), any());
         assertTrue(maybeString.isPresent());
@@ -54,7 +54,7 @@ class FileManageServiceTest {
         MultipartFile image = new MockMultipartFile("images", "image.webp",
                 MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes());
         //when
-        Optional<String> maybeString = fileManageService.uploadImage(image, Domain.USER);
+        Optional<String> maybeString = fileStorageManageService.uploadImage(image, Domain.USER);
         //then
         verify(fileStorageClient, times(0)).upload(any(), any());
         assertTrue(maybeString.isEmpty());
@@ -73,7 +73,7 @@ class FileManageServiceTest {
         given(fileStorageClient.upload(any(), any()))
                 .willReturn(savedPath);
         //when
-        List<String> filePaths = fileManageService.uploadImages(images, Domain.USER);
+        List<String> filePaths = fileStorageManageService.uploadImages(images, Domain.USER);
         //then
         verify(fileStorageClient, times(1)).upload(any(), any());
         assertEquals(filePaths.size(), 1);

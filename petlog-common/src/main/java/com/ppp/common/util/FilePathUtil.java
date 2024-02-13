@@ -9,10 +9,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class FilePathUtil {
-    public static String createFileName(String fileName) {
+    public static String getFileNameAndExtension(String fileName) {
+        return createFileName() + getFileExtension(fileName).orElse(".jpg");
+    }
+
+    public static String createFileName() {
         return UUID.randomUUID().toString().replaceAll("-", "") +
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")) +
-                fileName.substring(fileName.lastIndexOf("."));
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
     }
 
     public static Optional<String> getFileExtension(String fileName) {

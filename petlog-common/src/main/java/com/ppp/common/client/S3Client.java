@@ -28,7 +28,7 @@ public class S3Client implements FileStorageClient {
 
     @Override
     public String upload(MultipartFile multipartFile, Domain domain) {
-        String fileName = FilePathUtil.createFileName(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+        String fileName = FilePathUtil.getFileNameAndExtension(Objects.requireNonNull(multipartFile.getOriginalFilename()));
         String filePath = FilePathUtil.createFilePath(domain);
         try {
             File file = File.createTempFile("file", fileName);

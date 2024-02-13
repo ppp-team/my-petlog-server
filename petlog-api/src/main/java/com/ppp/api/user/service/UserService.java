@@ -6,7 +6,7 @@ import com.ppp.api.user.dto.response.ProfileResponse;
 import com.ppp.api.user.exception.ErrorCode;
 import com.ppp.api.user.exception.NotFoundUserException;
 import com.ppp.api.user.exception.UserException;
-import com.ppp.common.service.FileManageService;
+import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.common.constant.Domain;
 import com.ppp.domain.user.ProfileImage;
 import com.ppp.domain.user.User;
@@ -27,7 +27,7 @@ import static com.ppp.api.auth.exception.ErrorCode.NOTMATCH_PASSWORD;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final FileManageService fileManageService;
+    private final FileStorageManageService fileStorageManageService;
     private final UserRepository userRepository;
     private final ProfileImageRepository profileImageRepository;
     private final AuthService authService;
@@ -59,7 +59,7 @@ public class UserService {
     }
 
     private String uploadImageToS3(MultipartFile profileImage) {
-        return fileManageService.uploadImage(profileImage, Domain.USER)
+        return fileStorageManageService.uploadImage(profileImage, Domain.USER)
                 .orElseThrow(() -> new UserException(ErrorCode.PROFILE_REGISTRATION_FAILED));
     }
 
@@ -92,7 +92,7 @@ public class UserService {
 
             // delete previous image
             profileImageRepository.findByUser(userFromDb).ifPresent(
-                    image -> fileManageService.deleteImage(image.getUrl()));
+                    image -> fileStorageManageService.deleteImage(image.getUrl()));
         }
     }
 

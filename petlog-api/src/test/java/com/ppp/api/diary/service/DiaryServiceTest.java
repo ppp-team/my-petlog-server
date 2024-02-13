@@ -5,7 +5,7 @@ import com.ppp.api.diary.dto.response.DiaryDetailResponse;
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.pet.exception.PetException;
-import com.ppp.common.service.FileManageService;
+import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryMedia;
 import com.ppp.domain.diary.constant.DiaryMediaType;
@@ -47,7 +47,7 @@ class DiaryServiceTest {
     @Mock
     private PetRepository petRepository;
     @Mock
-    private FileManageService fileManageService;
+    private FileStorageManageService fileStorageManageService;
     @Mock
     private GuardianRepository guardianRepository;
     @Mock
@@ -66,14 +66,14 @@ class DiaryServiceTest {
 
     Pet pet = Pet.builder()
             .id(1L)
-            .birth(LocalDateTime.of(2023,2,8,0,0))
+            .birth(LocalDateTime.of(2023, 2, 8, 0, 0))
             .build();
 
     List<MultipartFile> images = List.of(
             new MockMultipartFile("images", "image.jpg",
-                    MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes()),
+                    MediaType.IMAGE_JPEG_VALUE, "abcde" .getBytes()),
             new MockMultipartFile("images", "image.jpg",
-                    MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes())
+                    MediaType.IMAGE_JPEG_VALUE, "abcde" .getBytes())
     );
 
     @Test
@@ -87,7 +87,7 @@ class DiaryServiceTest {
                 .willReturn(Optional.of(pet));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
                 .willReturn(true);
-        given(fileManageService.uploadImages(anyList(), any()))
+        given(fileStorageManageService.uploadImages(anyList(), any()))
                 .willReturn(List.of("/DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg",
                         "/DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
         Diary createdDiary = mock(Diary.class);
@@ -155,7 +155,7 @@ class DiaryServiceTest {
                 .willReturn(Optional.of(diary));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
                 .willReturn(true);
-        given(fileManageService.uploadImages(anyList(), any()))
+        given(fileStorageManageService.uploadImages(anyList(), any()))
                 .willReturn(List.of("/DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg",
                         "/DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
 

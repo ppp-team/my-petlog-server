@@ -9,7 +9,7 @@ import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.api.diary.dto.response.DiaryResponse;
 import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.pet.exception.PetException;
-import com.ppp.common.service.FileManageService;
+import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryMedia;
 import com.ppp.domain.diary.constant.DiaryMediaType;
@@ -45,7 +45,7 @@ public class DiaryService {
     private final DiaryRepository diaryRepository;
     private final PetRepository petRepository;
     private final GuardianRepository guardianRepository;
-    private final FileManageService fileManageService;
+    private final FileStorageManageService fileStorageManageService;
     private final DiaryCommentRedisService diaryCommentRedisService;
     private final DiaryRedisService diaryRedisService;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -76,7 +76,7 @@ public class DiaryService {
     private List<DiaryMedia> uploadImagesAndGetDiaryMedias(List<MultipartFile> images, Diary diary) {
         if (images == null || images.isEmpty())
             return new ArrayList<>();
-        return fileManageService.uploadImages(images, DIARY).stream()
+        return fileStorageManageService.uploadImages(images, DIARY).stream()
                 .map(uploadedPath -> DiaryMedia.of(diary, uploadedPath, DiaryMediaType.IMAGE))
                 .collect(Collectors.toList());
     }

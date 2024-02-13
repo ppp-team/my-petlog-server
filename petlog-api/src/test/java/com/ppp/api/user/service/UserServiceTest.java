@@ -2,7 +2,7 @@ package com.ppp.api.user.service;
 
 import com.ppp.api.auth.service.AuthService;
 import com.ppp.api.user.dto.response.ProfileResponse;
-import com.ppp.common.service.FileManageService;
+import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.ProfileImageRepository;
 import com.ppp.domain.user.repository.UserRepository;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
     @Mock
-    private FileManageService fileManageService;
+    private FileStorageManageService fileStorageManageService;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -83,7 +83,7 @@ class UserServiceTest {
         //when
         when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
         when(profileImageRepository.findByUser(any())).thenReturn(Optional.empty());
-        given(fileManageService.uploadImage(any(),any()))
+        given(fileStorageManageService.uploadImage(any(),any()))
                 .willReturn(Optional.of("/USER/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
 
         userService.createProfile(user,file,"새로운닉네임");
@@ -112,7 +112,7 @@ class UserServiceTest {
         lenient().when(authService.checkPasswordMatches(rawPassword, user.getPassword())).thenReturn(true);
         lenient().when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
         lenient().when(profileImageRepository.findByUser(any())).thenReturn(Optional.empty());
-        lenient().when(fileManageService.uploadImage(any(),any()))
+        lenient().when(fileStorageManageService.uploadImage(any(),any()))
                 .thenReturn(Optional.of("/USER/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
 
         userService.updateProfile(user,null,user.getNickname(),user.getPassword());

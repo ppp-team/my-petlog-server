@@ -1,14 +1,13 @@
-package com.ppp.common.exception;
+package com.ppp.api.video.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public class FileException extends RuntimeException {
-    private final String code;
+public class VideoException extends RuntimeException {
     private final HttpStatus httpStatus;
-
-    public FileException(ErrorCode errorCode) {
+    private final String code;
+    public VideoException(ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.httpStatus = errorCode.getStatus();
         this.code = errorCode.getCode();
