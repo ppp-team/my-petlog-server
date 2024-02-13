@@ -37,7 +37,7 @@ public class InvitationService {
     @Transactional(readOnly = true)
     public List<InvitationResponse> displayInvitations(User user) {
         List<InvitationResponse> invitationResponseList = new ArrayList<>();
-        List<Invitation> invitations = invitationRepository.findByInviteeId(user.getId());
+        List<Invitation> invitations = invitationRepository.findByInviteeIdAndInviteStatus(user.getId(), InviteStatus.PENDING);
         for (Invitation invitation : invitations) {
             Pet pet = invitation.getPet();
             String inviterId = invitation.getInviterId();
