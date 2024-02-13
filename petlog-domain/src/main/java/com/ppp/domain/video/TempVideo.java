@@ -7,7 +7,7 @@ import lombok.Getter;
 import org.springframework.data.redis.core.RedisHash;
 
 @Getter
-@RedisHash(value = "video", timeToLive = 170L)
+@RedisHash(value = "videos", timeToLive = 170L)
 public class TempVideo {
     @Id
     private String id;

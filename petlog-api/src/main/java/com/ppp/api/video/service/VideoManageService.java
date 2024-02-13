@@ -27,7 +27,7 @@ public class VideoManageService {
     private final TempVideoRedisRepository tempVideoRedisRepository;
 
     public VideoResponse uploadTempVideo(User user, String domain, MultipartFile video) {
-        if (!Domain.valueOf(domain).isHasVideo() && video.isEmpty())
+        if (!Domain.valueOf(domain).isHasVideo() || video.isEmpty())
             throw new VideoException(ErrorCode.VIDEO_UPLOAD_NOT_ALLOWED);
         FilePathUtil.getFileExtension(Objects.requireNonNull(video.getOriginalFilename()))
                 .filter(extension -> ALLOW_VIDEO_CODES.contains(extension.toLowerCase(Locale.ROOT)))

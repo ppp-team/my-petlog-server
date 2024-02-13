@@ -26,8 +26,8 @@ public class VideoController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<VideoResponse> uploadTempVideo(@RequestParam(defaultValue = "DIARY") @EnumValue(enumClass = Domain.class) String domain,
-                                                              @RequestPart MultipartFile video,
-                                                              @AuthenticationPrincipal PrincipalDetails principalDetail) {
+                                                         @RequestPart MultipartFile video,
+                                                         @AuthenticationPrincipal PrincipalDetails principalDetail) {
         return ResponseEntity.ok(videoManageService.uploadTempVideo(principalDetail.getUser(), domain, video));
     }
 }
