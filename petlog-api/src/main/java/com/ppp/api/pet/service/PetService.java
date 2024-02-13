@@ -30,7 +30,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PetsService {
+public class PetService {
     private final PetRepository petRepository;
     private final PetImageRepository petImageRepository;
     private final FileManageService fileManageService;

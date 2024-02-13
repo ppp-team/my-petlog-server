@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PetsServiceTest {
+class PetServiceTest {
     @Mock
     private PetRepository petRepository;
 
@@ -45,7 +45,7 @@ class PetsServiceTest {
     private GuardianService guardianService;
 
     @InjectMocks
-    private PetsService petsService;
+    private PetService petService;
 
     private User user = null;
     private MockMultipartFile file = null;
@@ -77,7 +77,7 @@ class PetsServiceTest {
                 .registeredNumber("1234")
                 .build();
 
-        petsService.createPet(petRequest, user, null);
+        petService.createPet(petRequest, user, null);
 
         verify(petRepository, times(1)).save(any(Pet.class));
     }
@@ -99,7 +99,7 @@ class PetsServiceTest {
 
         when(petRepository.findMyPetById(1L, user.getId())).thenReturn(Optional.of(pet));
 
-        petsService.updatePet(1L, petRequest, user, null);
+        petService.updatePet(1L, petRequest, user, null);
 
         assertEquals("name", pet.getName());
     }
@@ -109,7 +109,7 @@ class PetsServiceTest {
     void displayPetTest() {
         when(petRepository.findMyPetById(1L, user.getId())).thenReturn(Optional.of(pet));
 
-        MyPetResponse myPetResponse = petsService.findMyPetById(1L, user);
+        MyPetResponse myPetResponse = petService.findMyPetById(1L, user);
 
         Assertions.assertThat(myPetResponse).isNotNull();
     }
@@ -122,7 +122,7 @@ class PetsServiceTest {
 
         when(petRepository.findAllByUserId(user.getId())).thenReturn(myPets);
 
-        MyPetsResponse MyPetsResponse = petsService.findMyPets(user);
+        MyPetsResponse MyPetsResponse = petService.findMyPets(user);
 
         Assertions.assertThat(MyPetsResponse).isNotNull();
     }
@@ -131,7 +131,7 @@ class PetsServiceTest {
     @DisplayName("반려동물 삭제")
     void deleteMyPet() {
         Long petId = 1L;
-        petsService.deleteMyPet(petId, user);
+        petService.deleteMyPet(petId, user);
 
         verify(petRepository, times(1)).deleteById(petId);
     }
@@ -145,7 +145,7 @@ class PetsServiceTest {
         when(petRepository.findRepresentativePet(user.getId())).thenReturn(Optional.of(pet1));
         when(petRepository.findMyPetById(2L,user.getId())).thenReturn(Optional.of(pet2));
 
-        petsService.selectRepresentative(pet2.getId(), user);
+        petService.selectRepresentative(pet2.getId(), user);
 
         assertEquals(RepStatus.NORMAL, pet1.getRepStatus());
         assertEquals(RepStatus.REPRESENTATIVE, pet2.getRepStatus());
