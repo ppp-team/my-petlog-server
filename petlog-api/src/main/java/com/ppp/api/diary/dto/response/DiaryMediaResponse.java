@@ -8,13 +8,13 @@ import lombok.Builder;
 @Builder
 public record DiaryMediaResponse(
         @Schema(description = "미디어 아이디")
-        Long id,
+        Long mediaId,
         @Schema(description = "미디어 path")
         String path
 ) {
-    public static DiaryMediaResponse from(DiaryMedia diaryMedia){
+    public static DiaryMediaResponse from(DiaryMedia diaryMedia) {
         return DiaryMediaResponse.builder()
-                .id(diaryMedia.getId())
+                .mediaId(diaryMedia.getId())
                 .path(diaryMedia.getPath())
                 .build();
     }

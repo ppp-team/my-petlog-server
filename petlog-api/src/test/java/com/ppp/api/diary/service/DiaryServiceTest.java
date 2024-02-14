@@ -83,9 +83,9 @@ class DiaryServiceTest {
 
     List<MultipartFile> images = List.of(
             new MockMultipartFile("images", "image.jpg",
-                    MediaType.IMAGE_JPEG_VALUE, "abcde" .getBytes()),
+                    MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes()),
             new MockMultipartFile("images", "image.jpg",
-                    MediaType.IMAGE_JPEG_VALUE, "abcde" .getBytes())
+                    MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes())
     );
 
     @Test
@@ -260,7 +260,7 @@ class DiaryServiceTest {
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
-                .deletedVideoIds(Set.of(1L))
+                .deletedMediaIds(Set.of(1L))
                 .uploadedVideoIds(new ArrayList<>())
                 .date(LocalDate.now().toString())
                 .build();
@@ -303,7 +303,7 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedVideoIds(new HashSet<>())
+                .deletedMediaIds(new HashSet<>())
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()
@@ -346,7 +346,7 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedVideoIds(Set.of(1L))
+                .deletedMediaIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
 
@@ -396,7 +396,7 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedVideoIds(Set.of(1L))
+                .deletedMediaIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
@@ -408,14 +408,14 @@ class DiaryServiceTest {
     }
 
     @Test
-    @DisplayName("일기 수정 실패-media upload limit over")
-    void updateDiary_fail_MEDIA_UPLOAD_LIMIT_OVER() {
+    @DisplayName("일기 수정 실패-media upload limit over-동영상 수 제한")
+    void updateDiary_fail_MEDIA_UPLOAD_LIMIT_OVER_WhenVideoSizeOver() {
         //given
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedVideoIds(new HashSet<>())
+                .deletedMediaIds(new HashSet<>())
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
 
@@ -426,11 +426,56 @@ class DiaryServiceTest {
                 .user(user)
                 .pet(pet).build();
 
-        DiaryMedia diaryMedia = mock(DiaryMedia.class);
-        diary.addDiaryMedias(List.of(diaryMedia));
 
-        given(diaryMedia.getId()).willReturn(1L);
+        diary.addDiaryMedias(List.of(getDiaryMedia(DiaryMediaType.VIDEO)));
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(diary));
+        given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
+                .willReturn(true);
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.updateDiary(user, 1L, 1L, request, images));
+        //then
+        assertEquals(MEDIA_UPLOAD_LIMIT_OVER.getCode(), exception.getCode());
+    }
 
+    private DiaryMedia getDiaryMedia(DiaryMediaType type) {
+        DiaryMedia imageMedia = mock(DiaryMedia.class);
+        given(imageMedia.getId()).willReturn(1L);
+        given(imageMedia.getType()).willReturn(type);
+        return imageMedia;
+    }
+
+    @Test
+    @DisplayName("일기 수정 실패-media upload limit over-이미지 수 제한")
+    void updateDiary_fail_MEDIA_UPLOAD_LIMIT_OVER_WhenImageSizeOver() {
+        //given
+        DiaryUpdateRequest request = DiaryUpdateRequest.builder()
+                .title("우리 강아지")
+                .content("너무 귀엽당")
+                .date(LocalDate.now().toString())
+                .deletedMediaIds(new HashSet<>())
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
+                .build();
+
+        Diary diary = Diary.builder()
+                .title("우리집 고양이")
+                .content("츄르를 좋아해")
+                .date(LocalDate.of(2020, 11, 11))
+                .user(user)
+                .pet(pet).build();
+
+
+        diary.addDiaryMedias(List.of(
+                getDiaryMedia(DiaryMediaType.IMAGE),
+                getDiaryMedia(DiaryMediaType.IMAGE),
+                getDiaryMedia(DiaryMediaType.IMAGE),
+                getDiaryMedia(DiaryMediaType.IMAGE),
+                getDiaryMedia(DiaryMediaType.IMAGE),
+                getDiaryMedia(DiaryMediaType.IMAGE),
+                getDiaryMedia(DiaryMediaType.IMAGE),
+                getDiaryMedia(DiaryMediaType.IMAGE),
+                getDiaryMedia(DiaryMediaType.IMAGE),
+                getDiaryMedia(DiaryMediaType.IMAGE)));
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diary));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
@@ -449,7 +494,7 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedVideoIds(Set.of(1L))
+                .deletedMediaIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         User otherUser = User.builder()
@@ -477,7 +522,7 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedVideoIds(Set.of(1L))
+                .deletedMediaIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()
@@ -505,7 +550,7 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedVideoIds(Set.of(1L))
+                .deletedMediaIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()
@@ -535,7 +580,7 @@ class DiaryServiceTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedVideoIds(Set.of(1L))
+                .deletedMediaIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()

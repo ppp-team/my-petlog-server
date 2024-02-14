@@ -106,22 +106,39 @@ public class DiaryService {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateModifyDiary(diary, user, petId);
-
-        List<DiaryMedia> maintainedVideos = diary.getVideoMedias().stream()
-                .filter(video -> !request.getDeletedVideoIds().contains(video.getId()))
+        List<DiaryMedia> keepingVideos = diary.getVideoMedias().stream()
+                .filter(video -> !request.getDeletedMediaIds().contains(video.getId()))
                 .toList();
+        List<DiaryMedia> keepingImages = diary.getImageMedias().stream()
+                .filter(image -> !request.getDeletedMediaIds().contains(image.getId()))
+                .toList();
+        validateMediaSize(keepingVideos.size(), keepingImages.size(),
+                request.getUploadedVideoIds().size(), images == null ? 0 : images.size());
 
-        if (maintainedVideos.size() + request.getUploadedVideoIds().size() > DiaryPolicy.VIDEO_UPLOAD_LIMIT) {
-            throw new DiaryException(MEDIA_UPLOAD_LIMIT_OVER);
-        }
-
-        List<DiaryMedia> diaryMediasToBeDeleted = new ArrayList<>(diary.getDiaryMedias());
+        List<DiaryMedia> diaryMediasToBeDeleted = getDiaryMediasToBoDeleted(diary, keepingVideos, keepingImages);
         List<DiaryMedia> diaryMediasToBeUpdated = uploadAndGetDiaryMedias(images, request.getUploadedVideoIds(), diary, user);
+        keepOldDiaryMedia(diaryMediasToBeUpdated, keepingVideos, keepingImages);
 
-        diaryMediasToBeDeleted.removeAll(maintainedVideos);
-        diaryMediasToBeUpdated.addAll(maintainedVideos);
         diary.update(request.getTitle(), request.getContent(), LocalDate.parse(request.getDate()), diaryMediasToBeUpdated);
         applicationEventPublisher.publishEvent(new DiaryUpdatedEvent(diaryId, diaryMediasToBeDeleted));
+    }
+
+    private List<DiaryMedia> getDiaryMediasToBoDeleted(Diary diary, List<DiaryMedia> keepingVideos, List<DiaryMedia> keepingImages) {
+        List<DiaryMedia> diaryMediasToBeDeleted = new ArrayList<>(diary.getDiaryMedias());
+        diaryMediasToBeDeleted.removeAll(keepingImages);
+        diaryMediasToBeDeleted.removeAll(keepingVideos);
+        return diaryMediasToBeDeleted;
+    }
+
+    private void keepOldDiaryMedia(List<DiaryMedia> updatedMedias, List<DiaryMedia> keepingVideos, List<DiaryMedia> keepingImages) {
+        updatedMedias.addAll(keepingImages);
+        updatedMedias.addAll(keepingVideos);
+    }
+
+    private void validateMediaSize(int keepingVideoSize, int keepingImageSize, int requestedVideoSize, int requestedImageSize) {
+        if (keepingVideoSize + requestedVideoSize > DiaryPolicy.VIDEO_UPLOAD_LIMIT
+                || keepingImageSize + requestedImageSize > DiaryPolicy.IMAGE_UPLOAD_LIMIT)
+            throw new DiaryException(MEDIA_UPLOAD_LIMIT_OVER);
     }
 
     private void validateModifyDiary(Diary diary, User user, Long petId) {

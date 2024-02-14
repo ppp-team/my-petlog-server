@@ -31,8 +31,8 @@ public class DiaryUpdateRequest {
     @Date(message = "적합한 날짜를 입력해주세요.")
     private String date;
 
-    @ArraySchema(arraySchema = @Schema(description = "육아 일기 미디어 중 동영상 타입의 아이디", example = "[1, 2]"))
-    private Set<Long> deletedVideoIds = new HashSet<>();
+    @ArraySchema(arraySchema = @Schema(description = "삭제할 육아 일기 미디어의 아이디", example = "[1, 2]"))
+    private Set<Long> deletedMediaIds = new HashSet<>();
 
     @ArraySchema(arraySchema = @Schema(description = "임시 동영상 아이디", example = "[\"c8e8f796-8e29-4067-86c4-0eae419a054e\"]"))
     @Size(max = 1)

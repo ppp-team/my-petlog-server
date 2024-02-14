@@ -52,6 +52,12 @@ public class Diary extends BaseTimeEntity {
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DiaryMedia> diaryMedias = new ArrayList<>();
 
+    @Transient
+    private Set<DiaryMedia> videos = new HashSet<>();
+
+    @Transient
+    private Set<DiaryMedia> images = new HashSet<>();
+
     public void deleteDiaryMedias() {
         diaryMedias.clear();
     }
@@ -74,18 +80,19 @@ public class Diary extends BaseTimeEntity {
     }
 
     public Set<DiaryMedia> getVideoMedias() {
-        Set<DiaryMedia> videos = new HashSet<>();
-        for (int i = diaryMedias.size() - 1; i >= 0; i--) {
-            if (DiaryMediaType.IMAGE.equals(diaryMedias.get(i).getType()))
-                break;
-            videos.add(diaryMedias.get(i));
-        }
+        if (videos.isEmpty())
+            videos = new HashSet<>(diaryMedias.stream()
+                    .filter(diaryMedia
+                            -> DiaryMediaType.VIDEO.equals(diaryMedia.getType()))
+                    .toList());
         return videos;
     }
 
     public Set<DiaryMedia> getImageMedias() {
-        Set<DiaryMedia> images = new HashSet<>(this.diaryMedias);
-        images.removeAll(getVideoMedias());
+        if (images.isEmpty()) {
+            images = new HashSet<>(this.diaryMedias);
+            images.removeAll(getVideoMedias());
+        }
         return images;
     }
 
