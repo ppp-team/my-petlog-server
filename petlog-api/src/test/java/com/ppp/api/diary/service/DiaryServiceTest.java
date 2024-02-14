@@ -334,7 +334,7 @@ class DiaryServiceTest {
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
         verify(thumbnailService, times(1)).uploadThumbnail((MultipartFile) any(), any());
-        assertEquals(1, captor.getValue().getDiaryMedias().size());
+        assertEquals(1, captor.getValue().getDeletedPaths().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
@@ -380,7 +380,7 @@ class DiaryServiceTest {
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
         verify(thumbnailService, times(1)).uploadThumbnail((MultipartFile) any(), any());
-        assertEquals(0, captor.getValue().getDiaryMedias().size());
+        assertEquals(0, captor.getValue().getDeletedPaths().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
@@ -423,7 +423,7 @@ class DiaryServiceTest {
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
         verify(thumbnailService, times(1)).uploadThumbnail(anyString(), any());
-        assertEquals(0, captor.getValue().getDiaryMedias().size());
+        assertEquals(0, captor.getValue().getDeletedPaths().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
@@ -447,6 +447,7 @@ class DiaryServiceTest {
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
                 .content("츄르를 좋아해")
+                .thumbnailPath("oldthumbnail")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
                 .pet(pet).build();
@@ -475,7 +476,7 @@ class DiaryServiceTest {
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
         verify(thumbnailService, times(1)).uploadThumbnail((MultipartFile) any(), any());
-        assertEquals(1, captor.getValue().getDiaryMedias().size());
+        assertEquals(2, captor.getValue().getDeletedPaths().size());
         assertEquals(3, diary.getDiaryMedias().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());

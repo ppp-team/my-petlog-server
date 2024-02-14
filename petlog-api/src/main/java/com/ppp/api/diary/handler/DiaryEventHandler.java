@@ -1,20 +1,17 @@
 package com.ppp.api.diary.handler;
 
-import com.ppp.api.diary.service.DiaryCommentRedisService;
-import com.ppp.api.diary.service.DiaryRedisService;
-import com.ppp.api.diary.service.DiarySearchService;
 import com.ppp.api.diary.dto.event.DiaryCreatedEvent;
 import com.ppp.api.diary.dto.event.DiaryDeletedEvent;
 import com.ppp.api.diary.dto.event.DiaryUpdatedEvent;
+import com.ppp.api.diary.service.DiaryCommentRedisService;
+import com.ppp.api.diary.service.DiaryRedisService;
+import com.ppp.api.diary.service.DiarySearchService;
 import com.ppp.common.service.FileStorageManageService;
-import com.ppp.domain.diary.DiaryMedia;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -35,8 +32,7 @@ public class DiaryEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDiaryUpdatedEvent(DiaryUpdatedEvent event) {
         diarySearchService.update(event.getDiaryId());
-        fileStorageManageService.deleteImages(event.getDiaryMedias().stream().map(DiaryMedia::getPath)
-                .collect(Collectors.toList()));
+        fileStorageManageService.deleteImages(event.getDeletedPaths());
     }
 
     @Async
@@ -45,7 +41,6 @@ public class DiaryEventHandler {
         diarySearchService.delete(event.getDiaryId());
         diaryCommentRedisService.deleteDiaryCommentCountByDiaryId(event.getDiaryId());
         diaryRedisService.deleteAllLikeByDiaryId(event.getDiaryId());
-        fileStorageManageService.deleteImages(event.getDiaryMedias().stream().map(DiaryMedia::getPath)
-                .collect(Collectors.toList()));
+        fileStorageManageService.deleteImages(event.getDeletedPaths());
     }
 }

@@ -137,9 +137,9 @@ public class DiaryService {
         List<DiaryMedia> diaryMediasToBeUpdated = uploadAndGetDiaryMedias(images, newlyUploadedVideos, diary);
         keepOldDiaryMedia(diaryMediasToBeUpdated, keepingVideos, keepingImages);
 
+        applicationEventPublisher.publishEvent(new DiaryUpdatedEvent(diaryId, diaryMediasToBeDeleted, diary.getThumbnailPath()));
         diary.update(request.getTitle(), request.getContent(), LocalDate.parse(request.getDate()),
                 diaryMediasToBeUpdated, getThumbnail(images, newlyUploadedVideos));
-        applicationEventPublisher.publishEvent(new DiaryUpdatedEvent(diaryId, diaryMediasToBeDeleted));
     }
 
     private List<DiaryMedia> getDiaryMediasToBoDeleted(Diary diary, List<DiaryMedia> keepingVideos, List<DiaryMedia> keepingImages) {
@@ -173,7 +173,8 @@ public class DiaryService {
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateModifyDiary(diary, user, petId);
 
-        applicationEventPublisher.publishEvent(new DiaryDeletedEvent(diaryId, new ArrayList<>(diary.getDiaryMedias())));
+        applicationEventPublisher.publishEvent(new DiaryDeletedEvent(diaryId,
+                new ArrayList<>(diary.getDiaryMedias()), diary.getThumbnailPath()));
         diary.delete();
     }
 
