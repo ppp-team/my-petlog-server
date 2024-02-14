@@ -13,6 +13,7 @@ import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.video.exception.ErrorCode;
 import com.ppp.api.video.exception.VideoException;
 import com.ppp.common.service.FileStorageManageService;
+import com.ppp.common.service.ThumbnailService;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryMedia;
 import com.ppp.domain.diary.constant.DiaryMediaType;
@@ -54,6 +55,7 @@ public class DiaryService {
     private final FileStorageManageService fileStorageManageService;
     private final DiaryCommentRedisService diaryCommentRedisService;
     private final DiaryRedisService diaryRedisService;
+    private final ThumbnailService thumbnailService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TempVideoRedisRepository tempVideoRedisRepository;
 
@@ -62,22 +64,42 @@ public class DiaryService {
         Pet pet = petRepository.findByIdAndIsDeletedFalse(petId)
                 .orElseThrow(() -> new PetException(PET_NOT_FOUND));
         validateAccessDiary(petId, user);
+        List<TempVideo> uploadedVideos = getUploadedVideos(request.getUploadedVideoIds(), user);
 
         Diary diary = Diary.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .date(LocalDate.parse(request.getDate()))
+                .thumbnailPath(getThumbnail(images, uploadedVideos))
                 .user(user)
                 .pet(pet)
                 .build();
-        diary.addDiaryMedias(uploadAndGetDiaryMedias(images, request.getUploadedVideoIds(), diary, user));
+        diary.addDiaryMedias(uploadAndGetDiaryMedias(images, uploadedVideos, diary));
+
         applicationEventPublisher.publishEvent(
                 new DiaryCreatedEvent(diaryRepository.save(diary).getId()));
     }
 
-    private List<DiaryMedia> uploadAndGetDiaryMedias(List<MultipartFile> images, List<String> videoIds, Diary diary, User user) {
+    private List<TempVideo> getUploadedVideos(List<String> videoIds, User user) {
+        if (videoIds.isEmpty())
+            return new ArrayList<>();
+        return videoIds.stream().map(videoId ->
+                tempVideoRedisRepository.findById(videoId).stream()
+                        .filter(video -> Objects.equals(video.getUserId(), user.getId())).findFirst()
+                        .orElseThrow(() -> new VideoException(ErrorCode.NOT_FOUND_VIDEO))).toList();
+    }
+
+    private String getThumbnail(List<MultipartFile> images, List<TempVideo> tempVideos) {
+        if (images != null && !images.isEmpty())
+            return thumbnailService.uploadThumbnail(images.get(0), DIARY);
+        if (!tempVideos.isEmpty())
+            return thumbnailService.uploadThumbnail(tempVideos.get(0).getFilePath(), DIARY);
+        return DiaryPolicy.DEFAULT_THUMBNAIL_PATH;
+    }
+
+    private List<DiaryMedia> uploadAndGetDiaryMedias(List<MultipartFile> images, List<TempVideo> tempVideos, Diary diary) {
         List<DiaryMedia> diaryMedias = uploadImagesIfNeeded(images, diary);
-        uploadVideoIfNeeded(diaryMedias, videoIds, diary, user);
+        uploadVideoIfNeeded(diaryMedias, tempVideos, diary);
         return diaryMedias;
     }
 
@@ -89,14 +111,9 @@ public class DiaryService {
                 .collect(Collectors.toList());
     }
 
-    private void uploadVideoIfNeeded(List<DiaryMedia> diaryMedias, List<String> videoIds, Diary diary, User user) {
-        if (videoIds == null || videoIds.isEmpty())
+    private void uploadVideoIfNeeded(List<DiaryMedia> diaryMedias, List<TempVideo> tempVideos, Diary diary) {
+        if (tempVideos.isEmpty())
             return;
-        List<TempVideo> tempVideos = videoIds.stream().map(videoId ->
-                tempVideoRedisRepository.findById(videoId).stream()
-                        .filter(video -> Objects.equals(video.getUserId(), user.getId())).findFirst()
-                        .orElseThrow(() -> new VideoException(ErrorCode.NOT_FOUND_VIDEO))).toList();
-
         fileStorageManageService.uploadVideos(tempVideos, DIARY)
                 .forEach(uploadedPath -> diaryMedias.add(DiaryMedia.of(diary, uploadedPath, DiaryMediaType.VIDEO)));
     }
@@ -114,12 +131,14 @@ public class DiaryService {
                 .toList();
         validateMediaSize(keepingVideos.size(), keepingImages.size(),
                 request.getUploadedVideoIds().size(), images == null ? 0 : images.size());
+        List<TempVideo> newlyUploadedVideos = getUploadedVideos(request.getUploadedVideoIds(), user);
 
         List<DiaryMedia> diaryMediasToBeDeleted = getDiaryMediasToBoDeleted(diary, keepingVideos, keepingImages);
-        List<DiaryMedia> diaryMediasToBeUpdated = uploadAndGetDiaryMedias(images, request.getUploadedVideoIds(), diary, user);
+        List<DiaryMedia> diaryMediasToBeUpdated = uploadAndGetDiaryMedias(images, newlyUploadedVideos, diary);
         keepOldDiaryMedia(diaryMediasToBeUpdated, keepingVideos, keepingImages);
 
-        diary.update(request.getTitle(), request.getContent(), LocalDate.parse(request.getDate()), diaryMediasToBeUpdated);
+        diary.update(request.getTitle(), request.getContent(), LocalDate.parse(request.getDate()),
+                diaryMediasToBeUpdated, getThumbnail(images, newlyUploadedVideos));
         applicationEventPublisher.publishEvent(new DiaryUpdatedEvent(diaryId, diaryMediasToBeDeleted));
     }
 

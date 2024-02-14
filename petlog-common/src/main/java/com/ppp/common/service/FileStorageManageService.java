@@ -44,6 +44,13 @@ public class FileStorageManageService {
                 .collect(Collectors.toList());
     }
 
+    public Optional<String> uploadImage(File file, Domain domain) {
+        Optional<String> maybeExtension = FilePathUtil.getFileExtension(file.getName());
+        if (maybeExtension.isEmpty() || !ALLOW_IMAGE_CODES.contains(maybeExtension.get().toLowerCase(Locale.ROOT)))
+            return Optional.empty();
+        return Optional.of(fileStorageClient.upload(file, domain));
+    }
+
     public Optional<String> uploadVideo(TempVideo video, Domain domain) {
         File file = Path.of(video.getFilePath()).toFile();
         Optional<String> maybeExtension = FilePathUtil.getFileExtension(file.getName());
@@ -56,7 +63,8 @@ public class FileStorageManageService {
         return videos.stream()
                 .filter(video -> {
                     Optional<String> maybeExtension = FilePathUtil.getFileExtension(video.getFilePath());
-                    return maybeExtension.isPresent() && ALLOW_VIDEO_CODES.contains(maybeExtension.get());})
+                    return maybeExtension.isPresent() && ALLOW_VIDEO_CODES.contains(maybeExtension.get());
+                })
                 .map(video -> fileStorageClient.upload(Path.of(video.getFilePath()).toFile(), domain))
                 .collect(Collectors.toList());
     }
