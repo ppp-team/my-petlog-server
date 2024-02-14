@@ -12,6 +12,7 @@ public enum ErrorCode {
     NOT_DIARY_OWNER(HttpStatus.BAD_REQUEST, "DIARY-0003", "일기 작성자가 아닙니다."),
     DIARY_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "DIARY-0004","일치하는 댓글이 없습니다."),
     NOT_DIARY_COMMENT_OWNER(HttpStatus.BAD_REQUEST, "DIARY-0005", "댓글 작성자가 아닙니다."),
+    MEDIA_UPLOAD_LIMIT_OVER(HttpStatus.BAD_REQUEST, "DIARY-0006", "허용되는 미디어 수 초과입니다."),
     ;
 
     private final HttpStatus status;

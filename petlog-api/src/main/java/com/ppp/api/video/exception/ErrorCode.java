@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
     VIDEO_UPLOAD_NOT_ALLOWED(HttpStatus.FORBIDDEN, "VIDEO-0001", "동영상 업로드가 허용되지 않습니다."),
-    NOT_ALLOWED_EXTENSION(HttpStatus.BAD_REQUEST, "VIDEO-0002", "허용되지 않는 확장자입니다.")
+    NOT_ALLOWED_EXTENSION(HttpStatus.BAD_REQUEST, "VIDEO-0002", "허용되지 않는 확장자입니다."),
+    NOT_FOUND_VIDEO(HttpStatus.BAD_REQUEST, "VIDEO-0003", "해당 동영상을 찾을 수 없습니다.")
     ;
 
     private final HttpStatus status;

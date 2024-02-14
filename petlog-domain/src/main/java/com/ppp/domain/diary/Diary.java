@@ -1,6 +1,7 @@
 package com.ppp.domain.diary;
 
 import com.ppp.domain.common.BaseTimeEntity;
+import com.ppp.domain.diary.constant.DiaryMediaType;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.user.User;
 import jakarta.persistence.*;
@@ -11,7 +12,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.FetchType.LAZY;
@@ -49,10 +52,15 @@ public class Diary extends BaseTimeEntity {
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DiaryMedia> diaryMedias = new ArrayList<>();
 
+    @Transient
+    private Set<DiaryMedia> videos = new HashSet<>();
+
+    @Transient
+    private Set<DiaryMedia> images = new HashSet<>();
+
     public void deleteDiaryMedias() {
         diaryMedias.clear();
     }
-
 
     public void addDiaryMedias(List<DiaryMedia> diaryMedias) {
         this.diaryMedias.clear();
@@ -69,6 +77,23 @@ public class Diary extends BaseTimeEntity {
     public void delete() {
         this.isDeleted = true;
         deleteDiaryMedias();
+    }
+
+    public Set<DiaryMedia> getVideoMedias() {
+        if (videos.isEmpty())
+            videos = new HashSet<>(diaryMedias.stream()
+                    .filter(diaryMedia
+                            -> DiaryMediaType.VIDEO.equals(diaryMedia.getType()))
+                    .toList());
+        return videos;
+    }
+
+    public Set<DiaryMedia> getImageMedias() {
+        if (images.isEmpty()) {
+            images = new HashSet<>(this.diaryMedias);
+            images.removeAll(getVideoMedias());
+        }
+        return images;
     }
 
     @Builder
