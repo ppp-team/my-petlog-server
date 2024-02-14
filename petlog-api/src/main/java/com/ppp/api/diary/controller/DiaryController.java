@@ -1,6 +1,7 @@
 package com.ppp.api.diary.controller;
 
-import com.ppp.api.diary.dto.request.DiaryRequest;
+import com.ppp.api.diary.dto.request.DiaryCreateRequest;
+import com.ppp.api.diary.dto.request.DiaryUpdateRequest;
 import com.ppp.api.diary.dto.response.DiaryDetailResponse;
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.api.diary.service.DiaryService;
@@ -46,7 +47,7 @@ public class DiaryController {
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     private ResponseEntity<Void> createDiary(@PathVariable Long petId,
-                                             @Valid @RequestPart DiaryRequest request,
+                                             @Valid @RequestPart DiaryCreateRequest request,
                                              @Parameter(description = "multipart form data 형식의 이미지를 등록해주세요.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
                                              @Valid @RequestPart(required = false)
                                              @Size(max = 10, message = "이미지는 10개 이하로 첨부해주세요.") List<MultipartFile> images,
@@ -66,7 +67,7 @@ public class DiaryController {
     @PutMapping(value = "/{diaryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     private ResponseEntity<Void> updateDiary(@PathVariable Long petId,
                                              @PathVariable Long diaryId,
-                                             @Valid @RequestPart DiaryRequest request,
+                                             @Valid @RequestPart DiaryUpdateRequest request,
                                              @Parameter(description = "multipart form data 형식의 이미지를 등록해주세요.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
                                              @Valid @RequestPart(required = false)
                                              @Size(max = 10, message = "이미지는 10개 이하로 첨부해주세요.") List<MultipartFile> images,

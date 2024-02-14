@@ -3,11 +3,14 @@ package com.ppp.common.service;
 import com.ppp.common.client.FileStorageClient;
 import com.ppp.common.util.FilePathUtil;
 import com.ppp.domain.common.constant.Domain;
+import com.ppp.domain.video.TempVideo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 public class FileStorageManageService {
     private final FileStorageClient fileStorageClient;
     public static final List<String> ALLOW_IMAGE_CODES = List.of(".jpeg", ".png", ".jpg", ".gif");
+    public static final List<String> ALLOW_VIDEO_CODES = List.of(".mp4");
 
     public Optional<String> uploadImage(MultipartFile multipartFile, Domain domain) {
         Optional<String> maybeExtension = FilePathUtil.getFileExtension(
@@ -33,9 +37,27 @@ public class FileStorageManageService {
         return multipartFiles.stream()
                 .filter(multipartFile -> {
                     Optional<String> maybeExtension = FilePathUtil.getFileExtension(
-                                    Objects.requireNonNull(multipartFile.getOriginalFilename()));
-                    return maybeExtension.isPresent() && ALLOW_IMAGE_CODES.contains(maybeExtension.get());})
+                            Objects.requireNonNull(multipartFile.getOriginalFilename()));
+                    return maybeExtension.isPresent() && ALLOW_IMAGE_CODES.contains(maybeExtension.get());
+                })
                 .map(multipartFile -> fileStorageClient.upload(multipartFile, domain))
+                .collect(Collectors.toList());
+    }
+
+    public Optional<String> uploadVideo(TempVideo video, Domain domain) {
+        File file = Path.of(video.getFilePath()).toFile();
+        Optional<String> maybeExtension = FilePathUtil.getFileExtension(file.getName());
+        if (maybeExtension.isEmpty() || !ALLOW_VIDEO_CODES.contains(maybeExtension.get().toLowerCase(Locale.ROOT)))
+            return Optional.empty();
+        return Optional.of(fileStorageClient.upload(file, domain));
+    }
+
+    public List<String> uploadVideos(List<TempVideo> videos, Domain domain) {
+        return videos.stream()
+                .filter(video -> {
+                    Optional<String> maybeExtension = FilePathUtil.getFileExtension(video.getFilePath());
+                    return maybeExtension.isPresent() && ALLOW_VIDEO_CODES.contains(maybeExtension.get());})
+                .map(video -> fileStorageClient.upload(Path.of(video.getFilePath()).toFile(), domain))
                 .collect(Collectors.toList());
     }
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ppp.api.pet.dto.response.PetResponse;
 import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.domain.diary.Diary;
-import com.ppp.domain.diary.DiaryMedia;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -25,8 +24,10 @@ public record DiaryDetailResponse(
         @Schema(description = "일기 쓴 날짜", example = "2024.02.11")
         @JsonFormat(pattern = "yyyy.MM.dd")
         LocalDate date,
-        @ArraySchema(schema = @Schema(description = "이미지 path"))
-        List<String> images,
+        @ArraySchema(schema = @Schema(implementation = DiaryMediaResponse.class))
+        List<DiaryMediaResponse> images,
+        @ArraySchema(schema = @Schema(implementation = DiaryMediaResponse.class))
+        List<DiaryMediaResponse> videos,
         @Schema(description = "유저가 좋아요를 누른 글인지 여부")
         boolean isCurrentUserLiked,
         @Schema(description = "글쓴이에 대한 정보")
@@ -44,8 +45,11 @@ public record DiaryDetailResponse(
                 .title(diary.getTitle())
                 .content(diary.getContent())
                 .commentCount(commentCount)
-                .images(diary.getDiaryMedias().stream()
-                        .map(DiaryMedia::getPath)
+                .images(diary.getImageMedias().stream()
+                        .map(DiaryMediaResponse::from)
+                        .collect(Collectors.toList()))
+                .videos(diary.getVideoMedias().stream()
+                        .map(DiaryMediaResponse::from)
                         .collect(Collectors.toList()))
                 .date(diary.getDate())
                 .isCurrentUserLiked(isCurrentUserLiked)
