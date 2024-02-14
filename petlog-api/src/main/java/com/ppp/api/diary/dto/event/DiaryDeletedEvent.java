@@ -5,6 +5,9 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import static com.ppp.domain.diary.constant.DiaryPolicy.DEFAULT_THUMBNAIL_PATH;
 
 @Getter
 public class DiaryDeletedEvent {
@@ -14,7 +17,7 @@ public class DiaryDeletedEvent {
     public DiaryDeletedEvent(long diaryId, List<DiaryMedia> deletedDiaryMedias, String deletedThumbnailPath) {
         this.diaryId = diaryId;
         List<String> deletedPaths = new ArrayList<>(deletedDiaryMedias.stream().map(DiaryMedia::getPath).toList());
-        if (deletedThumbnailPath != null)
+        if (deletedThumbnailPath != null && !Objects.equals(deletedThumbnailPath, DEFAULT_THUMBNAIL_PATH))
             deletedPaths.add(deletedThumbnailPath);
         this.deletedPaths = deletedPaths;
     }
