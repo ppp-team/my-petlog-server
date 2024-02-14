@@ -4,6 +4,7 @@ package com.ppp.api.exception;
 import com.ppp.api.auth.exception.AuthException;
 import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.guardian.exception.GuardianException;
+import com.ppp.api.invitation.exception.InvitationException;
 import com.ppp.api.log.exception.LogException;
 import com.ppp.api.mock.exception.MockException;
 import com.ppp.api.pet.exception.PetException;
@@ -26,6 +27,18 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final String LOG_FORMAT = "Class : {}, Code : {}, Message : {}";
+
+    @ExceptionHandler(InvitationException.class)
+    public ResponseEntity<ExceptionResponse> handleInvitationException(InvitationException exception) {
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .status(exception.getHttpStatus().value())
+                .code(exception.getCode())
+                .message(exception.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
+        return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
+    }
 
     @ExceptionHandler(VideoException.class)
     public ResponseEntity<ExceptionResponse> handleVideoException(VideoException exception) {

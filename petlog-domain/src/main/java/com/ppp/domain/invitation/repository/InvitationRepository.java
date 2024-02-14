@@ -9,9 +9,13 @@ import java.util.Optional;
 
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
 
-    Optional<Invitation> findByInviteeIdAndPetId(String id, Long petId);
+    Optional<Invitation> findByInviteeIdAndPetId(String inviteeId, Long petId);
 
     List<Invitation> findByInviteeIdAndInviteStatus(String inviteeId, InviteStatus inviteStatus);
 
-    Optional<Invitation> findByIdAndInviteeId(Long invitationId, String inviteeId);
+    Optional<Invitation> findByIdAndInviteStatusAndInviteeId(Long invitationId, InviteStatus inviteStatus, String inviteeId);
+
+    List<Invitation> findByInviterIdAndInviteStatus(String inviteeId, InviteStatus inviteStatus);
+
+    Optional<Invitation> findByIdAndInviteStatusAndInviterId(Long invitationId, InviteStatus inviteStatus, String inviteeId);
 }
