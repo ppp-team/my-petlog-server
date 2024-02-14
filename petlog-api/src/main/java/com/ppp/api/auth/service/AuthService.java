@@ -48,6 +48,7 @@ public class AuthService {
         newUser.setEmail(registerRequest.getEmail());
         newUser.setPassword(encPwd);
         newUser.setRole(Role.USER);
+        newUser.setDeleted(false);
 
         userRepository.save(newUser);
     }
