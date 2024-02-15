@@ -22,7 +22,6 @@ dependencyManagement {
     }
 }
 
-var queryDslVersion = "5.0.0"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
