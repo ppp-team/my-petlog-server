@@ -6,6 +6,7 @@ import com.ppp.api.guardian.dto.response.GuardiansResponse;
 import com.ppp.api.guardian.exception.ErrorCode;
 import com.ppp.api.guardian.exception.GuardianException;
 import com.ppp.api.pet.exception.PetException;
+import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
 import com.ppp.domain.guardian.repository.GuardianRepository;
@@ -17,6 +18,7 @@ import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.ProfileImage;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.ProfileImageRepository;
+import com.ppp.domain.user.repository.UserQuerydslRepository;
 import com.ppp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -36,6 +39,7 @@ public class GuardianService {
     private final UserRepository userRepository;
     private final PetRepository petRepository;
     private final InvitationRepository invitationRepository;
+    private final UserQuerydslRepository userQuerydslRepository;
 
     public GuardiansResponse displayGuardians(Long petId) {
         List<GuardianResponse> guardianResponseList = new ArrayList<>();
@@ -70,8 +74,7 @@ public class GuardianService {
             } else {
                 guardianRepository.deleteById(requestedGuardian.getId());
             }
-        }
-        else {
+        } else {
             // 삭제 과정 - 본인이 이방의 리더일 때
             if (isReaderGuardian(guardianMe)) {
                 guardianRepository.deleteById(requestedGuardian.getId());
@@ -132,5 +135,17 @@ public class GuardianService {
     public Guardian findByUserIdAndPetId(User user, Long petId) {
         return guardianRepository.findByUserIdAndPetId(user.getId(), petId)
                 .orElseThrow(() -> new GuardianException(ErrorCode.GUARDIAN_NOT_FOUND));
+    }
+
+    public List<UserResponse> displayGuardiansByPetId(User user, Long petId) {
+        validateQueryGuardians(user.getId(), petId);
+        return userQuerydslRepository.findGuardianUserByPetId(petId)
+                .stream().map(userDao -> UserResponse.from(userDao, user.getId()))
+                .collect(Collectors.toList());
+    }
+
+    private void validateQueryGuardians(String userId, Long petId) {
+        if (!guardianRepository.existsByUserIdAndPetId(userId, petId))
+            throw new GuardianException(ErrorCode.FORBIDDEN_PET_SPACE);
     }
 }
