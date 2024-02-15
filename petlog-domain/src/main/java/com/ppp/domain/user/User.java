@@ -45,7 +45,6 @@ public class User extends BaseTimeEntity {
     private List<Pet> pets = new ArrayList<>();
 
 
-    // 팩토리 메소드를 이용한 생성
     public static User createUserByEmail(String email, String password, Role role) {
         return User.builder()
                 .id(GenerationUtil.generateIdFromEmail(email))
