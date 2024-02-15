@@ -1,18 +1,25 @@
 package com.ppp.common.service;
 
 import com.ppp.common.client.ThumbnailExtractClient;
+import com.ppp.common.exception.FileException;
 import com.ppp.domain.common.constant.Domain;
+import com.ppp.domain.common.constant.FileType;
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,73 +35,60 @@ class ThumbnailServiceTest {
     @InjectMocks
     private ThumbnailService thumbnailService;
 
-    @Test
-    @DisplayName("썸네일 업로드 성공-multipartfile")
-    void uploadThumbnailTest_success() {
-        //given
-        File thumbnailFile = mock(File.class);
-        MultipartFile file = new MockMultipartFile("images", "image.jpg",
-                MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes());
-        given(thumbnailExtractClient.extractThumbnail(file))
-                .willReturn(thumbnailFile);
-        given(fileStorageManageService.uploadImage(thumbnailFile, Domain.DIARY))
-                .willReturn(Optional.of("DIARY/2024020211223/randomfilename.png"));
-        //when
-        String result = thumbnailService.uploadThumbnail(file, Domain.DIARY);
-        //then
-        verify(thumbnailFile, times(1)).delete();
-        assertEquals("DIARY/2024020211223/randomfilename.png", result);
+    static MockedConstruction<URL> mockURL;
+    static MockedStatic<FileUtils> mockFiles;
+    static MockedStatic<File> mockFile;
+
+    @AfterEach
+    void tearDown() {
+        mockURL.close();
+        mockFile.close();
+        mockFiles.close();
     }
 
     @Test
-    @DisplayName("썸네일 업로드 성공-file storage manage service 가 empty 를 리턴-multipartfile")
-    void uploadThumbnailTest_success_ReturnDefaultPath() {
+    @DisplayName("썸네일 업로드 성공")
+    void uploadThumbnailTest_success() throws IOException {
         //given
-        File thumbnailFile = mock(File.class);
-        MultipartFile file = new MockMultipartFile("images", "image.jpg",
-                MediaType.IMAGE_JPEG_VALUE, "abcde".getBytes());
-        given(thumbnailExtractClient.extractThumbnail(file))
-                .willReturn(thumbnailFile);
-        given(fileStorageManageService.uploadImage(thumbnailFile, Domain.DIARY))
-                .willReturn(Optional.empty());
-        //when
-        String result = thumbnailService.uploadThumbnail(file, Domain.DIARY);
-        //then
-        verify(thumbnailFile, times(1)).delete();
-        assertEquals("RESOURCE/default-thumbnail.png", result);
-    }
-
-    @Test
-    @DisplayName("썸네일 업로드 성공-file path")
-    void uploadThumbnailTest_success_WhenFilePathIsGiven() {
-        //given
-        File thumbnailFile = mock(File.class);
         String filePath = "temp/video/fasfdas.mp4";
-        given(thumbnailExtractClient.extractThumbnail(filePath))
+        mockURL = mockConstruction(URL.class, (mock, context) -> {
+            given(mock.openStream()).willReturn(InputStream.nullInputStream());
+        });
+        mockFiles = mockStatic(FileUtils.class);
+        FileUtils.copyInputStreamToFile(any(), any());
+        mockFile = mockStatic(File.class);
+        File inputFile = Path.of("DIARY/2024020211223/randomfilename.mp4").toFile();
+        when(File.createTempFile(anyString(), anyString())).thenReturn(inputFile);
+        File thumbnailFile = mock(File.class);
+        given(thumbnailExtractClient.extractThumbnail(inputFile, FileType.VIDEO))
                 .willReturn(thumbnailFile);
         given(fileStorageManageService.uploadImage(thumbnailFile, Domain.DIARY))
-                .willReturn(Optional.of("DIARY/2024020211223/randomfilename.png"));
+                .willReturn(Optional.of("DIARY/2024020211223/thumbnail.png"));
         //when
-        String result = thumbnailService.uploadThumbnail(filePath, Domain.DIARY);
+        String result = thumbnailService.uploadThumbnailFromStorageFile(filePath, FileType.VIDEO, Domain.DIARY);
         //then
         verify(thumbnailFile, times(1)).delete();
-        assertEquals("DIARY/2024020211223/randomfilename.png", result);
+        assertEquals("DIARY/2024020211223/thumbnail.png", result);
     }
 
     @Test
-    @DisplayName("썸네일 업로드 성공-file storage manage service 가 empty 를 리턴-file path")
-    void uploadThumbnailTest_success_ReturnDefaultPath_WhenFilePathIsGiven() {
+    @DisplayName("썸네일 업로드 성공_에러 발생시 디폴트 썸네일 반환")
+    void uploadThumbnailTest_success_WhenAnyExceptionOccurred() throws IOException {
         //given
-        File thumbnailFile = mock(File.class);
         String filePath = "temp/video/fasfdas.mp4";
-        given(thumbnailExtractClient.extractThumbnail(filePath))
-                .willReturn(thumbnailFile);
-        given(fileStorageManageService.uploadImage(thumbnailFile, Domain.DIARY))
-                .willReturn(Optional.empty());
+        mockURL = mockConstruction(URL.class, (mock, context) -> {
+            given(mock.openStream()).willReturn(InputStream.nullInputStream());
+        });
+        mockFiles = mockStatic(FileUtils.class);
+        FileUtils.copyInputStreamToFile(any(), any());
+        mockFile = mockStatic(File.class);
+        File inputFile = Path.of("DIARY/2024020211223/randomfilename.mp4").toFile();
+        when(File.createTempFile(anyString(), anyString())).thenReturn(inputFile);
+        when(thumbnailExtractClient.extractThumbnail(inputFile, FileType.VIDEO))
+                .thenThrow(FileException.class);
         //when
-        String result = thumbnailService.uploadThumbnail(filePath, Domain.DIARY);
+        String result = thumbnailService.uploadThumbnailFromStorageFile(filePath, FileType.VIDEO, Domain.DIARY);
         //then
-        verify(thumbnailFile, times(1)).delete();
         assertEquals("RESOURCE/default-thumbnail.png", result);
     }
 }

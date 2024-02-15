@@ -3,7 +3,6 @@ package com.ppp.api.diary.service;
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryDocument;
-import com.ppp.domain.diary.repository.DiaryRepository;
 import com.ppp.domain.diary.repository.DiarySearchRepository;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.pet.Pet;
@@ -21,7 +20,6 @@ import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -31,9 +29,6 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class DiarySearchServiceTest {
-    @Mock
-    private DiaryRepository diaryRepository;
-
     @Mock
     private DiarySearchRepository diarySearchRepository;
 
@@ -64,11 +59,8 @@ class DiarySearchServiceTest {
     @Test
     @DisplayName("저장 성공")
     void save_success() {
-        //given
-        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
-                .willReturn(Optional.of(diary));
         //when
-        diarySearchService.save(1L);
+        diarySearchService.save(diary);
         ArgumentCaptor<DiaryDocument> captor = ArgumentCaptor.forClass(DiaryDocument.class);
         //then
         verify(diarySearchRepository, times(1))
@@ -83,11 +75,7 @@ class DiarySearchServiceTest {
     @Test
     @DisplayName("업데이트 성공")
     void update_success() {
-        //given
-        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
-                .willReturn(Optional.of(diary));
-        //when
-        diarySearchService.save(1L);
+        diarySearchService.update(diary);
         ArgumentCaptor<DiaryDocument> captor = ArgumentCaptor.forClass(DiaryDocument.class);
         //then
         verify(diarySearchRepository, times(1))

@@ -119,20 +119,17 @@ class DiaryServiceTest {
                         .build()));
         given(fileStorageManageService.uploadVideos(any(), any()))
                 .willReturn(List.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
-        given(thumbnailService.uploadThumbnail((MultipartFile) any(), any())).willReturn("DIARY/2024-01-31/thumbnail.jpg");
         //when
         diaryService.createDiary(user, 1L, request, images);
         ArgumentCaptor<Diary> diaryCaptor = ArgumentCaptor.forClass(Diary.class);
         //then
         verify(diaryRepository, times(1)).save(diaryCaptor.capture());
-        verify(thumbnailService, times(1)).uploadThumbnail((MultipartFile) any(), any());
         assertEquals(request.getTitle(), diaryCaptor.getValue().getTitle());
         assertEquals(request.getContent(), diaryCaptor.getValue().getContent());
         assertEquals(request.getDate(), diaryCaptor.getValue().getDate().toString());
         assertEquals(user.getId(), diaryCaptor.getValue().getUser().getId());
         assertEquals(pet.getId(), diaryCaptor.getValue().getPet().getId());
         assertEquals(3, diaryCaptor.getValue().getDiaryMedias().size());
-        assertEquals("DIARY/2024-01-31/thumbnail.jpg", diaryCaptor.getValue().getThumbnailPath());
     }
 
     @Test
@@ -155,20 +152,17 @@ class DiaryServiceTest {
                         "DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
         Diary createdDiary = mock(Diary.class);
         given(diaryRepository.save(any())).willReturn(createdDiary);
-        given(thumbnailService.uploadThumbnail((MultipartFile) any(), any())).willReturn("DIARY/2024-01-31/thumbnail.jpg");
         //when
         diaryService.createDiary(user, 1L, request, images);
         ArgumentCaptor<Diary> diaryCaptor = ArgumentCaptor.forClass(Diary.class);
         //then
         verify(diaryRepository, times(1)).save(diaryCaptor.capture());
-        verify(thumbnailService, times(1)).uploadThumbnail((MultipartFile) any(), any());
         assertEquals(request.getTitle(), diaryCaptor.getValue().getTitle());
         assertEquals(request.getContent(), diaryCaptor.getValue().getContent());
         assertEquals(request.getDate(), diaryCaptor.getValue().getDate().toString());
         assertEquals(user.getId(), diaryCaptor.getValue().getUser().getId());
         assertEquals(pet.getId(), diaryCaptor.getValue().getPet().getId());
         assertEquals(2, diaryCaptor.getValue().getDiaryMedias().size());
-        assertEquals("DIARY/2024-01-31/thumbnail.jpg", diaryCaptor.getValue().getThumbnailPath());
     }
 
     @Test
@@ -195,20 +189,17 @@ class DiaryServiceTest {
                         .build()));
         given(fileStorageManageService.uploadVideos(any(), any()))
                 .willReturn(List.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
-        given(thumbnailService.uploadThumbnail(anyString(), any())).willReturn("DIARY/2024-01-31/thumbnail.jpg");
         //when
         diaryService.createDiary(user, 1L, request, new ArrayList<>());
         ArgumentCaptor<Diary> diaryCaptor = ArgumentCaptor.forClass(Diary.class);
         //then
         verify(diaryRepository, times(1)).save(diaryCaptor.capture());
-        verify(thumbnailService, times(1)).uploadThumbnail(anyString(), any());
         assertEquals(request.getTitle(), diaryCaptor.getValue().getTitle());
         assertEquals(request.getContent(), diaryCaptor.getValue().getContent());
         assertEquals(request.getDate(), diaryCaptor.getValue().getDate().toString());
         assertEquals(user.getId(), diaryCaptor.getValue().getUser().getId());
         assertEquals(pet.getId(), diaryCaptor.getValue().getPet().getId());
         assertEquals(1, diaryCaptor.getValue().getDiaryMedias().size());
-        assertEquals("DIARY/2024-01-31/thumbnail.jpg", diaryCaptor.getValue().getThumbnailPath());
     }
 
     @Test
@@ -326,20 +317,17 @@ class DiaryServiceTest {
         given(fileStorageManageService.uploadImages(anyList(), any()))
                 .willReturn(List.of("DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg",
                         "DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
-        given(thumbnailService.uploadThumbnail((MultipartFile) any(), any())).willReturn("DIARY/2024-01-31/thumbnail.jpg");
 
         //when
         diaryService.updateDiary(user, 1L, 1L, request, images);
         ArgumentCaptor<DiaryUpdatedEvent> captor = ArgumentCaptor.forClass(DiaryUpdatedEvent.class);
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
-        verify(thumbnailService, times(1)).uploadThumbnail((MultipartFile) any(), any());
         assertEquals(1, captor.getValue().getDeletedPaths().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
         assertEquals(2, diary.getDiaryMedias().size());
-        assertEquals("DIARY/2024-01-31/thumbnail.jpg", diary.getThumbnailPath());
     }
 
     @Test
@@ -373,19 +361,16 @@ class DiaryServiceTest {
                         .build()));
         given(fileStorageManageService.uploadVideos(any(), any()))
                 .willReturn(List.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
-        given(thumbnailService.uploadThumbnail((MultipartFile) any(), any())).willReturn("DIARY/2024-01-31/thumbnail.jpg");
         //when
         diaryService.updateDiary(user, 1L, 1L, request, images);
         ArgumentCaptor<DiaryUpdatedEvent> captor = ArgumentCaptor.forClass(DiaryUpdatedEvent.class);
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
-        verify(thumbnailService, times(1)).uploadThumbnail((MultipartFile) any(), any());
         assertEquals(0, captor.getValue().getDeletedPaths().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
         assertEquals(3, diary.getDiaryMedias().size());
-        assertEquals("DIARY/2024-01-31/thumbnail.jpg", diary.getThumbnailPath());
     }
 
     @Test
@@ -416,19 +401,16 @@ class DiaryServiceTest {
                         .build()));
         given(fileStorageManageService.uploadVideos(any(), any()))
                 .willReturn(List.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
-        given(thumbnailService.uploadThumbnail(anyString(), any())).willReturn("DIARY/2024-01-31/thumbnail.jpg");
         //when
         diaryService.updateDiary(user, 1L, 1L, request, new ArrayList<>());
         ArgumentCaptor<DiaryUpdatedEvent> captor = ArgumentCaptor.forClass(DiaryUpdatedEvent.class);
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
-        verify(thumbnailService, times(1)).uploadThumbnail(anyString(), any());
         assertEquals(0, captor.getValue().getDeletedPaths().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
         assertEquals(1, diary.getDiaryMedias().size());
-        assertEquals("DIARY/2024-01-31/thumbnail.jpg", diary.getThumbnailPath());
     }
 
 
@@ -469,19 +451,16 @@ class DiaryServiceTest {
                         .build()));
         given(fileStorageManageService.uploadVideos(any(), any()))
                 .willReturn(List.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
-        given(thumbnailService.uploadThumbnail((MultipartFile) any(), any())).willReturn("DIARY/2024-01-31/thumbnail.jpg");
         //when
         diaryService.updateDiary(user, 1L, 1L, request, images);
         ArgumentCaptor<DiaryUpdatedEvent> captor = ArgumentCaptor.forClass(DiaryUpdatedEvent.class);
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
-        verify(thumbnailService, times(1)).uploadThumbnail((MultipartFile) any(), any());
         assertEquals(2, captor.getValue().getDeletedPaths().size());
         assertEquals(3, diary.getDiaryMedias().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
-        assertEquals("DIARY/2024-01-31/thumbnail.jpg", diary.getThumbnailPath());
     }
 
 
