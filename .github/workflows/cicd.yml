@@ -58,7 +58,7 @@ jobs:
         echo "${{ secrets.SSH_KEY }}" > private_key.pem
         chmod 600 private_key.pem
         scp -i private_key.pem -o StrictHostKeyChecking=no petlog-api/build/libs/petlog-api-0.0.1-SNAPSHOT.jar ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/${{ secrets.USERNAME }}/petlog-api.jar
-        ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} "kill -9 `ps -ef | grep "Dspring" | grep -v grep | awk '{print $2}'`; sleep 10; nohup java -jar -Dspring.profiles.active=dev -Djasypt.encryptor.password=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }} /home/${{ secrets.USERNAME }}/petlog-api.jar > app.log 2>&1 &"
+        ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} "kill -9 `ps -ef | grep "Dspring" | grep -v grep | awk '{print $2}'`; sleep 10; nohup java -jar -Dspring.profiles.active=dev -Duser.timezone=Aisa/Seoul -Djasypt.encryptor.password=${{ secrets.JASYPT_ENCRYPTOR_PASSWORD }} /home/${{ secrets.USERNAME }}/petlog-api.jar > app.log 2>&1 &"
         rm -f private_key.pem
 
     - name: revoke runner ip address
