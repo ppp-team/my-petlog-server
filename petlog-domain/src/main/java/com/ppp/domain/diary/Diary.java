@@ -82,8 +82,7 @@ public class Diary extends BaseTimeEntity {
     public Set<DiaryMedia> getVideoMedias() {
         if (videos.isEmpty())
             videos = new HashSet<>(diaryMedias.stream()
-                    .filter(diaryMedia
-                            -> DiaryMediaType.VIDEO.equals(diaryMedia.getType()))
+                    .filter(diaryMedia -> DiaryMediaType.VIDEO.equals(diaryMedia.getType()))
                     .toList());
         return videos;
     }
@@ -96,12 +95,17 @@ public class Diary extends BaseTimeEntity {
         return images;
     }
 
+    public void addThumbnail(String thumbnailPath) {
+        this.thumbnailPath = thumbnailPath;
+    }
+
     @Builder
-    public Diary(String title, String content, LocalDate date, Pet pet, User user) {
+    public Diary(String title, String content, LocalDate date, Pet pet, User user, String thumbnailPath) {
         this.title = title;
         this.content = content;
         this.date = date;
         this.pet = pet;
         this.user = user;
+        this.thumbnailPath = thumbnailPath;
     }
 }

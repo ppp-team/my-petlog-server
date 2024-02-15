@@ -1,9 +1,11 @@
 project:
   version: v1
+storage:
+  uri: uri
 spring:
   data:
     redis:
-      password: ${{ secrets.REDIS_TEST_PASSWORD }}
+      password: 1234
   datasource:
     url: jdbc:h2:mem:test;NON_KEYWORDS=USER
     username: sa

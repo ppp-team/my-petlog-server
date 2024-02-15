@@ -8,10 +8,11 @@ import com.ppp.api.diary.service.DiaryService;
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.common.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,10 +46,10 @@ public class DiaryController {
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "404", description = "일치하는 반려동물 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @RequestBody(content = @Content(encoding = @Encoding(name = "request", contentType = "application/json")))
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Void> createDiary(@PathVariable Long petId,
                                              @Valid @RequestPart DiaryCreateRequest request,
-                                             @Parameter(description = "multipart form data 형식의 이미지를 등록해주세요.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
                                              @Valid @RequestPart(required = false)
                                              @Size(max = 10, message = "이미지는 10개 이하로 첨부해주세요.") List<MultipartFile> images,
                                              @AuthenticationPrincipal PrincipalDetails principalDetails) {
@@ -64,11 +65,11 @@ public class DiaryController {
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "404", description = "일치하는 반려동물 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
-    @PutMapping(value = "/{diaryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @RequestBody(content = @Content(encoding = @Encoding(name = "request", contentType = "application/json")))
+    @PutMapping(value = "/{diaryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Void> updateDiary(@PathVariable Long petId,
                                              @PathVariable Long diaryId,
                                              @Valid @RequestPart DiaryUpdateRequest request,
-                                             @Parameter(description = "multipart form data 형식의 이미지를 등록해주세요.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
                                              @Valid @RequestPart(required = false)
                                              @Size(max = 10, message = "이미지는 10개 이하로 첨부해주세요.") List<MultipartFile> images,
                                              @AuthenticationPrincipal PrincipalDetails principalDetails) {

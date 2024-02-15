@@ -139,4 +139,32 @@ class FileStorageManageServiceTest {
         assertTrue(filePaths.contains(savedPath));
     }
 
+    @Test
+    @DisplayName("이미지 업로드-성공-파일일때")
+    void uploadImage_success_WhenFileIsGiven() {
+        //given
+        File file = new File("abcde.jpg");
+        String savedPath = "USER/2024-01-30/abcdefgthdsfalfakldfsaaf202302041111234.jpg";
+        given(fileStorageClient.upload((File) any(), any()))
+                .willReturn(savedPath);
+        //when
+        Optional<String> maybeString = fileStorageManageService.uploadImage(file, Domain.USER);
+        //then
+        verify(fileStorageClient, times(1)).upload((File) any(), any());
+        assertTrue(maybeString.isPresent());
+        assertEquals(savedPath, maybeString.get());
+    }
+
+    @Test
+    @DisplayName("이미지 업로드-성공-허용하지 않는 확장자가 주어짐-파일일때")
+    void uploadImage_success_GivenNotSupportedExtension_WhenFileIsGiven() {
+        //given
+        File file = new File("abcde.webp");
+        //when
+        Optional<String> maybeString = fileStorageManageService.uploadImage(file, Domain.USER);
+        //then
+        verify(fileStorageClient, times(0)).upload((File) any(), any());
+        assertTrue(maybeString.isEmpty());
+    }
+
 }

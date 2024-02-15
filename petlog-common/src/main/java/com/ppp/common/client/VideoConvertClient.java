@@ -37,6 +37,4 @@ public interface VideoConvertClient {
             log.error("Class : {}, Code : {}, Message : {}", getClass(), FILE_CLEAN_JOB_FAILED.getCode(), FILE_CLEAN_JOB_FAILED.getMessage());
         }
     }
-
-    ;
 }

@@ -9,6 +9,7 @@ import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.video.exception.VideoException;
 import com.ppp.common.service.FileStorageManageService;
+import com.ppp.common.service.ThumbnailService;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryMedia;
 import com.ppp.domain.diary.constant.DiaryMediaType;
@@ -61,6 +62,8 @@ class DiaryServiceTest {
     private DiaryCommentRedisService diaryCommentRedisService;
     @Mock
     private DiaryRedisService diaryRedisService;
+    @Mock
+    private ThumbnailService thumbnailService;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
     @InjectMocks
@@ -135,6 +138,7 @@ class DiaryServiceTest {
         //given
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
+                .uploadedVideoIds(new ArrayList<>())
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
                 .build();
@@ -159,6 +163,43 @@ class DiaryServiceTest {
         assertEquals(user.getId(), diaryCaptor.getValue().getUser().getId());
         assertEquals(pet.getId(), diaryCaptor.getValue().getPet().getId());
         assertEquals(2, diaryCaptor.getValue().getDiaryMedias().size());
+    }
+
+    @Test
+    @DisplayName("일기 생성 성공-비디오만 업로드")
+    void createDiary_success_WhenVideoUploadOnly() {
+        //given
+        DiaryCreateRequest request = DiaryCreateRequest.builder()
+                .title("우리 강아지")
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
+                .content("너무 귀엽당")
+                .date(LocalDate.now().toString())
+                .build();
+
+        given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(pet));
+        given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
+                .willReturn(true);
+        Diary createdDiary = mock(Diary.class);
+        given(diaryRepository.save(any())).willReturn(createdDiary);
+        given(tempVideoRedisRepository.findById(anyString()))
+                .willReturn(Optional.of(TempVideo.builder()
+                        .filePath("temp/encoded/2024021313/267d730ad30d4c8da5560e9b3cc0581820240213130549683.mp4")
+                        .userId(user.getId())
+                        .build()));
+        given(fileStorageManageService.uploadVideos(any(), any()))
+                .willReturn(List.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
+        //when
+        diaryService.createDiary(user, 1L, request, new ArrayList<>());
+        ArgumentCaptor<Diary> diaryCaptor = ArgumentCaptor.forClass(Diary.class);
+        //then
+        verify(diaryRepository, times(1)).save(diaryCaptor.capture());
+        assertEquals(request.getTitle(), diaryCaptor.getValue().getTitle());
+        assertEquals(request.getContent(), diaryCaptor.getValue().getContent());
+        assertEquals(request.getDate(), diaryCaptor.getValue().getDate().toString());
+        assertEquals(user.getId(), diaryCaptor.getValue().getUser().getId());
+        assertEquals(pet.getId(), diaryCaptor.getValue().getPet().getId());
+        assertEquals(1, diaryCaptor.getValue().getDiaryMedias().size());
     }
 
     @Test
@@ -212,9 +253,6 @@ class DiaryServiceTest {
                 .willReturn(Optional.of(pet));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
                 .willReturn(true);
-        given(fileStorageManageService.uploadImages(anyList(), any()))
-                .willReturn(List.of("DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg",
-                        "DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
         given(tempVideoRedisRepository.findById(anyString()))
                 .willReturn(Optional.empty());
         //when
@@ -238,10 +276,6 @@ class DiaryServiceTest {
                 .willReturn(Optional.of(pet));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
                 .willReturn(true);
-        given(fileStorageManageService.uploadImages(anyList(), any()))
-                .willReturn(List.of("DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg",
-                        "DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
-
         given(tempVideoRedisRepository.findById(anyString()))
                 .willReturn(Optional.of(TempVideo.builder()
                         .filePath("temp/encoded/2024021313/267d730ad30d4c8da5560e9b3cc0581820240213130549683.mp4")
@@ -283,12 +317,13 @@ class DiaryServiceTest {
         given(fileStorageManageService.uploadImages(anyList(), any()))
                 .willReturn(List.of("DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg",
                         "DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
+
         //when
         diaryService.updateDiary(user, 1L, 1L, request, images);
         ArgumentCaptor<DiaryUpdatedEvent> captor = ArgumentCaptor.forClass(DiaryUpdatedEvent.class);
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
-        assertEquals(1, captor.getValue().getDiaryMedias().size());
+        assertEquals(1, captor.getValue().getDeletedPaths().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
@@ -331,12 +366,53 @@ class DiaryServiceTest {
         ArgumentCaptor<DiaryUpdatedEvent> captor = ArgumentCaptor.forClass(DiaryUpdatedEvent.class);
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
-        assertEquals(0, captor.getValue().getDiaryMedias().size());
+        assertEquals(0, captor.getValue().getDeletedPaths().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
         assertEquals(3, diary.getDiaryMedias().size());
     }
+
+    @Test
+    @DisplayName("일기 수정 성공-비디오만 업로드될때")
+    void updateDiary_success_WhenVideoUploadOnly() {
+        //given
+        DiaryUpdateRequest request = DiaryUpdateRequest.builder()
+                .title("우리 강아지")
+                .content("너무 귀엽당")
+                .date(LocalDate.now().toString())
+                .deletedMediaIds(new HashSet<>())
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
+                .build();
+        Diary diary = Diary.builder()
+                .title("우리집 고양이")
+                .content("츄르를 좋아해")
+                .date(LocalDate.of(2020, 11, 11))
+                .user(user)
+                .pet(pet).build();
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(diary));
+        given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
+                .willReturn(true);
+        given(tempVideoRedisRepository.findById(anyString()))
+                .willReturn(Optional.of(TempVideo.builder()
+                        .filePath("temp/encoded/2024021313/267d730ad30d4c8da5560e9b3cc0581820240213130549683.mp4")
+                        .userId(user.getId())
+                        .build()));
+        given(fileStorageManageService.uploadVideos(any(), any()))
+                .willReturn(List.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
+        //when
+        diaryService.updateDiary(user, 1L, 1L, request, new ArrayList<>());
+        ArgumentCaptor<DiaryUpdatedEvent> captor = ArgumentCaptor.forClass(DiaryUpdatedEvent.class);
+        //then
+        verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
+        assertEquals(0, captor.getValue().getDeletedPaths().size());
+        assertEquals(request.getTitle(), diary.getTitle());
+        assertEquals(request.getContent(), diary.getContent());
+        assertEquals(request.getDate(), diary.getDate().toString());
+        assertEquals(1, diary.getDiaryMedias().size());
+    }
+
 
     @Test
     @DisplayName("일기 수정 성공-기존 비디오를 삭제하고 비디오 업로드")
@@ -353,6 +429,7 @@ class DiaryServiceTest {
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
                 .content("츄르를 좋아해")
+                .thumbnailPath("oldthumbnail")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
                 .pet(pet).build();
@@ -374,13 +451,12 @@ class DiaryServiceTest {
                         .build()));
         given(fileStorageManageService.uploadVideos(any(), any()))
                 .willReturn(List.of("VIDEO/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.mp4"));
-
         //when
         diaryService.updateDiary(user, 1L, 1L, request, images);
         ArgumentCaptor<DiaryUpdatedEvent> captor = ArgumentCaptor.forClass(DiaryUpdatedEvent.class);
         //then
         verify(applicationEventPublisher, times(1)).publishEvent(captor.capture());
-        assertEquals(1, captor.getValue().getDiaryMedias().size());
+        assertEquals(2, captor.getValue().getDeletedPaths().size());
         assertEquals(3, diary.getDiaryMedias().size());
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());

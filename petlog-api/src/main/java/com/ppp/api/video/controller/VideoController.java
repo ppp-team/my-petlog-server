@@ -39,7 +39,7 @@ public class VideoController {
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "404", description = "일치하는 반려동물 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VideoResponse> uploadTempVideo(@RequestParam(defaultValue = "DIARY") @EnumValue(enumClass = Domain.class) String domain,
                                                          @RequestPart MultipartFile video,
                                                          @AuthenticationPrincipal PrincipalDetails principalDetail) {

@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -83,7 +84,7 @@ class UserServiceTest {
         //when
         when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
         when(profileImageRepository.findByUser(any())).thenReturn(Optional.empty());
-        given(fileStorageManageService.uploadImage(any(),any()))
+        given(fileStorageManageService.uploadImage((MultipartFile) any(),any()))
                 .willReturn(Optional.of("/USER/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
 
         userService.createProfile(user,file,"새로운닉네임");
@@ -112,7 +113,7 @@ class UserServiceTest {
         lenient().when(authService.checkPasswordMatches(rawPassword, user.getPassword())).thenReturn(true);
         lenient().when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
         lenient().when(profileImageRepository.findByUser(any())).thenReturn(Optional.empty());
-        lenient().when(fileStorageManageService.uploadImage(any(),any()))
+        lenient().when(fileStorageManageService.uploadImage((MultipartFile) any(),any()))
                 .thenReturn(Optional.of("/USER/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
 
         userService.updateProfile(user,null,user.getNickname(),user.getPassword());
