@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.ppp.api.pet.exception.ErrorCode.PET_NOT_FOUND;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -37,7 +39,10 @@ public class GuardianService {
     private final PetRepository petRepository;
     private final InvitationRepository invitationRepository;
 
-    public GuardiansResponse displayGuardians(Long petId) {
+    public GuardiansResponse displayGuardians(Long petId, User user) {
+        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
+            throw new GuardianException(ErrorCode.GUARDIAN_NOT_FOUND);
+
         List<GuardianResponse> guardianResponseList = new ArrayList<>();
         List<Guardian> guardianList = guardianRepository.findAllByPetIdOrderByCreatedAtDesc(petId);
         for (Guardian guardian : guardianList) {
@@ -97,7 +102,7 @@ public class GuardianService {
         validateInvitation(petId, inviteeUser, inviterUser);
 
         Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new PetException(com.ppp.api.pet.exception.ErrorCode.PET_NOT_FOUND));
+                .orElseThrow(() -> new PetException(PET_NOT_FOUND));
         Invitation invitation = Invitation.builder()
                 .inviterId(inviterUser.getId())
                 .inviteeId(inviteeUser.getId())
