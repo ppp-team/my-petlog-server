@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
@@ -89,10 +88,6 @@ public class UserService {
         if (profileImage != null && !profileImage.isEmpty()) {
             savedPath = uploadImageToS3(profileImage);
             createProfileImage(user, savedPath);
-
-            // delete previous image
-            profileImageRepository.findByUser(userFromDb).ifPresent(
-                    image -> fileStorageManageService.deleteImage(image.getUrl()));
         }
     }
 

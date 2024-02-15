@@ -51,6 +51,7 @@ public class GuardianService {
     }
 
     public void createGuardian(Pet pet, User user, GuardianRole guardianRole) {
+        validateIsGuardian(user.getId(), pet.getId());
         guardianRepository.save(new Guardian(guardianRole, pet, user));
     }
 
@@ -112,8 +113,7 @@ public class GuardianService {
             throw new GuardianException(ErrorCode.NOT_INVITED_EMAIL);
 
         // 이미 공동집사일 때
-        if (guardianRepository.existsByUserIdAndPetId(inviteeUser.getId(), petId))
-            throw new GuardianException(ErrorCode.NOT_INVITED_ALREADY_GUARDIAN);
+        validateIsGuardian(inviteeUser.getId(), petId);
 
         // 이미 초대한 사용자일 때
         Optional<Invitation> invitationOfInvitee = invitationRepository.findByInviteeIdAndPetId(inviteeUser.getId(), petId);
@@ -122,6 +122,11 @@ public class GuardianService {
                     InviteStatus.ACCEPTED.name().equals(invitation.getInviteStatus().name()))
                 throw new GuardianException(ErrorCode.NOT_INVITED);
         });
+    }
+
+    private void validateIsGuardian(String userId, Long petId) {
+        if (guardianRepository.existsByUserIdAndPetId(userId, petId))
+            throw new GuardianException(ErrorCode.NOT_INVITED_ALREADY_GUARDIAN);
     }
 
     public Guardian findByUserIdAndPetId(User user, Long petId) {

@@ -28,4 +28,6 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
             "AND p.isDeleted = false " +
             "AND p.repStatus = 'REPRESENTATIVE'")
     Optional<Pet> findRepresentativePet(@Param("userId") String userId);
+
+    Optional<Pet> findByInvitedCode(String inviteCode);
 }
