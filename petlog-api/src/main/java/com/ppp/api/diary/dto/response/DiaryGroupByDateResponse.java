@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 public record DiaryGroupByDateResponse(
         @Schema(description = "날짜", example = "2024년 2월 11일 일요일")
-        @JsonFormat(pattern = "yyyy년 M월 d일 E요일")
+        @JsonFormat(pattern = "yyyy년 M월 d일 E요일", locale = "ko")
         LocalDate date,
         @ArraySchema(schema = @Schema(description = "일기"))
         List<DiaryResponse> diaries
