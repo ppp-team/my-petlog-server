@@ -46,10 +46,14 @@ public class User extends BaseTimeEntity {
 
 
     // 팩토리 메소드를 이용한 생성
-    public static User createUserByEmail(String email) {
-        User user = new User();
-        user.id = GenerationUtil.generateIdFromEmail(email);
-        return user;
+    public static User createUserByEmail(String email, String password, Role role) {
+        return User.builder()
+                .id(GenerationUtil.generateIdFromEmail(email))
+                .email(email)
+                .password(password)
+                .role(role)
+                .isDeleted(false)
+                .build();
     }
 
     public void setEmail(String email) {
