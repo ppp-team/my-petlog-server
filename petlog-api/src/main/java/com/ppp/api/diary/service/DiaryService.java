@@ -180,7 +180,7 @@ public class DiaryService {
     public Slice<DiaryGroupByDateResponse> displayDiaries(User user, Long petId, int page, int size) {
         validateAccessDiary(petId, user);
         return getGroupedDiariesSlice(
-                diaryRepository.findByPetIdAndIsDeletedFalseOrderByIdDesc(petId,
+                diaryRepository.findByPetIdAndIsDeletedFalseOrderByDateDesc(petId,
                         PageRequest.of(page, size)), user.getId());
     }
 

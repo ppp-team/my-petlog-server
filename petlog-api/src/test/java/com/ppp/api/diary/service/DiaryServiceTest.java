@@ -833,7 +833,7 @@ class DiaryServiceTest {
     @DisplayName("일기 리스트 조회 성공")
     void displayDiaries_success() {
         //given
-        given(diaryRepository.findByPetIdAndIsDeletedFalseOrderByIdDesc(anyLong(), any()))
+        given(diaryRepository.findByPetIdAndIsDeletedFalseOrderByDateDesc(anyLong(), any()))
                 .willReturn(new SliceImpl<>(List.of(
                         Diary.builder()
                                 .title("우리집 고양이")

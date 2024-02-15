@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
     Optional<Diary> findByIdAndIsDeletedFalse(Long id);
-    Slice<Diary> findByPetIdAndIsDeletedFalseOrderByIdDesc(Long petId, PageRequest pageRequest);
+    Slice<Diary> findByPetIdAndIsDeletedFalseOrderByDateDesc(Long petId, PageRequest pageRequest);
     boolean existsByIdAndIsDeletedFalse(Long id);
 }

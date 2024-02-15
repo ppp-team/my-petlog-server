@@ -8,7 +8,7 @@ import java.util.List;
 
 @Builder
 public record LogGroupByDateResponse(
-        @JsonFormat(pattern = "yyyy년 M월 d일 E요일")
+        @JsonFormat(pattern = "yyyy년 M월 d일 E요일", locale = "ko")
         LocalDateTime date,
         List<LogResponse> logs
 ) {
