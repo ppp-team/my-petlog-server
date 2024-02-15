@@ -2,6 +2,7 @@ package com.ppp.common.client;
 
 import com.ppp.common.exception.FileException;
 import com.ppp.common.util.FilePathUtil;
+import com.ppp.domain.common.constant.FileType;
 import com.ppp.domain.common.constant.VideoCompressType;
 import lombok.RequiredArgsConstructor;
 import net.bramp.ffmpeg.FFmpeg;
@@ -57,43 +58,46 @@ public class FfmpegClient implements VideoConvertClient, ThumbnailExtractClient 
     }
 
     @Override
-    public File extractThumbnail(String savedVideoPath) {
-        Path inputPath = Path.of(savedVideoPath);
-        File output = Paths.get(DEFAULT_PATH, THUMBNAIL_EXTENSION).toFile();
-        try {
-            fFmpeg.run(new FFmpegBuilder()
-                    .setInput(inputPath.toString())
-                    .overrideOutputFiles(true)
-                    .addOutput(output.getPath())
-                    .addExtraArgs("-ss", "00:00:01")
-                    .addExtraArgs("-vf", "scale=160:160")
-                    .setFrames(1)
-                    .done());
-        } catch (Exception e) {
-            log.error("Class : {}, Code : {}, Message : {}", getClass(), EXTRACT_THUMBNAIL_FAILED.getCode(), EXTRACT_THUMBNAIL_FAILED.getMessage());
-        }
-        return output;
+    public File extractThumbnail(File input, FileType type) throws FileException {
+        if (FileType.IMAGE.equals(type))
+            return extractThumbnailFromImage(input);
+        return extractThumbnailFromVideo(input);
     }
 
-    @Override
-    public File extractThumbnail(MultipartFile multipartFile) {
+    public File extractThumbnailFromImage(File input) throws FileException {
         try {
             File output = File.createTempFile("s_temp", THUMBNAIL_EXTENSION);
-            File input = File.createTempFile("temp", multipartFile.getOriginalFilename());
-            Files.write(input.toPath(), multipartFile.getBytes());
             fFmpeg.run(new FFmpegBuilder()
                     .overrideOutputFiles(true)
                     .setInput(input.getPath())
                     .addOutput(output.getPath())
                     .addExtraArgs("-vf", "scale=160:160")
                     .done());
-            log.error(output.getAbsolutePath());
             FileUtils.delete(input);
             return output;
         } catch (Exception e) {
             log.error("Class : {}, Code : {}, Message : {}", getClass(), EXTRACT_THUMBNAIL_FAILED.getCode(), EXTRACT_THUMBNAIL_FAILED.getMessage());
+            throw new FileException(EXTRACT_THUMBNAIL_FAILED);
         }
-        return null;
+    }
+
+    public File extractThumbnailFromVideo(File input) throws FileException {
+        try {
+            File output = File.createTempFile("s_temp", THUMBNAIL_EXTENSION);
+            fFmpeg.run(new FFmpegBuilder()
+                    .setInput(input.getPath())
+                    .overrideOutputFiles(true)
+                    .addOutput(output.getPath())
+                    .addExtraArgs("-ss", "00:00:01")
+                    .addExtraArgs("-vf", "scale=160:160")
+                    .setFrames(1)
+                    .done());
+            FileUtils.delete(input);
+            return output;
+        } catch (Exception e) {
+            log.error("Class : {}, Code : {}, Message : {}", getClass(), EXTRACT_THUMBNAIL_FAILED.getCode(), EXTRACT_THUMBNAIL_FAILED.getMessage());
+            throw new FileException(EXTRACT_THUMBNAIL_FAILED);
+        }
     }
 
 }

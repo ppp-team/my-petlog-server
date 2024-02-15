@@ -67,11 +67,10 @@ public class Diary extends BaseTimeEntity {
         this.diaryMedias.addAll(diaryMedias);
     }
 
-    public void update(String title, String content, LocalDate date, List<DiaryMedia> diaryMedias, String thumbnailPath) {
+    public void update(String title, String content, LocalDate date, List<DiaryMedia> diaryMedias) {
         this.title = title;
         this.content = content;
         this.date = date;
-        this.thumbnailPath = thumbnailPath;
         addDiaryMedias(diaryMedias);
     }
 
@@ -94,6 +93,10 @@ public class Diary extends BaseTimeEntity {
             images.removeAll(getVideoMedias());
         }
         return images;
+    }
+
+    public void addThumbnail(String thumbnailPath) {
+        this.thumbnailPath = thumbnailPath;
     }
 
     @Builder

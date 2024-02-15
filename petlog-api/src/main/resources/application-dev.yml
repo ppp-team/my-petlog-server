@@ -3,6 +3,8 @@ server:
 
 project:
   version: v1
+storage:
+  uri: ENC("n6I7hj2lozaEpcvpsJ4p6jkPT1l/he9ITISbaZRKcQZ9pTylwfc5O1q+jY7Gkx/G9k3TWahamxDqk+3UO0b1gw==")
 
 spring:
   servlet:

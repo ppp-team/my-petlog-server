@@ -1,11 +1,10 @@
 package com.ppp.common.client;
 
-import org.springframework.web.multipart.MultipartFile;
+import com.ppp.common.exception.FileException;
+import com.ppp.domain.common.constant.FileType;
 
 import java.io.File;
 
 public interface ThumbnailExtractClient {
-    File extractThumbnail(String path);
-
-    File extractThumbnail(MultipartFile multipartFile);
+    File extractThumbnail(File input, FileType type) throws FileException;
 }

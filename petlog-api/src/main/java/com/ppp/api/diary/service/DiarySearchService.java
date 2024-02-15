@@ -3,8 +3,8 @@ package com.ppp.api.diary.service;
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.api.diary.dto.response.DiaryResponse;
 import com.ppp.api.diary.exception.DiaryException;
+import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryDocument;
-import com.ppp.domain.diary.repository.DiaryRepository;
 import com.ppp.domain.diary.repository.DiarySearchRepository;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.user.User;
@@ -26,19 +26,17 @@ import static com.ppp.api.diary.exception.ErrorCode.FORBIDDEN_PET_SPACE;
 @Slf4j
 @RequiredArgsConstructor
 public class DiarySearchService {
-    private final DiaryRepository diaryRepository;
     private final DiarySearchRepository diarySearchRepository;
     private final DiaryCommentRedisService diaryCommentRedisService;
     private final GuardianRepository guardianRepository;
 
-    public void save(Long diaryId) {
-        diaryRepository.findByIdAndIsDeletedFalse(diaryId)
-                .ifPresent(diary -> diarySearchRepository.save(DiaryDocument.from(diary)));
+
+    public void save(Diary diary) {
+        diarySearchRepository.save(DiaryDocument.from(diary));
     }
 
-    public void update(Long diaryId) {
-        diaryRepository.findByIdAndIsDeletedFalse(diaryId)
-                .ifPresent(diary -> diarySearchRepository.save(DiaryDocument.from(diary)));
+    public void update(Diary diary) {
+        diarySearchRepository.save(DiaryDocument.from(diary));
     }
 
     public void delete(Long diaryId) {
