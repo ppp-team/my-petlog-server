@@ -28,7 +28,7 @@ public record DiaryResponse(
                 .title(diary.getTitle())
                 .content(diary.getContent())
                 .thumbnailPath(diary.getThumbnailPath())
-                .writer(UserResponse.from(diary.getUser(), currentUserId))
+                .writer(UserResponse.of(diary.getUser().getId(), diary.getUser().getNickname(), currentUserId))
                 .commentCount(commentCount)
                 .build();
     }

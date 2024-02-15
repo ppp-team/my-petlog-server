@@ -44,6 +44,9 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user")
     private List<Pet> pets = new ArrayList<>();
 
+    @OneToOne(mappedBy = "user")
+    private ProfileImage profile;
+
 
     public static User createUserByEmail(String email, String password, Role role) {
         return User.builder()

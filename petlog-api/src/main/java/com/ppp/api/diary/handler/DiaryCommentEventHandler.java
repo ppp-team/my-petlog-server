@@ -4,12 +4,16 @@ import com.ppp.api.diary.dto.event.DiaryCommentCreatedEvent;
 import com.ppp.api.diary.dto.event.DiaryCommentDeletedEvent;
 import com.ppp.api.diary.service.DiaryCommentRedisService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.util.concurrent.CompletableFuture;
+
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class DiaryCommentEventHandler {
     private final DiaryCommentRedisService diaryCommentRedisService;
@@ -23,7 +27,10 @@ public class DiaryCommentEventHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDiaryCommentDeletedEvent(DiaryCommentDeletedEvent event) {
-        diaryCommentRedisService.decreaseDiaryCommentCountByDiaryId(event.getDiaryId());
-        diaryCommentRedisService.deleteAllLikeByCommentId(event.getCommentId());
+        CompletableFuture.runAsync(() -> {
+                    log.info("Class : {}, Method : {}", this.getClass(), "handleDiaryCommentDeletedEvent");
+                })
+                .thenRunAsync(() -> diaryCommentRedisService.decreaseDiaryCommentCountByDiaryId(event.getDiaryId()))
+                .thenRunAsync(() -> diaryCommentRedisService.deleteAllLikeByCommentId(event.getCommentId()));
     }
 }

@@ -16,12 +16,15 @@ public record UserResponse(
         String id,
         @Schema(description = "유저 닉네임")
         String nickname,
+        @Schema(description = "유저 프로필")
+        String profilePath,
         @Schema(description = "현재 유저인지 여부")
         boolean isCurrentUser
 ) {
     public static UserResponse from(User user, String currentUserId) {
         return UserResponse.builder()
                 .id(user.getId())
+                .profilePath(user.getProfile().getUrl())
                 .nickname(user.getNickname())
                 .isCurrentUser(Objects.equals(user.getId(), currentUserId))
                 .build();

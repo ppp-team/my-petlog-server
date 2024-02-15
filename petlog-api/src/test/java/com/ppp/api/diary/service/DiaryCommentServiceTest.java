@@ -10,6 +10,7 @@ import com.ppp.domain.diary.repository.DiaryCommentRepository;
 import com.ppp.domain.diary.repository.DiaryRepository;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.pet.Pet;
+import com.ppp.domain.user.ProfileImage;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -53,11 +54,17 @@ class DiaryCommentServiceTest {
 
     User user = User.builder()
             .id("abcde1234")
+            .profile(ProfileImage.builder()
+                    .url("USER/12345678/1232132313dsfadskfakfsa.jpg")
+                    .build())
             .nickname("hi")
             .build();
 
     User userA = User.builder()
             .id("abc123")
+            .profile(ProfileImage.builder()
+                    .url("USER/12345678/1232132313dsfadskfakfsa.jpg")
+                    .build())
             .nickname("첫째누나")
             .build();
 
@@ -342,8 +349,10 @@ class DiaryCommentServiceTest {
         //then
         assertEquals(response.getContent().get(0).content(), "우리 체리 귀엽다 ~ ^^");
         assertEquals(response.getContent().get(1).content(), "체리짱귀");
+        assertEquals(response.getContent().get(0).writer().profilePath(), userA.getProfile().getUrl());
         assertEquals(response.getContent().get(0).writer().nickname(), userA.getNickname());
         assertEquals(response.getContent().get(1).writer().nickname(), user.getNickname());
+        assertEquals(response.getContent().get(1).writer().profilePath(), user.getProfile().getUrl());
         assertFalse(response.getContent().get(0).writer().isCurrentUser());
         assertTrue(response.getContent().get(1).writer().isCurrentUser());
         assertFalse(response.getContent().get(0).taggedUsers().get(0).isCurrentUser());
