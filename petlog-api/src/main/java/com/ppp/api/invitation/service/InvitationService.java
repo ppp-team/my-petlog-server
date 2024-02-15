@@ -89,7 +89,7 @@ public class InvitationService {
             User invitee = userRepository.findById(inviteeId).orElse(new User());
             ProfileImage profileImage = profileImageRepository.findByUser(invitee).orElse(new ProfileImage());
 
-            MyInvitationResponse invitationResponse = MyInvitationResponse.from(myInvitation, user, profileImage);
+            MyInvitationResponse invitationResponse = MyInvitationResponse.from(myInvitation, invitee, profileImage);
             myInvitationResponseList.add(invitationResponse);
         }
         return myInvitationResponseList;

@@ -13,7 +13,7 @@ import lombok.*;
 @Builder
 public class MyInvitationResponse {
     private Long invitationId;
-    private String inviterName;
+    private String inviteeName;
     private String inviteStatus;
     private String profilePath;
     private String invitedAt;
@@ -21,7 +21,7 @@ public class MyInvitationResponse {
     public static MyInvitationResponse from(Invitation invitation, User user, ProfileImage profileImage) {
         return MyInvitationResponse.builder()
                 .invitationId(invitation.getId())
-                .inviterName(user.getNickname())
+                .inviteeName(user.getNickname())
                 .inviteStatus(InviteStatus.PENDING.getValue())
                 .profilePath(profileImage.getUrl())
                 .invitedAt(TimeUtil.calculateTerm(invitation.getCreatedAt()))
