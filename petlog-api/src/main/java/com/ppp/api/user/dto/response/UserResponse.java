@@ -2,6 +2,7 @@ package com.ppp.api.user.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ppp.domain.user.User;
+import com.ppp.domain.user.UserDao;
 import com.ppp.domain.user.UserDocument;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -35,6 +36,14 @@ public record UserResponse(
                 .id(userDocument.getId())
                 .nickname(userDocument.getNickname())
                 .isCurrentUser(Objects.equals(userDocument.getId(), currentUserId))
+                .build();
+    }
+
+    public static UserResponse from(UserDao user, String currentUserId) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .nickname(user.getNickname())
+                .isCurrentUser(Objects.equals(user.getId(), currentUserId))
                 .build();
     }
 

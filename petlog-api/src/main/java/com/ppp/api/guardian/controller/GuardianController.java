@@ -6,8 +6,10 @@ import com.ppp.api.guardian.dto.request.InviteGuardianRequest;
 import com.ppp.api.guardian.dto.response.GuardianResponse;
 import com.ppp.api.guardian.dto.response.GuardiansResponse;
 import com.ppp.api.guardian.service.GuardianService;
+import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.common.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "관리-공동집사(펫메이트 그룹)", description = "관리-공동집사 APIs")
 @Slf4j
@@ -66,8 +70,20 @@ public class GuardianController {
             @PathVariable Long petId,
             @RequestBody InviteGuardianRequest inviteGuardianRequest,
             @AuthenticationPrincipal PrincipalDetails principalDetails
-            ) {
+    ) {
         guardianService.inviteGuardian(petId, inviteGuardianRequest, principalDetails.getUser());
         return ResponseEntity.ok().build();
+    }
+
+
+    @Operation(summary = "반려 동물에 대한 공동 집사 리스트 조회 for Diary Comment, Log")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(array = @ArraySchema(schema = @Schema(implementation = UserResponse.class)))}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+    })
+    @GetMapping("/v1/pets/{petId}/guardians")
+    public ResponseEntity<List<UserResponse>> displayGuardiansByPetId(@PathVariable Long petId,
+                                                                      @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(guardianService.displayGuardiansByPetId(principalDetails.getUser(), petId));
     }
 }
