@@ -100,6 +100,10 @@ public class PetService {
         return MyPetResponse.from(pet, petImage);
     }
 
+    public String findPetCode(Long petId) {
+        return petRepository.findPetCodeById(petId).orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
+    }
+
     @Transactional
     public void updatePet(Long petId, PetRequest petRequest, User user, MultipartFile petImage) {
         Pet pet = petRepository.findMyPetById(petId, user.getId())

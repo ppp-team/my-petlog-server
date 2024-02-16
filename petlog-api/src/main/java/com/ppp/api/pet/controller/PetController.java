@@ -66,13 +66,23 @@ public class PetController {
     @Operation(summary = "반려동물 조회", description = "반려동물를 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = MyPetResponse.class))}),
-            @ApiResponse(responseCode = "404", description = "반려동물을 찾을 수 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "반려동물을 찾을 수 없습니다", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
     @GetMapping("/v1/my/pets/{petId}")
     public ResponseEntity<MyPetResponse> displayPet(
             @PathVariable("petId") Long petId,
             @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(petService.findMyPetById(petId, principalDetails.getUser()));
+    }
+
+    @Operation(summary = "반려동물 코드 조회", description = "반려동물 id 를 통해 초대코드를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "404", description = "반려동물을 찾을 수 없습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+    })
+    @GetMapping("/v1/my/pets/{petId}/code")
+    public ResponseEntity<String> displayPetCode(@PathVariable Long petId) {
+        return ResponseEntity.ok(petService.findPetCode(petId));
     }
 
     @Operation(summary = "반려동물 리스트", description = "자신이 등록한 반려동물 목록을 조회합니다.")
