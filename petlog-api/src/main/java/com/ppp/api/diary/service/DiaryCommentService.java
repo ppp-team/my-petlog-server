@@ -42,6 +42,7 @@ public class DiaryCommentService {
     @Transactional
     public void createComment(User user, Long petId, Long diaryId, DiaryCommentRequest request) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
+                .filter(foundDiary -> Objects.equals(foundDiary.getPet().getId(), petId))
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateCreateComment(petId, user);
 
@@ -71,7 +72,7 @@ public class DiaryCommentService {
 
     @Transactional
     public void updateComment(User user, Long petId, Long commentId, DiaryCommentRequest request) {
-        DiaryComment comment = diaryCommentRepository.findByIdAndIsDeletedFalse(commentId)
+        DiaryComment comment = diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(commentId, petId)
                 .orElseThrow(() -> new DiaryException(DIARY_COMMENT_NOT_FOUND));
         validateModifyComment(comment, user, petId);
 
@@ -87,7 +88,7 @@ public class DiaryCommentService {
 
     @Transactional
     public void deleteComment(User user, Long petId, Long commentId) {
-        DiaryComment comment = diaryCommentRepository.findByIdAndIsDeletedFalse(commentId)
+        DiaryComment comment = diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(commentId, petId)
                 .orElseThrow(() -> new DiaryException(DIARY_COMMENT_NOT_FOUND));
         validateModifyComment(comment, user, petId);
 
@@ -97,6 +98,7 @@ public class DiaryCommentService {
 
     public Slice<DiaryCommentResponse> displayComments(User user, Long petId, Long diaryId, int page, int size) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
+                .filter(foundDiary -> Objects.equals(foundDiary.getPet().getId(), petId))
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateDisplayComments(user, petId);
 

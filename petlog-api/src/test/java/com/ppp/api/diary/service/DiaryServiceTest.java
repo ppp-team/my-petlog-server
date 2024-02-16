@@ -491,6 +491,31 @@ class DiaryServiceTest {
     }
 
     @Test
+    @DisplayName("일기 수정 실패-diary not found-다이어리 pet id와 주어진 pet id가 다름")
+    void updateDiary_fail_DIARY_NOT_FOUND_WhenGivenPetIdIsNotDiaryPetId() {
+        //given
+        DiaryUpdateRequest request = DiaryUpdateRequest.builder()
+                .title("우리 강아지")
+                .content("너무 귀엽당")
+                .date(LocalDate.now().toString())
+                .deletedMediaIds(Set.of(1L))
+                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
+                .build();
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(Diary.builder()
+                        .title("우리집 고양이")
+                        .content("츄르를 좋아해")
+                        .thumbnailPath("oldthumbnail")
+                        .date(LocalDate.of(2020, 11, 11))
+                        .user(user)
+                        .pet(pet).build()));
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.updateDiary(user, 2L, 1L, request, images));
+        //then
+        assertEquals(DIARY_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
     @DisplayName("일기 수정 실패-media upload limit over-동영상 수 제한")
     void updateDiary_fail_MEDIA_UPLOAD_LIMIT_OVER_WhenVideoSizeOver() {
         //given
@@ -717,6 +742,24 @@ class DiaryServiceTest {
                 .willReturn(Optional.empty());
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.deleteDiary(user, 1L, 1L));
+        //then
+        assertEquals(DIARY_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("일기 삭제 실패-diary not found-다이어리 pet id와 주어진 pet id가 다름")
+    void deleteDiary_fail_DIARY_NOT_FOUND_WhenGivenPetIdIsNotDiaryPetId() {
+        //given
+        Diary diary = Diary.builder()
+                .title("우리집 고양이")
+                .content("츄르를 좋아해")
+                .date(LocalDate.of(2020, 11, 11))
+                .user(user)
+                .pet(pet).build();
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(diary));
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.deleteDiary(user, 2L, 1L));
         //then
         assertEquals(DIARY_NOT_FOUND.getCode(), exception.getCode());
     }
