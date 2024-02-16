@@ -2,11 +2,13 @@ package com.ppp.api.log.controller;
 
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.log.dto.request.LogRequest;
+import com.ppp.api.log.dto.response.LogCalenderResponse;
 import com.ppp.api.log.dto.response.LogDetailResponse;
 import com.ppp.api.log.dto.response.LogGroupByDateResponse;
 import com.ppp.api.log.service.LogService;
 import com.ppp.common.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Log", description = "Log APIs")
@@ -74,7 +77,7 @@ public class LogController {
 
     @Operation(summary = "기록 상세 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = LogDetailResponse.class))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "404", description = "일치하는 기록 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
@@ -87,7 +90,7 @@ public class LogController {
 
     @Operation(summary = "기록 날짜별 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = LogGroupByDateResponse.class))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "400", description = "날짜가 적합하지 않음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
@@ -102,7 +105,7 @@ public class LogController {
 
     @Operation(summary = "기록 해야할 일 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "200", content = {@Content(array = @ArraySchema(schema = @Schema(implementation = LogGroupByDateResponse.class)))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @GetMapping(value = "/task")
@@ -125,5 +128,20 @@ public class LogController {
                                                @AuthenticationPrincipal PrincipalDetails principalDetails) {
         logService.checkComplete(principalDetails.getUser(), petId, logId);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "기록 날짜별 조회")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = LogCalenderResponse.class))}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "날짜가 적합하지 않음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+    })
+    @GetMapping(value = "/calender")
+    @Validated
+    private ResponseEntity<LogCalenderResponse> displayLogRecordedDayByTheMonth(@PathVariable Long petId,
+                                                                                @RequestParam int year,
+                                                                                @RequestParam int month,
+                                                                                @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(logService.displayLogRecordedDayByTheMonth(principalDetails.getUser(), petId, year, month));
     }
 }

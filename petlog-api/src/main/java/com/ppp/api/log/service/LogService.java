@@ -1,6 +1,7 @@
 package com.ppp.api.log.service;
 
 import com.ppp.api.log.dto.request.LogRequest;
+import com.ppp.api.log.dto.response.LogCalenderResponse;
 import com.ppp.api.log.dto.response.LogDetailResponse;
 import com.ppp.api.log.dto.response.LogGroupByDateResponse;
 import com.ppp.api.log.dto.response.LogResponse;
@@ -12,6 +13,7 @@ import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.log.Log;
 import com.ppp.domain.log.LogLocation;
 import com.ppp.domain.log.constant.LogType;
+import com.ppp.domain.log.repository.LogQuerydslRepository;
 import com.ppp.domain.log.repository.LogRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.repository.PetRepository;
@@ -42,6 +44,7 @@ public class LogService {
     private final PetRepository petRepository;
     private final GuardianRepository guardianRepository;
     private final UserRepository userRepository;
+    private final LogQuerydslRepository logQuerydslRepository;
 
     @Transactional
     public void createLog(User user, Long petId, LogRequest request) {
@@ -182,5 +185,19 @@ public class LogService {
         validateAccessLog(petId, user);
 
         log.switchIsComplete();
+    }
+
+    public LogCalenderResponse displayLogRecordedDayByTheMonth(User user, Long petId, int year, int month) {
+        validateAccessLog(petId, user);
+
+        return LogCalenderResponse.from(logQuerydslRepository.findExistingDayByPetIdInMonth(petId, getFirstDayOfMonth(year, month)));
+    }
+
+    private LocalDate getFirstDayOfMonth(int year, int month) {
+        try {
+            return LocalDate.of(year, month, 1);
+        } catch (DateTimeException e) {
+            throw new LogException(INVALID_DATE);
+        }
     }
 }

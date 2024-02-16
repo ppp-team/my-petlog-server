@@ -140,6 +140,44 @@ class LogServiceTest {
     }
 
     @Test
+    @DisplayName("건강 기록 생성 성공-산책 타입이고 subType이 주어지지 않음")
+    void createLog_success_WhenTypeIsWALKAndSubTypeIsNull() {
+        //given
+        LogRequest request = LogRequest.builder()
+                .type("WALK")
+                .subType(null)
+                .kakaoLocationId(null)
+                .isCustomLocation(false)
+                .datetime(LocalDateTime.of(2024, 1, 1, 11, 11).toString())
+                .isComplete(true)
+                .isImportant(false)
+                .memo("합정점에 잠깐 들려 커피 사기")
+                .managerId("abc123")
+                .build();
+        given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(pet));
+        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
+                .willReturn(Optional.of(userA));
+        given(guardianRepository.existsByUserIdAndPetId("abc123", 1L))
+                .willReturn(true);
+        given(guardianRepository.existsByUserIdAndPetId("abcde1234", 1L))
+                .willReturn(true);
+        //when
+        logService.createLog(user, 1L, request);
+        ArgumentCaptor<Log> captor = ArgumentCaptor.forClass(Log.class);
+        //then
+        verify(logRepository, times(1)).save(captor.capture());
+        assertEquals(WALK.name(), captor.getValue().getTypeMap().get("type"));
+        assertEquals(LocalDateTime.of(2024, 1, 1, 11, 11), captor.getValue().getDatetime());
+        assertTrue(captor.getValue().isComplete());
+        assertFalse(captor.getValue().isImportant());
+        assertEquals("합정점에 잠깐 들려 커피 사기", captor.getValue().getMemo());
+        assertEquals(1L, captor.getValue().getPet().getId());
+        assertEquals("abc123", captor.getValue().getManager().getId());
+        assertNull(captor.getValue().getLocation());
+    }
+
+    @Test
     @DisplayName("건강 기록 생성 성공-카카오 로케이션")
     void createLog_success_WhenKakaoMapLocation() {
         //given
