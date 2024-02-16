@@ -4,20 +4,20 @@ import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.invitation.dto.request.InvitationRequest;
 import com.ppp.api.invitation.dto.request.RegisterInvitationRequest;
 import com.ppp.api.invitation.dto.response.InvitationResponse;
-import com.ppp.api.invitation.dto.response.MyInvitationResponse;
 import com.ppp.api.invitation.exception.ErrorCode;
 import com.ppp.api.invitation.exception.InvitationException;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.util.TimeUtil;
 import com.ppp.domain.guardian.constant.GuardianRole;
 import com.ppp.domain.invitation.Invitation;
+import com.ppp.domain.invitation.MyInvitationDto;
 import com.ppp.domain.invitation.constant.InviteStatus;
+import com.ppp.domain.invitation.repository.InvitationQuerydslRepository;
 import com.ppp.domain.invitation.repository.InvitationRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.repository.PetImageRepository;
 import com.ppp.domain.pet.repository.PetRepository;
-import com.ppp.domain.user.ProfileImage;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.ProfileImageRepository;
 import com.ppp.domain.user.repository.UserRepository;
@@ -42,6 +42,7 @@ public class InvitationService {
     private final PetImageRepository petImageRepository;
     private final UserRepository userRepository;
     private final ProfileImageRepository profileImageRepository;
+    private final InvitationQuerydslRepository invitationQuerydslRepository;
 
     @Transactional(readOnly = true)
     public List<InvitationResponse> displayInvitations(User user) {
@@ -79,22 +80,22 @@ public class InvitationService {
         invitation.updateInviteStatus(InviteStatus.REJECTED);
     }
 
-    public List<MyInvitationResponse> displayMyInvitations(User user) {
-        List<Invitation> myInvitations = invitationRepository.findByInviterIdAndInviteStatus(user.getId(), InviteStatus.PENDING);
-
-        List<MyInvitationResponse> myInvitationResponseList = new ArrayList<>();
-
-        for (Invitation myInvitation : myInvitations) {
-            String inviteeId = myInvitation.getInviteeId();
-            User invitee = userRepository.findById(inviteeId).orElse(new User());
-            ProfileImage profileImage = profileImageRepository.findByUser(invitee).orElse(new ProfileImage());
-
-            MyInvitationResponse invitationResponse = MyInvitationResponse.from(myInvitation, invitee, profileImage);
-            myInvitationResponseList.add(invitationResponse);
-        }
-        return myInvitationResponseList;
+    public List<MyInvitationDto> displayMyInvitations(User user) {
+        List<MyInvitationDto> myInvitationDtoResponseList = invitationQuerydslRepository.findMyInvitationByInviterId(user.getId());
+        myInvitationDtoResponseList.forEach(myInvitationDto -> {
+                String status = null;
+                if (InviteStatus.PENDING.name().equals(myInvitationDto.getInviteStatus())) {
+                    status = InviteStatus.PENDING.getValue();
+                } else if (InviteStatus.REJECTED.name().equals(myInvitationDto.getInviteStatus())) {
+                    status = InviteStatus.REJECTED.getValue();
+                }
+                myInvitationDto.setInviteStatus(status);
+                myInvitationDto.setInvitedAt(TimeUtil.calculateTerm(myInvitationDto.getCreatedAt()));
+        });
+        return myInvitationDtoResponseList;
     }
 
+    @Transactional
     public void cancelInvitation(InvitationRequest invitationRequest, User user) {
         Invitation invitation = invitationRepository.findByIdAndInviteStatusAndInviterId(invitationRequest.getInvitationId(), InviteStatus.PENDING, user.getId())
             .orElseThrow(() -> new InvitationException(ErrorCode.INVITATION_NOT_FOUND));

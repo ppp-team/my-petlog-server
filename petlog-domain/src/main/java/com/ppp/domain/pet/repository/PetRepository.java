@@ -30,4 +30,8 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
     Optional<Pet> findRepresentativePet(@Param("userId") String userId);
 
     Optional<Pet> findByInvitedCode(String inviteCode);
+
+    @Query("SELECT p.invitedCode FROM Pet p " +
+            "WHERE p.id = :petId ")
+    Optional<String> findPetCodeById(@Param("petId") Long petId);
 }
