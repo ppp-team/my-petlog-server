@@ -67,7 +67,7 @@ public class LogService {
     }
 
     private LogLocation getLocationIfExists(LogRequest request, Log log) {
-        if (!LogType.WALK.equals(request.getLogType()))
+        if (!LogType.WALK.equals(request.getLogType()) || request.getSubType() == null)
             return null;
         if (request.getIsCustomLocation())
             return LogLocation.builder()
