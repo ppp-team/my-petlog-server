@@ -4,9 +4,9 @@ import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.invitation.dto.request.InvitationRequest;
 import com.ppp.api.invitation.dto.request.RegisterInvitationRequest;
 import com.ppp.api.invitation.dto.response.InvitationResponse;
-import com.ppp.api.invitation.dto.response.MyInvitationResponse;
 import com.ppp.api.invitation.service.InvitationService;
 import com.ppp.common.security.PrincipalDetails;
+import com.ppp.domain.invitation.MyInvitationDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -63,10 +63,10 @@ public class InvitationController {
 
     @Operation(summary = "내가 초대한 내역", description = "펫메이트 초대 내역에서 내가 초대한 내역을 확인합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(array = @ArraySchema(schema = @Schema(implementation = MyInvitationResponse.class)))}),
+            @ApiResponse(responseCode = "200", content = {@Content(array = @ArraySchema(schema = @Schema(implementation = MyInvitationDto.class)))}),
     })
     @GetMapping("/v1/my/invitations/my-invitations")
-    public ResponseEntity<List<MyInvitationResponse>> displayMyInvitations(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<List<MyInvitationDto>> displayMyInvitations(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(invitationService.displayMyInvitations(principalDetails.getUser()));
     }
 
