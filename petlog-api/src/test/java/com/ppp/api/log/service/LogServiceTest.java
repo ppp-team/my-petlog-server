@@ -1,6 +1,7 @@
 package com.ppp.api.log.service;
 
 import com.ppp.api.log.dto.request.LogRequest;
+import com.ppp.api.log.dto.response.LogCalenderResponse;
 import com.ppp.api.log.dto.response.LogDetailResponse;
 import com.ppp.api.log.dto.response.LogGroupByDateResponse;
 import com.ppp.api.log.exception.LogException;
@@ -10,6 +11,7 @@ import com.ppp.api.user.exception.UserException;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.log.Log;
 import com.ppp.domain.log.constant.LogLocationType;
+import com.ppp.domain.log.repository.LogQuerydslRepository;
 import com.ppp.domain.log.repository.LogRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.repository.PetRepository;
@@ -25,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +52,8 @@ class LogServiceTest {
     private GuardianRepository guardianRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private LogQuerydslRepository logQuerydslRepository;
     @InjectMocks
     private LogService logService;
 
@@ -884,5 +889,54 @@ class LogServiceTest {
         LogException exception = assertThrows(LogException.class, () -> logService.checkComplete(user, 1L, 1L));
         //then
         assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 기록 달별 조회 성공")
+    void displayLogRecordedDayByTheMonth_success() {
+        //given
+        int year = 2024;
+        int month = 2;
+        List<LocalDate> dates = List.of(
+                LocalDate.of(2024, 2, 14),
+                LocalDate.of(2024, 2, 15),
+                LocalDate.of(2024, 2, 16),
+                LocalDate.of(2024, 2, 17));
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        given(logQuerydslRepository.findExistingDayByPetIdInMonth(anyLong(), any()))
+                .willReturn(dates);
+        //when
+        LogCalenderResponse response = logService.displayLogRecordedDayByTheMonth(user, 1L, year, month);
+        //then
+        assertEquals(response.scheduledDays().size(), 4);
+    }
+
+    @Test
+    @DisplayName("건강 기록 달별 조회 실패_forbidden pet space")
+    void displayLogRecordedDayByTheMonth_fail_FORBIDDEN_PET_SPACE() {
+        //given
+        int year = 2024;
+        int month = 2;
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(false);
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.displayLogRecordedDayByTheMonth(user, 1L, year, month));
+        //then
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 기록 달별 조회 실패_invalid date")
+    void displayLogRecordedDayByTheMonth_fail_INVALID_DATE() {
+        //given
+        int year = 2024;
+        int month = 13;
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.displayLogRecordedDayByTheMonth(user, 1L, year, month));
+        //then
+        assertEquals(INVALID_DATE.getCode(), exception.getCode());
     }
 }
