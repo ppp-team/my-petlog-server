@@ -6,7 +6,6 @@ import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.guardian.exception.GuardianException;
 import com.ppp.api.invitation.exception.InvitationException;
 import com.ppp.api.log.exception.LogException;
-import com.ppp.api.mock.exception.MockException;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.user.exception.UserException;
 import com.ppp.api.video.exception.VideoException;
@@ -143,17 +142,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
     }
 
-    @ExceptionHandler(MockException.class)
-    public ResponseEntity<ExceptionResponse> handleMockException(MockException exception) {
-        ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .status(exception.getStatus())
-                .code(exception.getCode())
-                .message(exception.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
 
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ExceptionResponse> handleAuthException(AuthException exception) {
@@ -172,18 +160,6 @@ public class GlobalExceptionHandler {
         ExceptionResponse errorResponse = ExceptionResponse.builder()
                 .status(exception.getHttpStatus().value())
                 .code(exception.getErrorCode())
-                .message(exception.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
-        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
-        return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
-    }
-
-    @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ExceptionResponse> handleCustomException(CustomException exception) {
-        ExceptionResponse errorResponse = ExceptionResponse.builder()
-                .status(exception.getHttpStatus().value())
-                .code(exception.getCode())
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
