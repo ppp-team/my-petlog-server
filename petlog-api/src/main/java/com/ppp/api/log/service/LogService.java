@@ -100,6 +100,7 @@ public class LogService {
     @Transactional
     public void updateLog(User user, Long petId, Long logId, LogRequest request) {
         Log log = logRepository.findByIdAndIsDeletedFalse(logId)
+                .filter(foundLog -> Objects.equals(foundLog.getPet().getId(), petId))
                 .orElseThrow(() -> new LogException(LOG_NOT_FOUND));
         User mangerUser = userRepository.findByIdAndIsDeletedFalse(request.getManagerId())
                 .filter(maybeUser -> guardianRepository.existsByUserIdAndPetId(maybeUser.getId(), petId))
@@ -113,6 +114,7 @@ public class LogService {
     @Transactional
     public void deleteLog(User user, Long petId, Long logId) {
         Log log = logRepository.findByIdAndIsDeletedFalse(logId)
+                .filter(foundLog -> Objects.equals(foundLog.getPet().getId(), petId))
                 .orElseThrow(() -> new LogException(LOG_NOT_FOUND));
         validateAccessLog(petId, user);
 
@@ -126,6 +128,7 @@ public class LogService {
 
     public LogDetailResponse displayLog(User user, Long petId, Long logId) {
         Log log = logRepository.findByIdAndIsDeletedFalse(logId)
+                .filter(foundLog -> Objects.equals(foundLog.getPet().getId(), petId))
                 .orElseThrow(() -> new LogException(LOG_NOT_FOUND));
         validateAccessLog(petId, user);
 
@@ -181,6 +184,7 @@ public class LogService {
     @Transactional
     public void checkComplete(User user, Long petId, Long logId) {
         Log log = logRepository.findByIdAndIsDeletedFalse(logId)
+                .filter(foundLog -> Objects.equals(foundLog.getPet().getId(), petId))
                 .orElseThrow(() -> new LogException(LOG_NOT_FOUND));
         validateAccessLog(petId, user);
 

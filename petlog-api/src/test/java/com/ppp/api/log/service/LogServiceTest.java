@@ -419,6 +419,39 @@ class LogServiceTest {
     }
 
     @Test
+    @DisplayName("건강 기록 수정 실패-log not found-주어진 반려 동물 id와 로그의 반려 동물 id가 다름")
+    void updateLog_fail_LOG_NOT_FOUND_WhenGivenPetIdIsNotLogPetId() {
+        //given
+        LogRequest request = LogRequest.builder()
+                .type("FEED")
+                .subType("습식")
+                .datetime(LocalDateTime.of(2024, 1, 1, 11, 11).toString())
+                .isCustomLocation(false)
+                .isComplete(false)
+                .isImportant(false)
+                .memo("로얄 캐닌 연어맛 500g 줬음!")
+                .managerId("abc123")
+                .build();
+
+        Log log = Log.builder()
+                .typeMap(Map.of("type", CUSTOM.name(),
+                        "subType", "강아지 카페"))
+                .datetime(LocalDateTime.of(2024, 2, 2, 22, 22))
+                .isImportant(true)
+                .isComplete(false)
+                .memo("고구마 챙겨가기")
+                .manager(user)
+                .pet(pet)
+                .build();
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(log));
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.updateLog(user, 2L, 1L, request));
+        //then
+        assertEquals(LOG_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
     @DisplayName("건강 기록 수정 실패-not found user")
     void updateLog_fail_NOT_FOUND_USER() {
         //given
@@ -559,6 +592,28 @@ class LogServiceTest {
                 .willReturn(Optional.empty());
         //when
         LogException exception = assertThrows(LogException.class, () -> logService.deleteLog(user, 1L, 1L));
+        //then
+        assertEquals(LOG_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 기록 삭제 실패-log not found-주어진 반려 동물 id와 로그의 반려 동물 id가 다름")
+    void deleteLog_fail_LOG_NOT_FOUND_WhenGivenPetIdIsNotLogPetId() {
+        //given
+        Log log = Log.builder()
+                .typeMap(Map.of("type", CUSTOM.name(),
+                        "subType", "강아지 카페"))
+                .datetime(LocalDateTime.of(2024, 2, 2, 22, 22))
+                .isImportant(true)
+                .isComplete(false)
+                .memo("고구마 챙겨가기")
+                .manager(user)
+                .pet(pet)
+                .build();
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(log));
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.deleteLog(user, 2L, 1L));
         //then
         assertEquals(LOG_NOT_FOUND.getCode(), exception.getCode());
     }
@@ -785,6 +840,27 @@ class LogServiceTest {
     }
 
     @Test
+    @DisplayName("건강 수첩 상세 조회 성공-log not found-주어진 반려 동물 id와 로그의 반려 동물 id가 다름")
+    void displayLog_success_LOG_NOT_FOUND_WhenGivenPetIdIsNotLogPetId() {
+        //given
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(Log.builder()
+                        .typeMap(Map.of("type", FEED.name(),
+                                "subType", "건식"))
+                        .datetime(LocalDateTime.of(2024, 2, 2, 21, 22))
+                        .isImportant(true)
+                        .isComplete(true)
+                        .memo("엄마 밥 또 주지 마셈")
+                        .manager(user)
+                        .pet(pet)
+                        .build()));
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.displayLog(user, 2L, 1L));
+        //then
+        assertEquals(LOG_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
     @DisplayName("건강 수첩 상세 조회 실패-forbidden pet space")
     void displayLog_fail_FORBIDDEN_PET_SPACE() {
         //given
@@ -863,6 +939,28 @@ class LogServiceTest {
                 .willReturn(Optional.empty());
         //when
         LogException exception = assertThrows(LogException.class, () -> logService.checkComplete(user, 1L, 1L));
+        //then
+        assertEquals(LOG_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("건강 수첩 완료 체크 실패-log not found-주어진 반려 동물 id와 로그의 반려 동물 id가 다름")
+    void checkComplete_success_LOG_NOT_FOUND_WhenGivenPetIdIsNotLogPetId() {
+        //given
+        Log log = Log.builder()
+                .typeMap(Map.of("type", FEED.name(),
+                        "subType", "건식"))
+                .datetime(LocalDateTime.of(2024, 2, 2, 21, 22))
+                .isImportant(true)
+                .isComplete(true)
+                .memo("엄마 밥 또 주지 마셈")
+                .manager(user)
+                .pet(pet)
+                .build();
+        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(log));
+        //when
+        LogException exception = assertThrows(LogException.class, () -> logService.checkComplete(user, 2L, 1L));
         //then
         assertEquals(LOG_NOT_FOUND.getCode(), exception.getCode());
     }

@@ -130,7 +130,7 @@ public class LogController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "기록 날짜별 조회")
+    @Operation(summary = "기록 달별 조회")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = LogCalenderResponse.class))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
