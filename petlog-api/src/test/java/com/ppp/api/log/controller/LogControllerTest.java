@@ -220,4 +220,20 @@ class LogControllerTest {
                 .andExpect(status().isOk());
         //then
     }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("건강 기록 달별 조회 성공 ")
+    void displayLogsBy_success() throws Exception {
+        //given
+        //when
+        mockMvc.perform(get("/api/v1/pets/{petId}/logs/calender", 1L)
+                        .param("year", "2024")
+                        .param("month", "2")
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                ).andDo(print())
+                .andExpect(status().isOk());
+        //then
+    }
 }

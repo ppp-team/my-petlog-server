@@ -1,6 +1,7 @@
 package com.ppp.domain.user.repository;
 
 import com.ppp.domain.user.UserDao;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -20,7 +21,11 @@ public class UserQuerydslRepository {
         return jpaQueryFactory.select(constructor(UserDao.class, user.id, user.nickname))
                 .from(guardian)
                 .leftJoin(guardian.user, user)
-                .where(guardian.pet.id.eq(petId))
+                .where(petIdEq(petId))
                 .fetch();
+    }
+
+    private BooleanExpression petIdEq(Long petId) {
+        return petId != null ? guardian.pet.id.eq(petId) : null;
     }
 }
