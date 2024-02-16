@@ -6,7 +6,7 @@ import com.ppp.api.invitation.dto.request.RegisterInvitationRequest;
 import com.ppp.api.invitation.dto.response.InvitationResponse;
 import com.ppp.api.invitation.service.InvitationService;
 import com.ppp.common.security.PrincipalDetails;
-import com.ppp.domain.invitation.MyInvitationDto;
+import com.ppp.domain.invitation.dto.MyInvitationDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;

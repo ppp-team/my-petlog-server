@@ -1,6 +1,6 @@
 package com.ppp.domain.user.repository;
 
-import com.ppp.domain.user.UserDao;
+import com.ppp.domain.user.dto.UserDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +17,8 @@ import static com.querydsl.core.types.Projections.constructor;
 public class UserQuerydslRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
-    public List<UserDao> findGuardianUserByPetId(Long petId) {
-        return jpaQueryFactory.select(constructor(UserDao.class, user.id, user.nickname))
+    public List<UserDto> findGuardianUserByPetId(Long petId) {
+        return jpaQueryFactory.select(constructor(UserDto.class, user.id, user.nickname))
                 .from(guardian)
                 .leftJoin(guardian.user, user)
                 .where(petIdEq(petId))

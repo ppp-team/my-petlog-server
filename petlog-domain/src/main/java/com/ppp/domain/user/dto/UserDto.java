@@ -1,15 +1,15 @@
-package com.ppp.domain.user;
+package com.ppp.domain.user.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 
 @Data
-public class UserDao {
+public class UserDto {
     private String id;
     private String nickname;
 
     @QueryProjection
-    public UserDao(String id, String nickname) {
+    public UserDto(String id, String nickname) {
         this.id = id;
         this.nickname = nickname;
     }

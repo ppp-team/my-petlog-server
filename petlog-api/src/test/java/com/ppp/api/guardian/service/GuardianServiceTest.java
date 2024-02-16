@@ -4,7 +4,7 @@ import com.ppp.api.guardian.exception.GuardianException;
 import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.user.User;
-import com.ppp.domain.user.UserDao;
+import com.ppp.domain.user.dto.UserDto;
 import com.ppp.domain.user.repository.UserQuerydslRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,8 +42,8 @@ class GuardianServiceTest {
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(true);
         given(userQuerydslRepository.findGuardianUserByPetId(anyLong()))
-                .willReturn(List.of(new UserDao("abcde1234", "hi"),
-                        new UserDao("qwerty1456", "체리엄마")));
+                .willReturn(List.of(new UserDto("abcde1234", "hi"),
+                        new UserDto("qwerty1456", "체리엄마")));
         //when
         List<UserResponse> response = guardianService.displayGuardiansByPetId(user, 1L);
         //then

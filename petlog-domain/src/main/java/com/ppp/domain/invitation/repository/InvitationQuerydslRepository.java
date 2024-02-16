@@ -1,6 +1,6 @@
 package com.ppp.domain.invitation.repository;
 
-import com.ppp.domain.invitation.MyInvitationDto;
+import com.ppp.domain.invitation.dto.MyInvitationDto;
 import com.ppp.domain.invitation.constant.InviteStatus;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
