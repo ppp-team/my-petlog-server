@@ -12,7 +12,9 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static jakarta.persistence.FetchType.LAZY;
@@ -55,15 +57,17 @@ public class Log extends BaseTimeEntity {
     @JoinColumn(name = "manager_id", nullable = false)
     private User manager;
 
-    @OneToOne(mappedBy = "log", cascade = CascadeType.ALL, fetch = LAZY, optional = false)
-    private LogLocation location;
+    @OneToMany(mappedBy = "log", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LogLocation> location = new ArrayList<>();
 
     public void addLocation(LogLocation location) {
-        this.location = location;
+        this.location.clear();
+        this.location.add(location);
     }
 
     public void delete() {
         this.isDeleted = true;
+        this.location.clear();
     }
 
     public void switchCompleteStatus() {

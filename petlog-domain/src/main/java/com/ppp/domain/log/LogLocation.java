@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class LogLocation extends BaseTimeEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -22,8 +23,8 @@ public class LogLocation extends BaseTimeEntity {
     @Column
     private Long mapId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "log_id", nullable = false)
     private Log log;
 
     @Builder
