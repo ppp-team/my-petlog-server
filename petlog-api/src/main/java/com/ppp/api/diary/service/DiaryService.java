@@ -243,10 +243,12 @@ public class DiaryService {
     }
 
     public String getThumbnailFromDiaryMedia(DiaryMedia thumbnailMedia) {
-        if (DiaryMediaType.IMAGE.equals(thumbnailMedia.getType()))
-            return thumbnailService.uploadThumbnailFromStorageFile(
-                    thumbnailMedia.getPath(), FileType.IMAGE, DIARY);
-        return thumbnailService.uploadThumbnailFromStorageFile(
-                thumbnailMedia.getPath(), FileType.VIDEO, DIARY);
+        try {
+            if (DiaryMediaType.IMAGE.equals(thumbnailMedia.getType()))
+                return thumbnailService.uploadThumbnailFromStorageFile(thumbnailMedia.getPath(), FileType.IMAGE, DIARY);
+            return thumbnailService.uploadThumbnailFromStorageFile(thumbnailMedia.getPath(), FileType.VIDEO, DIARY);
+        } catch (Exception e) {
+            return DiaryPolicy.DEFAULT_THUMBNAIL_PATH;
+        }
     }
 }
