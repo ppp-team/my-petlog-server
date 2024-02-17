@@ -142,6 +142,20 @@ class DiaryCommentServiceTest {
     }
 
     @Test
+    @DisplayName("다이어리 댓글 생성 실패-diary not found-다이어리 pet id와 주어진 pet id가 다름")
+    void createComment_fail_DIARY_NOT_FOUND_WhenGivenPetIdIsNotDiaryPetId() {
+        //given
+        DiaryCommentRequest request = new DiaryCommentRequest("오늘은 산으로 산책을 갔어요", List.of("abc123", "dab456"));
+
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(diary));
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.createComment(user, 2L, 1L, request));
+        //then
+        assertEquals(DIARY_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
     @DisplayName("다이어리 댓글 생성 실패-forbidden pet space")
     void createComment_fail_FORBIDDEN_PET_SPACE() {
         //given
@@ -169,7 +183,7 @@ class DiaryCommentServiceTest {
                 .diary(diary)
                 .user(user)
                 .build();
-        given(diaryCommentRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(anyLong(), anyLong()))
                 .willReturn(Optional.of(diaryComment));
         given(userRepository.findByIdAndIsDeletedFalse("abc123")).willReturn(Optional.of(userA));
         given(userRepository.findByIdAndIsDeletedFalse("dab456")).willReturn(Optional.empty());
@@ -194,7 +208,7 @@ class DiaryCommentServiceTest {
         //given
         DiaryCommentRequest request = new DiaryCommentRequest("오늘은 산으로 산책을 갔어요", List.of("abc123", "dab456"));
 
-        given(diaryCommentRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(anyLong(), anyLong()))
                 .willReturn(Optional.empty());
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.updateComment(user, 1L, 1L, request));
@@ -216,7 +230,7 @@ class DiaryCommentServiceTest {
                 .diary(diary)
                 .user(otherUser)
                 .build();
-        given(diaryCommentRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(anyLong(), anyLong()))
                 .willReturn(Optional.of(diaryComment));
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.updateComment(user, 1L, 1L, request));
@@ -236,7 +250,7 @@ class DiaryCommentServiceTest {
                 .diary(diary)
                 .user(user)
                 .build();
-        given(diaryCommentRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(anyLong(), anyLong()))
                 .willReturn(Optional.of(diaryComment));
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(false);
@@ -257,7 +271,7 @@ class DiaryCommentServiceTest {
                 .diary(diary)
                 .user(user)
                 .build();
-        given(diaryCommentRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(anyLong(), anyLong()))
                 .willReturn(Optional.of(diaryComment));
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(true);
@@ -272,7 +286,7 @@ class DiaryCommentServiceTest {
     @DisplayName("다이어리 댓글 삭제 실패-comment not found")
     void deleteComment_success_DIARY_COMMENT_NOT_FOUND() {
         //given
-        given(diaryCommentRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(anyLong(), anyLong()))
                 .willReturn(Optional.empty());
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.deleteComment(user, 1L, 1L));
@@ -292,7 +306,7 @@ class DiaryCommentServiceTest {
                 .diary(diary)
                 .user(otherUser)
                 .build();
-        given(diaryCommentRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(anyLong(), anyLong()))
                 .willReturn(Optional.of(diaryComment));
         //when
         DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.deleteComment(user, 1L, 1L));
@@ -310,7 +324,7 @@ class DiaryCommentServiceTest {
                 .diary(diary)
                 .user(user)
                 .build();
-        given(diaryCommentRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(anyLong(), anyLong()))
                 .willReturn(Optional.of(diaryComment));
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(false);
@@ -359,6 +373,32 @@ class DiaryCommentServiceTest {
         assertEquals(response.getContent().get(0).taggedUsers().get(0).id(), "ljf123");
         assertEquals(response.getContent().get(0).taggedUsers().get(0).nickname(), "둘째누나");
     }
+
+    @Test
+    @DisplayName("다이어리 댓글 조회 실패-diary not found")
+    void displayComments_fail_DIARY_NOT_FOUND() {
+        //given
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.empty());
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.displayComments(user, 1L, 1L, 1, 10));
+        //then
+        assertEquals(DIARY_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("다이어리 댓글 조회 실패-diary not found-다이어리 pet id와 주어진 pet id가 다름")
+    void displayComments_fail_DIARY_NOT_FOUND_WhenGivenPetIdIsNotDiaryPetId() {
+        //given
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(diary));
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryCommentService.displayComments(user, 2L, 1L, 1, 10));
+        //then
+        assertEquals(DIARY_NOT_FOUND.getCode(), exception.getCode());
+    }
+
+
 
     @Test
     @DisplayName("다이어리 댓글 조회 실패-forbidden pet space")

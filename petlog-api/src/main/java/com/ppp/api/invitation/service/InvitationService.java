@@ -10,7 +10,7 @@ import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.util.TimeUtil;
 import com.ppp.domain.guardian.constant.GuardianRole;
 import com.ppp.domain.invitation.Invitation;
-import com.ppp.domain.invitation.MyInvitationDto;
+import com.ppp.domain.invitation.dto.MyInvitationDto;
 import com.ppp.domain.invitation.constant.InviteStatus;
 import com.ppp.domain.invitation.repository.InvitationQuerydslRepository;
 import com.ppp.domain.invitation.repository.InvitationRepository;

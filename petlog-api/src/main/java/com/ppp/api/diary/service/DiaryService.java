@@ -113,6 +113,7 @@ public class DiaryService {
     @Transactional
     public void updateDiary(User user, Long petId, Long diaryId, DiaryUpdateRequest request, List<MultipartFile> images) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
+                .filter(foundDiary -> Objects.equals(foundDiary.getPet().getId(), petId))
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateModifyDiary(diary, user, petId);
         List<DiaryMedia> keepingVideos = diary.getVideoMedias().stream()
@@ -159,6 +160,7 @@ public class DiaryService {
     @Transactional
     public void deleteDiary(User user, Long petId, Long diaryId) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
+                .filter(foundDiary -> Objects.equals(foundDiary.getPet().getId(), petId))
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateModifyDiary(diary, user, petId);
 
@@ -169,6 +171,7 @@ public class DiaryService {
 
     public DiaryDetailResponse displayDiary(User user, Long petId, Long diaryId) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
+                .filter(foundDiary -> Objects.equals(foundDiary.getPet().getId(), petId))
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateAccessDiary(petId, user);
         return DiaryDetailResponse.from(diary, user.getId(),

@@ -1,4 +1,4 @@
-package com.ppp.domain.invitation;
+package com.ppp.domain.invitation.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.annotations.QueryProjection;
