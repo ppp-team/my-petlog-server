@@ -188,7 +188,7 @@ public class LogService {
                 .orElseThrow(() -> new LogException(LOG_NOT_FOUND));
         validateAccessLog(petId, user);
 
-        log.switchIsComplete();
+        log.switchCompleteStatus();
     }
 
     public LogCalenderResponse displayLogRecordedDayByTheMonth(User user, Long petId, int year, int month) {
