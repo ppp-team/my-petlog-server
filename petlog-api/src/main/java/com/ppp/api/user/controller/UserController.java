@@ -3,6 +3,7 @@ package com.ppp.api.user.controller;
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.user.dto.request.EmailRequest;
 import com.ppp.api.user.dto.request.NicknameRequest;
+import com.ppp.api.user.dto.request.ValidatePasswordRequest;
 import com.ppp.api.user.dto.response.ProfileResponse;
 import com.ppp.api.user.exception.ErrorCode;
 import com.ppp.api.user.exception.UserException;
@@ -73,7 +74,6 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "User not found", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "500", description = "Invalid password", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PutMapping(value = "/v1/users/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateProfile(
@@ -94,5 +94,11 @@ public class UserController {
     @GetMapping("/v1/users/me")
     public ResponseEntity<ProfileResponse> displayMe(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(userService.displayMe(principalDetails.getUser()));
+    }
+
+    @PostMapping("/v1/users/password/validation")
+    public ResponseEntity<String> validatePassword(@RequestBody ValidatePasswordRequest validatePasswordRequest, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        userService.validatePassword(validatePasswordRequest.getPassword(), principalDetails.getUser().getPassword());
+        return ResponseEntity.ok().build();
     }
 }
