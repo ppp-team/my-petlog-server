@@ -141,7 +141,7 @@ class LogServiceTest {
         assertEquals(1L, captor.getValue().getPet().getId());
         assertEquals("abc123", captor.getValue().getManager().getId());
         assertNotNull(captor.getValue().getLocation());
-        assertEquals(LogLocationType.CUSTOM, captor.getValue().getLocation().getType());
+        assertEquals(LogLocationType.CUSTOM, captor.getValue().getLocation().get(0).getType());
     }
 
     @Test
@@ -179,7 +179,7 @@ class LogServiceTest {
         assertEquals("합정점에 잠깐 들려 커피 사기", captor.getValue().getMemo());
         assertEquals(1L, captor.getValue().getPet().getId());
         assertEquals("abc123", captor.getValue().getManager().getId());
-        assertNull(captor.getValue().getLocation());
+        assertNull(captor.getValue().getLocation().get(0));
     }
 
     @Test
@@ -219,8 +219,8 @@ class LogServiceTest {
         assertEquals(1L, captor.getValue().getPet().getId());
         assertEquals("abc123", captor.getValue().getManager().getId());
         assertNotNull(captor.getValue().getLocation());
-        assertEquals(LogLocationType.KAKAO, captor.getValue().getLocation().getType());
-        assertEquals(2057327896L, captor.getValue().getLocation().getMapId());
+        assertEquals(LogLocationType.KAKAO, captor.getValue().getLocation().get(0).getType());
+        assertEquals(2057327896L, captor.getValue().getLocation().get(0).getMapId());
     }
 
     @Test
@@ -581,7 +581,7 @@ class LogServiceTest {
         logService.deleteLog(user, 1L, 1L);
         //then
         assertTrue(log.isDeleted());
-        assertNull(log.getLocation());
+        assertTrue(log.getLocation().isEmpty());
     }
 
     @Test

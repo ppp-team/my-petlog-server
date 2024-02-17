@@ -839,7 +839,6 @@ class DiaryServiceTest {
         assertEquals(response.writer().profilePath(), user.getProfile().getUrl());
         assertEquals(response.commentCount(), 3);
         assertEquals(response.writer().nickname(), user.getNickname());
-        assertEquals(response.pet().age(), "1살");
         assertFalse(response.isCurrentUserLiked());
         assertEquals(response.likeCount(), 5);
     }

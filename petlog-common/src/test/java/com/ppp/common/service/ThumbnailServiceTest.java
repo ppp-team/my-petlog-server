@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -48,7 +49,7 @@ class ThumbnailServiceTest {
 
     @Test
     @DisplayName("썸네일 업로드 성공")
-    void uploadThumbnailTest_success() throws IOException {
+    void uploadThumbnailTest_success() throws Exception {
         //given
         String filePath = "temp/video/fasfdas.mp4";
         mockURL = mockConstruction(URL.class, (mock, context) -> {
@@ -72,8 +73,8 @@ class ThumbnailServiceTest {
     }
 
     @Test
-    @DisplayName("썸네일 업로드 성공_에러 발생시 디폴트 썸네일 반환")
-    void uploadThumbnailTest_success_WhenAnyExceptionOccurred() throws IOException {
+    @DisplayName("썸네일 업로드 성공_에러 발생시 익셉션 발생")
+    void uploadThumbnailTest_success_WhenAnyExceptionOccurred() throws Exception {
         //given
         String filePath = "temp/video/fasfdas.mp4";
         mockURL = mockConstruction(URL.class, (mock, context) -> {
@@ -87,8 +88,7 @@ class ThumbnailServiceTest {
         when(thumbnailExtractClient.extractThumbnail(inputFile, FileType.VIDEO))
                 .thenThrow(FileException.class);
         //when
-        String result = thumbnailService.uploadThumbnailFromStorageFile(filePath, FileType.VIDEO, Domain.DIARY);
+        FileException exception = assertThrows(FileException.class, () -> thumbnailService.uploadThumbnailFromStorageFile(filePath, FileType.VIDEO, Domain.DIARY));
         //then
-        assertEquals("RESOURCE/default-thumbnail.png", result);
     }
 }
