@@ -58,17 +58,12 @@ public class Log extends BaseTimeEntity {
     @OneToOne(mappedBy = "log", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY, optional = false)
     private LogLocation location;
 
-    private void deleteLocation() {
-        location = null;
-    }
-
     public void addLocation(LogLocation location) {
         this.location = location;
     }
 
     public void delete() {
         this.isDeleted = true;
-        deleteLocation();
     }
 
     public void switchIsComplete() {
