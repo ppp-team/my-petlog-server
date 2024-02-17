@@ -38,7 +38,7 @@ public class FileStorageManageService {
                 .filter(multipartFile -> {
                     Optional<String> maybeExtension = FilePathUtil.getFileExtension(
                             Objects.requireNonNull(multipartFile.getOriginalFilename()));
-                    return maybeExtension.isPresent() && ALLOW_IMAGE_CODES.contains(maybeExtension.get());
+                    return maybeExtension.isPresent() && ALLOW_IMAGE_CODES.contains(maybeExtension.get().toLowerCase(Locale.ROOT));
                 })
                 .map(multipartFile -> fileStorageClient.upload(multipartFile, domain))
                 .collect(Collectors.toList());

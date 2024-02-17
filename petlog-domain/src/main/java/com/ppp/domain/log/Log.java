@@ -55,12 +55,8 @@ public class Log extends BaseTimeEntity {
     @JoinColumn(name = "manager_id", nullable = false)
     private User manager;
 
-    @OneToOne(mappedBy = "log", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY, optional = false)
+    @OneToOne(mappedBy = "log", cascade = CascadeType.ALL, fetch = LAZY, optional = false)
     private LogLocation location;
-
-    private void deleteLocation() {
-        location = null;
-    }
 
     public void addLocation(LogLocation location) {
         this.location = location;
@@ -68,10 +64,9 @@ public class Log extends BaseTimeEntity {
 
     public void delete() {
         this.isDeleted = true;
-        deleteLocation();
     }
 
-    public void switchIsComplete() {
+    public void switchCompleteStatus() {
         isComplete = !isComplete;
     }
 
