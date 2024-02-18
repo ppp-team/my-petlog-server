@@ -73,7 +73,7 @@ public class AuthService {
 
     public AuthenticationResponse socialLogin(SocialRequest socialRequest) {
         User user = userRepository.findByEmail(socialRequest.getEmail())
-                .orElseGet(() -> userRepository.save(User.createUserByEmail(socialRequest.getEmail(), null, Role.USER))
+                .orElseGet(() -> userRepository.save(User.createUserByEmail(socialRequest.getEmail(), Role.USER))
         );
 
         String accessToken = jwtTokenProvider.generateAccessToken(user);

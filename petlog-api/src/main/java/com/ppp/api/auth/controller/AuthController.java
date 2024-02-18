@@ -53,6 +53,11 @@ public class AuthController {
     }
 
     @Operation(description = "소셜 로그인 성공시 해당 유저를 회원가입/로그인 시켜 토큰을 반환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content =
+                    {@Content(mediaType = "application/json", schema =
+                    @Schema(implementation = AuthenticationResponse.class))}),
+    })
     @PostMapping("/login/social")
     public ResponseEntity<AuthenticationResponse> socialLogin(@RequestBody SocialRequest socialRequest) {
         return ResponseEntity.ok(authService.socialLogin(socialRequest));
