@@ -141,7 +141,7 @@ class LogServiceTest {
         assertEquals(1L, captor.getValue().getPet().getId());
         assertEquals("abc123", captor.getValue().getManager().getId());
         assertNotNull(captor.getValue().getLocation());
-        assertEquals(LogLocationType.CUSTOM, captor.getValue().getLocation().get(0).getType());
+        assertEquals(LogLocationType.CUSTOM, captor.getValue().getLocation().getType());
     }
 
     @Test
@@ -179,7 +179,7 @@ class LogServiceTest {
         assertEquals("합정점에 잠깐 들려 커피 사기", captor.getValue().getMemo());
         assertEquals(1L, captor.getValue().getPet().getId());
         assertEquals("abc123", captor.getValue().getManager().getId());
-        assertNull(captor.getValue().getLocation().get(0));
+        assertNull(captor.getValue().getLocation());
     }
 
     @Test
@@ -219,8 +219,8 @@ class LogServiceTest {
         assertEquals(1L, captor.getValue().getPet().getId());
         assertEquals("abc123", captor.getValue().getManager().getId());
         assertNotNull(captor.getValue().getLocation());
-        assertEquals(LogLocationType.KAKAO, captor.getValue().getLocation().get(0).getType());
-        assertEquals(2057327896L, captor.getValue().getLocation().get(0).getMapId());
+        assertEquals(LogLocationType.KAKAO, captor.getValue().getLocation().getType());
+        assertEquals(2057327896L, captor.getValue().getLocation().getMapId());
     }
 
     @Test
@@ -581,7 +581,7 @@ class LogServiceTest {
         logService.deleteLog(user, 1L, 1L);
         //then
         assertTrue(log.isDeleted());
-        assertTrue(log.getLocation().isEmpty());
+        assertNull(log.getLocation());
     }
 
     @Test
@@ -806,7 +806,7 @@ class LogServiceTest {
     @DisplayName("건강 수첩 상세 조회 성공")
     void displayLog_success() {
         //given
-        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(logRepository.findLogWithLocationByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(Log.builder()
                         .typeMap(Map.of("type", FEED.name(),
                                 "subType", "건식"))
@@ -822,7 +822,7 @@ class LogServiceTest {
         //when
         LogDetailResponse response = logService.displayLog(user, 1L, 1L);
         //then
-        assertEquals(response.type(), FEED.getTitle());
+        assertEquals(response.type(), FEED.name());
         assertEquals(response.subType(), "건식");
         assertEquals(response.memo(), "엄마 밥 또 주지 마셈");
     }
@@ -831,7 +831,7 @@ class LogServiceTest {
     @DisplayName("건강 수첩 상세 조회 실패-log not found")
     void displayLog_fail_LOG_NOT_FOUND() {
         //given
-        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(logRepository.findLogWithLocationByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.empty());
         //when
         LogException exception = assertThrows(LogException.class, () -> logService.displayLog(user, 1L, 1L));
@@ -843,7 +843,7 @@ class LogServiceTest {
     @DisplayName("건강 수첩 상세 조회 성공-log not found-주어진 반려 동물 id와 로그의 반려 동물 id가 다름")
     void displayLog_success_LOG_NOT_FOUND_WhenGivenPetIdIsNotLogPetId() {
         //given
-        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(logRepository.findLogWithLocationByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(Log.builder()
                         .typeMap(Map.of("type", FEED.name(),
                                 "subType", "건식"))
@@ -864,7 +864,7 @@ class LogServiceTest {
     @DisplayName("건강 수첩 상세 조회 실패-forbidden pet space")
     void displayLog_fail_FORBIDDEN_PET_SPACE() {
         //given
-        given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
+        given(logRepository.findLogWithLocationByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(Log.builder()
                         .typeMap(Map.of("type", FEED.name(),
                                 "subType", "건식"))

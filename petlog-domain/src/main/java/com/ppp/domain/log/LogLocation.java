@@ -33,4 +33,8 @@ public class LogLocation extends BaseTimeEntity {
         this.mapId = mapId;
         this.log = log;
     }
+
+    public boolean getIsCustomLocation() {
+        return LogLocationType.CUSTOM.equals(type);
+    }
 }

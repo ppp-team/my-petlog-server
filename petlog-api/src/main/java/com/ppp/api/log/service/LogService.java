@@ -127,7 +127,7 @@ public class LogService {
     }
 
     public LogDetailResponse displayLog(User user, Long petId, Long logId) {
-        Log log = logRepository.findByIdAndIsDeletedFalse(logId)
+        Log log = logRepository.findLogWithLocationByIdAndIsDeletedFalse(logId)
                 .filter(foundLog -> Objects.equals(foundLog.getPet().getId(), petId))
                 .orElseThrow(() -> new LogException(LOG_NOT_FOUND));
         validateAccessLog(petId, user);
