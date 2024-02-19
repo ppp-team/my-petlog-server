@@ -1,6 +1,7 @@
 package com.ppp.domain.log;
 
 import com.ppp.domain.common.BaseTimeEntity;
+import com.ppp.domain.log.constant.LogType;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.user.User;
 import jakarta.persistence.*;
@@ -12,11 +13,9 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.FetchType.LAZY;
 
 @Getter
@@ -53,7 +52,7 @@ public class Log extends BaseTimeEntity {
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = EAGER)
     @JoinColumn(name = "manager_id", nullable = false)
     private User manager;
 
@@ -82,6 +81,18 @@ public class Log extends BaseTimeEntity {
         this.isComplete = isComplete;
         this.manager = manager;
         addLocation(location);
+    }
+
+    public String getTaskName() {
+        LogType type = LogType.valueOf(typeMap.get("type"));
+        return Objects.equals(LogType.CUSTOM, type) ?
+                this.getTypeMap().get("subType") : type.getTitle();
+    }
+
+    public LogLocation getLocation() {
+        if (this.location.isEmpty())
+            return null;
+        return location.get(0);
     }
 
     @Builder

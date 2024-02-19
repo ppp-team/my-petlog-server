@@ -17,18 +17,33 @@ public record LogResponse(
         boolean isImportant,
         @JsonFormat(pattern = "HH:mm")
         LocalDateTime time,
-        UserResponse manager
+        UserResponse manager,
+        LogDetail detail
 ) {
     public static LogResponse from(Log log, String currentUserId) {
-        LogType type = LogType.valueOf(log.getTypeMap().get("type"));
         return LogResponse.builder()
                 .logId(log.getId())
-                .taskName(Objects.equals(LogType.CUSTOM, type) ?
-                        log.getTypeMap().get("subType") : type.getTitle())
+                .taskName(log.getTaskName())
                 .isComplete(log.isComplete())
                 .isImportant(log.isImportant())
                 .time(log.getDatetime())
                 .manager(UserResponse.of(log.getManager().getId(), log.getManager().getNickname(), currentUserId))
+                .detail(LogDetail.from(log))
                 .build();
+    }
+
+    @Builder
+    private record LogDetail(
+            String type,
+            String subType,
+            String memo
+    ) {
+        private static LogDetail from(Log log) {
+            return LogDetail.builder()
+                    .type(log.getTypeMap().get("type"))
+                    .subType(log.getTypeMap().get("subType"))
+                    .memo(log.getMemo())
+                    .build();
+        }
     }
 }
