@@ -58,6 +58,15 @@ public class User extends BaseTimeEntity {
                 .build();
     }
 
+    public static User createUserByEmail(String email, Role role) {
+        return User.builder()
+                .id(GenerationUtil.generateIdFromEmail(email))
+                .email(email)
+                .role(role)
+                .isDeleted(false)
+                .build();
+    }
+
     public void setEmail(String email) {
         this.email = email;
     }

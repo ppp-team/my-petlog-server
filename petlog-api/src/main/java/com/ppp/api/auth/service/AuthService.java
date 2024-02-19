@@ -1,10 +1,11 @@
 package com.ppp.api.auth.service;
 
 
-import com.ppp.api.auth.exception.AuthException;
-import com.ppp.api.auth.dto.response.AuthenticationResponse;
 import com.ppp.api.auth.dto.request.RegisterRequest;
 import com.ppp.api.auth.dto.request.SigninRequest;
+import com.ppp.api.auth.dto.request.SocialRequest;
+import com.ppp.api.auth.dto.response.AuthenticationResponse;
+import com.ppp.api.auth.exception.AuthException;
 import com.ppp.api.auth.exception.ErrorCode;
 import com.ppp.api.user.exception.NotFoundUserException;
 import com.ppp.common.client.RedisClient;
@@ -68,6 +69,21 @@ public class AuthService {
         }
 
         throw new AuthException(ErrorCode.NOTMATCH_PASSWORD);
+    }
+
+    public AuthenticationResponse socialLogin(SocialRequest socialRequest) {
+        User user = userRepository.findByEmail(socialRequest.getEmail())
+                .orElseGet(() -> userRepository.save(User.createUserByEmail(socialRequest.getEmail(), Role.USER))
+        );
+
+        String accessToken = jwtTokenProvider.generateAccessToken(user);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user);
+        redisClient.setValues(user.getEmail(), refreshToken, Duration.ofMillis(jwtTokenProvider.getRefreshExpiration(refreshToken)));
+
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     public AuthenticationResponse regenerateToken(String refreshToken) {

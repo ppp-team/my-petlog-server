@@ -1,5 +1,6 @@
 package com.ppp.api.auth.controller;
 
+import com.ppp.api.auth.dto.request.SocialRequest;
 import com.ppp.api.auth.service.AuthService;
 import com.ppp.api.auth.dto.request.SigninRequest;
 import com.ppp.api.auth.dto.response.AuthenticationResponse;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +31,10 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "409", description = "이메일 중복", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Invalid password", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<Void> signup(@Valid @RequestBody RegisterRequest registerRequest) {
         authService.signup(registerRequest);
         return ResponseEntity.ok().build();
     }
@@ -42,11 +45,22 @@ public class AuthController {
                     { @Content(mediaType = "application/json", schema =
                     @Schema(implementation = AuthenticationResponse.class)) }),
             @ApiResponse(responseCode = "404", description = "User not found", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "500", description = "Invalid password", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+            @ApiResponse(responseCode = "500", description = "Invalid password", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
     @PostMapping("/signin")
-    public ResponseEntity<AuthenticationResponse> signin(@RequestBody SigninRequest signinRequest) {
+    public ResponseEntity<AuthenticationResponse> signin(@Valid @RequestBody SigninRequest signinRequest) {
         return ResponseEntity.ok(authService.signin(signinRequest));
+    }
+
+    @Operation(description = "소셜 로그인 성공시 해당 유저를 회원가입/로그인 시켜 토큰을 반환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content =
+                    {@Content(mediaType = "application/json", schema =
+                    @Schema(implementation = AuthenticationResponse.class))}),
+    })
+    @PostMapping("/login/social")
+    public ResponseEntity<AuthenticationResponse> socialLogin(@RequestBody SocialRequest socialRequest) {
+        return ResponseEntity.ok(authService.socialLogin(socialRequest));
     }
 
     @Operation(summary = "로그아웃")
