@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -102,7 +103,7 @@ public class DiaryCommentService {
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateDisplayComments(user, petId);
 
-        return diaryCommentRepository.findByDiaryAndIsDeletedFalse(diary, PageRequest.of(page, size))
+        return diaryCommentRepository.findByDiaryAndIsDeletedFalse(diary, PageRequest.of(page, size, Sort.by("id").descending()))
                 .map(comment -> DiaryCommentResponse.from(comment, user.getId(),
                         diaryCommentRedisService.isDiaryCommentLikeExistByCommentIdAndUserId(comment.getId(), user.getId()),
                         diaryCommentRedisService.getLikeCountByCommentId(comment.getId())));

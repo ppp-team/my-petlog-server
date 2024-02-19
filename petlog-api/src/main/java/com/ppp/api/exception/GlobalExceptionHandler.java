@@ -175,7 +175,7 @@ public class GlobalExceptionHandler {
                 .message(exception.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
-        log.error(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
+        log.error(LOG_FORMAT, exception.getClass().getSimpleName(), exception.getStackTrace(), exception.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
