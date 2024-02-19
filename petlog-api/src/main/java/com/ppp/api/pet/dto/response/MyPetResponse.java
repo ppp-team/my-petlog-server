@@ -71,7 +71,7 @@ public class MyPetResponse {
                 .type(pet.getType())
                 .breed(pet.getBreed())
                 .gender(pet.getGender())
-                .isNeutered(pet.getIsNeutered() ? "Y" : "N")
+                .isNeutered(pet.getIsNeutered() == null ? null : (pet.getIsNeutered() ? "Y" : "N"))
                 .birth(pet.getBirth())
                 .firstMeetDate(pet.getFirstMeetDate())
                 .weight(pet.getWeight() == 0 ? null : String.valueOf(pet.getWeight()))

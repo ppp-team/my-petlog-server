@@ -46,7 +46,7 @@ public class PetService {
                 .type(petRequest.getType())
                 .breed(petRequest.getBreed())
                 .gender(petRequest.getToGender())
-                .isNeutered(petRequest.getIsNeutered())
+                .isNeutered(petRequest.getIsNeutered() != null ? petRequest.getIsNeutered() : null)
                 .birth(petRequest.convertToBirthLocalDateTime())
                 .firstMeetDate(petRequest.convertToFirstMeetDateLocalDateTime())
                 .weight(petRequest.getWeight())
@@ -109,13 +109,13 @@ public class PetService {
         Pet pet = petRepository.findMyPetById(petId, user.getId())
                 .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
 
+        petImageRepository.findByPet(pet).ifPresent(
+                image -> fileStorageManageService.deleteImage(image.getUrl()));
+
         pet.updatePet(petRequest.getName(), petRequest.getType(), petRequest.getBreed(), petRequest.getGender()
                 , petRequest.getIsNeutered(), petRequest.getBirth(), petRequest.getFirstMeetDate(), petRequest.getWeight(), petRequest.getRegisteredNumber());
 
         savePetImage(pet, petImage);
-
-        petImageRepository.findByPet(pet).ifPresent(
-                image -> fileStorageManageService.deleteImage(image.getUrl()));
     }
 
     @Transactional
