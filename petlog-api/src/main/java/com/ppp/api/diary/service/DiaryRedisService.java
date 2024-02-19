@@ -14,12 +14,12 @@ public class DiaryRedisService {
     private final RedisClient redisClient;
 
     public boolean isLikeExistByDiaryIdAndUserId(Long diaryId, String userId) {
-        return redisClient.isValueExistInSet(Domain.DIARY, diaryId, userId);
+        return redisClient.isValueExistInSet(Domain.DIARY_LIKE, diaryId, userId);
     }
 
     @Cacheable(value = "diaryLikeCount")
     public Integer getLikeCountByDiaryId(Long diaryId) {
-        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY, diaryId);
+        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_LIKE, diaryId);
         assert likeCount != null;
 
         return likeCount.intValue();
@@ -27,8 +27,8 @@ public class DiaryRedisService {
 
     @CachePut(value = "diaryLikeCount", key = "#a0")
     public Integer registerLikeByDiaryIdAndUserId(Long diaryId, String userId) {
-        redisClient.addValueToSet(Domain.DIARY, diaryId, userId);
-        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY, diaryId);
+        redisClient.addValueToSet(Domain.DIARY_LIKE, diaryId, userId);
+        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_LIKE, diaryId);
         assert likeCount != null;
 
         return likeCount.intValue();
@@ -36,8 +36,8 @@ public class DiaryRedisService {
 
     @CachePut(value = "diaryLikeCount", key = "#a0")
     public Integer cancelLikeByDiaryIdAndUserId(Long diaryId, String userId) {
-        redisClient.removeValueToSet(Domain.DIARY, diaryId, userId);
-        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY, diaryId);
+        redisClient.removeValueToSet(Domain.DIARY_LIKE, diaryId, userId);
+        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_LIKE, diaryId);
         assert likeCount != null;
 
         return likeCount.intValue();
@@ -45,6 +45,6 @@ public class DiaryRedisService {
 
     @CacheEvict(value = "diaryLikeCount")
     public void deleteAllLikeByDiaryId(Long diaryId) {
-        redisClient.removeKeyToSet(Domain.DIARY, diaryId);
+        redisClient.removeKeyToSet(Domain.DIARY_LIKE, diaryId);
     }
 }

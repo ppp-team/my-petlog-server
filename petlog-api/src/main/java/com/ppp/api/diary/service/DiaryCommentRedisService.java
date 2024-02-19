@@ -40,12 +40,12 @@ public class DiaryCommentRedisService {
     }
 
     public boolean isDiaryCommentLikeExistByCommentIdAndUserId(Long commentId, String userId) {
-        return redisClient.isValueExistInSet(Domain.DIARY_COMMENT, commentId, userId);
+        return redisClient.isValueExistInSet(Domain.DIARY_COMMENT_LIKE, commentId, userId);
     }
 
     @Cacheable(value = "diaryCommentLikeCount")
     public Integer getLikeCountByCommentId(Long commentId) {
-        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_COMMENT, commentId);
+        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_COMMENT_LIKE, commentId);
         assert likeCount != null;
 
         return likeCount.intValue();
@@ -53,8 +53,8 @@ public class DiaryCommentRedisService {
 
     @CachePut(value = "diaryCommentLikeCount", key = "#a0")
     public Integer registerLikeByCommentIdAndUserId(Long commentId, String userId) {
-        redisClient.addValueToSet(Domain.DIARY_COMMENT, commentId, userId);
-        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_COMMENT, commentId);
+        redisClient.addValueToSet(Domain.DIARY_COMMENT_LIKE, commentId, userId);
+        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_COMMENT_LIKE, commentId);
         assert likeCount != null;
 
         return likeCount.intValue();
@@ -62,8 +62,8 @@ public class DiaryCommentRedisService {
 
     @CachePut(value = "diaryCommentLikeCount", key = "#a0")
     public Integer cancelLikeByCommentIdAndUserId(Long commentId, String userId) {
-        redisClient.removeValueToSet(Domain.DIARY_COMMENT, commentId, userId);
-        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_COMMENT, commentId);
+        redisClient.removeValueToSet(Domain.DIARY_COMMENT_LIKE, commentId, userId);
+        Long likeCount = redisClient.getSizeOfSet(Domain.DIARY_COMMENT_LIKE, commentId);
         assert likeCount != null;
 
         return likeCount.intValue();
@@ -71,6 +71,6 @@ public class DiaryCommentRedisService {
 
     @CacheEvict(value = "diaryCommentLikeCount")
     public void deleteAllLikeByCommentId(Long commentId) {
-        redisClient.removeKeyToSet(Domain.DIARY_COMMENT, commentId);
+        redisClient.removeKeyToSet(Domain.DIARY_COMMENT_LIKE, commentId);
     }
 }

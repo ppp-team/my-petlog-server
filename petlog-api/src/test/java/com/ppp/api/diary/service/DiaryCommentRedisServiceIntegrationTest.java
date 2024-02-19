@@ -131,7 +131,7 @@ class DiaryCommentRedisServiceIntegrationTest {
     @DisplayName("다이어리 댓글 좋아요 개수 캐싱 성공")
     void cachingGetLikeCountByCommentId_success() {
         //given
-        given(redisClient.getSizeOfSet(Domain.DIARY_COMMENT, 1L))
+        given(redisClient.getSizeOfSet(Domain.DIARY_COMMENT_LIKE, 1L))
                 .willReturn(1L);
         //when
         Integer cacheMiss = diaryCommentRedisService.getLikeCountByCommentId(1L);
@@ -149,7 +149,7 @@ class DiaryCommentRedisServiceIntegrationTest {
     @DisplayName("다이어리 댓글 좋아요 개수 캐싱 업데이트 성공")
     void cachingRegisterLikeByCommentId_success() {
         //given
-        given(redisClient.getSizeOfSet(Domain.DIARY_COMMENT, 1L))
+        given(redisClient.getSizeOfSet(Domain.DIARY_COMMENT_LIKE, 1L))
                 .willReturn(3L);
         //when
         Integer cacheUpdated = diaryCommentRedisService.registerLikeByCommentIdAndUserId(1L, "abcde");
@@ -165,7 +165,7 @@ class DiaryCommentRedisServiceIntegrationTest {
     @DisplayName("다이어리 댓글 좋아요 개수 캐싱 업데이트 성공")
     void cachingCancelLikeByCommentId_success() {
         //given
-        given(redisClient.getSizeOfSet(Domain.DIARY_COMMENT, 1L))
+        given(redisClient.getSizeOfSet(Domain.DIARY_COMMENT_LIKE, 1L))
                 .willReturn(3L);
         //when
         Integer cacheUpdated = diaryCommentRedisService.cancelLikeByCommentIdAndUserId(1L, "abcde");
@@ -181,7 +181,7 @@ class DiaryCommentRedisServiceIntegrationTest {
     @DisplayName("다이어리 댓글 좋아요 캐시 삭제 성공")
     void deleteAllLikeByCommentId_success() {
         //given
-        given(redisClient.getSizeOfSet(Domain.DIARY_COMMENT, 1L))
+        given(redisClient.getSizeOfSet(Domain.DIARY_COMMENT_LIKE, 1L))
                 .willReturn(3L);
         //when
         Integer cacheMiss = diaryCommentRedisService.getLikeCountByCommentId(1L);
