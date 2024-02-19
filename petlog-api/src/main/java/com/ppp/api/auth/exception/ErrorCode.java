@@ -17,7 +17,7 @@ public enum ErrorCode {
     ILLEGALARGUMENT_TOKEN(HttpStatus.UNAUTHORIZED, "TOKEN-0007","JWT 클레임 문자열이 비어 있음"),
 
     EXISTS_EMAIL(HttpStatus.CONFLICT, "AUTH-0001", "이메일이 존재합니다."),
-    NOTMATCH_PASSWORD(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH-0002", "현재 비밀번호와 다릅니다.");
+    NOTMATCH_PASSWORD(HttpStatus.BAD_REQUEST, "AUTH-0002", "현재 비밀번호와 다릅니다.");
 
 
     private final HttpStatus status;

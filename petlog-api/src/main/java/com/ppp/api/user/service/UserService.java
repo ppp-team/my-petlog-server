@@ -16,11 +16,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
-import static com.ppp.api.auth.exception.ErrorCode.NOTMATCH_PASSWORD;
 
 @Slf4j
 @Service
@@ -77,17 +75,13 @@ public class UserService {
 
     @Transactional
     public void updateProfile(User user, MultipartFile profileImage, String nickname, String password) {
-        if (!authService.checkPasswordMatches(password, user.getPassword())) {
-            throw new AuthException(NOTMATCH_PASSWORD);
-        }
-
-        User userFromDb = userRepository.findByEmail(user.getEmail())
+          User userFromDb = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
         if (nickname != null && !nickname.isEmpty()) userFromDb.setNickname(nickname);
+        if (password != null && !password.isEmpty()) userFromDb.setPassword(authService.encodePassword(password));
 
-        String savedPath = null;
         if (profileImage != null && !profileImage.isEmpty()) {
-            savedPath = uploadImageToS3(profileImage);
+            String savedPath = uploadImageToS3(profileImage);
             createProfileImage(user, savedPath);
         }
     }
@@ -105,5 +99,10 @@ public class UserService {
                 .email(userFromDb.getEmail())
                 .profilePath(profilePath)
                 .build();
+    }
+
+    public void validatePassword(String rawPassword, String encodedPassword) {
+        if (!authService.checkPasswordMatches(rawPassword, encodedPassword))
+            throw new AuthException(com.ppp.api.auth.exception.ErrorCode.NOTMATCH_PASSWORD);
     }
 }
