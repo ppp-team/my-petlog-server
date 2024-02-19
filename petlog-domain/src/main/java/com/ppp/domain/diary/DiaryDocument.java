@@ -1,14 +1,13 @@
 package com.ppp.domain.diary;
 
 import com.ppp.domain.common.BaseDocument;
+import com.ppp.domain.user.User;
 import com.ppp.domain.user.UserDocument;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-
-import java.time.LocalDate;
 
 @Getter
 @Document(indexName = "diaries")
@@ -49,5 +48,9 @@ public class DiaryDocument extends BaseDocument {
                 .petId(diary.getPet().getId())
                 .user(UserDocument.from(diary.getUser()))
                 .build();
+    }
+
+    public void updateUser(User user) {
+        this.user = UserDocument.from(user);
     }
 }
