@@ -9,9 +9,7 @@ import com.ppp.api.user.exception.NotFoundUserException;
 import com.ppp.api.user.exception.UserException;
 import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.common.constant.Domain;
-import com.ppp.domain.user.ProfileImage;
 import com.ppp.domain.user.User;
-import com.ppp.domain.user.repository.ProfileImageRepository;
 import com.ppp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Optional;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,7 +25,6 @@ public class UserService {
 
     private final FileStorageManageService fileStorageManageService;
     private final UserRepository userRepository;
-    private final ProfileImageRepository profileImageRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final AuthService authService;
 
@@ -43,19 +38,17 @@ public class UserService {
 
     @Transactional
     public void createProfile(User user, MultipartFile profileImage, String nickname) {
-        // save nickname
         User userFromDB = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
         userFromDB.setNickname(nickname);
-
         // save image
-        saveProfileImage(user, profileImage);
+        saveProfileImage(userFromDB, profileImage);
     }
 
     public void saveProfileImage(User user, MultipartFile profileImage) {
         if (profileImage != null && !profileImage.isEmpty()) {
             String savedPath = uploadImageToS3(profileImage);
-            createProfileImage(user, savedPath);
+            user.updateProfilePath(savedPath);
         }
     }
 
@@ -65,43 +58,27 @@ public class UserService {
     }
 
 
-    private void createProfileImage(User user, String path) {
-        Optional<ProfileImage> existingImage = profileImageRepository.findByUser(user);
-        if (existingImage.isPresent()) {
-            ProfileImage image = existingImage.get();
-            image.setUrl(path);
-        } else {
-            ProfileImage newImage = ProfileImage.builder().user(user).url(path).build();
-            profileImageRepository.save(newImage);
-        }
-    }
-
     @Transactional
     public void updateProfile(User user, MultipartFile profileImage, String nickname, String password) {
-          User userFromDb = userRepository.findByEmail(user.getEmail())
+        User userFromDb = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
-        if (nickname != null && !nickname.isEmpty()) userFromDb.setNickname(nickname);
-        if (password != null && !password.isEmpty()) userFromDb.setPassword(authService.encodePassword(password));
+        if (nickname != null && !nickname.isEmpty())
+            userFromDb.setNickname(nickname);
+        if (password != null && !password.isEmpty())
+            userFromDb.setPassword(authService.encodePassword(password));
 
-        if (profileImage != null && !profileImage.isEmpty()) {
-            String savedPath = uploadImageToS3(profileImage);
-            createProfileImage(user, savedPath);
-        }
+        saveProfileImage(userFromDb, profileImage);
         applicationEventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
     }
 
     public ProfileResponse displayMe(User user) {
         User userFromDb = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
-
-        String profilePath = profileImageRepository.findByUser(userFromDb)
-                .map(ProfileImage::getUrl)
-                .orElse(null);
         return ProfileResponse.builder()
                 .id(userFromDb.getId())
                 .nickname(userFromDb.getNickname())
                 .email(userFromDb.getEmail())
-                .profilePath(profilePath)
+                .profilePath(userFromDb.getProfilePath())
                 .build();
     }
 

@@ -10,8 +10,8 @@ import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.util.TimeUtil;
 import com.ppp.domain.guardian.constant.GuardianRole;
 import com.ppp.domain.invitation.Invitation;
-import com.ppp.domain.invitation.dto.MyInvitationDto;
 import com.ppp.domain.invitation.constant.InviteStatus;
+import com.ppp.domain.invitation.dto.MyInvitationDto;
 import com.ppp.domain.invitation.repository.InvitationQuerydslRepository;
 import com.ppp.domain.invitation.repository.InvitationRepository;
 import com.ppp.domain.pet.Pet;
@@ -19,8 +19,6 @@ import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.repository.PetImageRepository;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
-import com.ppp.domain.user.repository.ProfileImageRepository;
-import com.ppp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,8 +38,6 @@ public class InvitationService {
     private final GuardianService guardianService;
     private final PetRepository petRepository;
     private final PetImageRepository petImageRepository;
-    private final UserRepository userRepository;
-    private final ProfileImageRepository profileImageRepository;
     private final InvitationQuerydslRepository invitationQuerydslRepository;
 
     @Transactional(readOnly = true)
@@ -98,7 +94,7 @@ public class InvitationService {
     @Transactional
     public void cancelInvitation(InvitationRequest invitationRequest, User user) {
         Invitation invitation = invitationRepository.findByIdAndInviteStatusAndInviterId(invitationRequest.getInvitationId(), InviteStatus.PENDING, user.getId())
-            .orElseThrow(() -> new InvitationException(ErrorCode.INVITATION_NOT_FOUND));
+                .orElseThrow(() -> new InvitationException(ErrorCode.INVITATION_NOT_FOUND));
         invitation.updateInviteStatus(InviteStatus.CANCELED);
     }
 

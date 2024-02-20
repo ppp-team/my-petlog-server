@@ -44,8 +44,7 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user")
     private List<Pet> pets = new ArrayList<>();
 
-    @OneToOne(mappedBy = "user")
-    private ProfileImage profile;
+    private String profilePath;
 
 
     public static User createUserByEmail(String email, String password, Role role) {
@@ -65,6 +64,10 @@ public class User extends BaseTimeEntity {
                 .role(role)
                 .isDeleted(false)
                 .build();
+    }
+
+    public void updateProfilePath(String path) {
+        this.profilePath = path;
     }
 
     public void setEmail(String email) {
