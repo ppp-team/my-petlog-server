@@ -231,7 +231,7 @@ public class DiaryService {
 
     @Transactional
     public Diary saveThumbnail(Long diaryId) {
-        Diary diary = diaryRepository.findById(diaryId)
+        Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         List<DiaryMedia> diaryMedias = diary.getDiaryMedias();
         if (diaryMedias.isEmpty()) {

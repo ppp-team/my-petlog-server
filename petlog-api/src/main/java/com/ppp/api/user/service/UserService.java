@@ -2,6 +2,7 @@ package com.ppp.api.user.service;
 
 import com.ppp.api.auth.exception.AuthException;
 import com.ppp.api.auth.service.AuthService;
+import com.ppp.api.user.dto.event.UserProfileUpdatedEvent;
 import com.ppp.api.user.dto.response.ProfileResponse;
 import com.ppp.api.user.exception.ErrorCode;
 import com.ppp.api.user.exception.NotFoundUserException;
@@ -14,6 +15,7 @@ import com.ppp.domain.user.repository.ProfileImageRepository;
 import com.ppp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +30,7 @@ public class UserService {
     private final FileStorageManageService fileStorageManageService;
     private final UserRepository userRepository;
     private final ProfileImageRepository profileImageRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final AuthService authService;
 
     public boolean existsByNickname(String nickname) {
@@ -84,6 +87,7 @@ public class UserService {
             String savedPath = uploadImageToS3(profileImage);
             createProfileImage(user, savedPath);
         }
+        applicationEventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
     }
 
     public ProfileResponse displayMe(User user) {
