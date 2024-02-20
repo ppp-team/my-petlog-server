@@ -4,7 +4,6 @@ import com.ppp.api.auth.service.AuthService;
 import com.ppp.api.user.dto.response.ProfileResponse;
 import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.user.User;
-import com.ppp.domain.user.repository.ProfileImageRepository;
 import com.ppp.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -30,8 +30,6 @@ class UserServiceTest {
     private FileStorageManageService fileStorageManageService;
     @Mock
     private UserRepository userRepository;
-    @Mock
-    private ProfileImageRepository profileImageRepository;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
 
@@ -46,7 +44,7 @@ class UserServiceTest {
     @DisplayName("닉네임이 존재할 때")
     void existsByNicknameWhenNotExists() {
         //given
-        String existingNickname  = "닉네임";
+        String existingNickname = "닉네임";
 
         when(userRepository.existsByNickname(anyString())).thenReturn(true);
 
@@ -54,14 +52,14 @@ class UserServiceTest {
         boolean result = userService.existsByNickname(existingNickname);
 
         //then
-        assertTrue(result,"닉네임이 이미 존재하는 경우 테스트 실패");
+        assertTrue(result, "닉네임이 이미 존재하는 경우 테스트 실패");
     }
 
     @Test
     @DisplayName("이메일이 존재할 때")
     void existsByEmailWhenNotExists() {
         //given
-        String existingEmail  = "a@naver.com";
+        String existingEmail = "a@naver.com";
 
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
@@ -69,7 +67,7 @@ class UserServiceTest {
         boolean result = userService.existsByEmail(existingEmail);
 
         //then
-        assertTrue(result,"이메일이 이미 존재하는 경우 테스트 실패");
+        assertTrue(result, "이메일이 이미 존재하는 경우 테스트 실패");
     }
 
     @Test
@@ -86,15 +84,13 @@ class UserServiceTest {
 
         //when
         when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
-        when(profileImageRepository.findByUser(any())).thenReturn(Optional.empty());
-        given(fileStorageManageService.uploadImage((MultipartFile) any(),any()))
+        given(fileStorageManageService.uploadImage((MultipartFile) any(), any()))
                 .willReturn(Optional.of("/USER/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
 
-        userService.createProfile(user,file,"새로운닉네임");
+        userService.createProfile(user, file, "새로운닉네임");
 
         //then
         verify(userRepository, times(1)).findByEmail(any());
-        verify(profileImageRepository, times(1)).findByUser(any());
     }
 
     @Test
@@ -115,11 +111,10 @@ class UserServiceTest {
         //when
         lenient().when(authService.checkPasswordMatches(rawPassword, user.getPassword())).thenReturn(true);
         lenient().when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
-        lenient().when(profileImageRepository.findByUser(any())).thenReturn(Optional.empty());
-        lenient().when(fileStorageManageService.uploadImage((MultipartFile) any(),any()))
+        lenient().when(fileStorageManageService.uploadImage((MultipartFile) any(), any()))
                 .thenReturn(Optional.of("/USER/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
 
-        userService.updateProfile(user,null,user.getNickname(),user.getPassword());
+        userService.updateProfile(user, null, user.getNickname(), user.getPassword());
 
         //then
         verify(userRepository, times(1)).findByEmail(any());

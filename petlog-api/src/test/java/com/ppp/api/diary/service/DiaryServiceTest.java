@@ -10,8 +10,6 @@ import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.video.exception.VideoException;
 import com.ppp.common.service.FileStorageManageService;
 import com.ppp.common.service.ThumbnailService;
-import com.ppp.domain.common.constant.Domain;
-import com.ppp.domain.common.constant.FileType;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryMedia;
 import com.ppp.domain.diary.constant.DiaryMediaType;
@@ -20,7 +18,6 @@ import com.ppp.domain.diary.repository.DiaryRepository;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.repository.PetRepository;
-import com.ppp.domain.user.ProfileImage;
 import com.ppp.domain.user.User;
 import com.ppp.domain.video.TempVideo;
 import com.ppp.domain.video.repository.TempVideoRedisRepository;
@@ -75,17 +72,13 @@ class DiaryServiceTest {
 
     User user = User.builder()
             .id("randomstring")
-            .profile(ProfileImage.builder()
-                    .url("USER/12345678/1232132313dsfadskfakfsa.jpg")
-                    .build())
             .nickname("hi")
+            .profilePath("USER/12345678/1232132313dsfadskfakfsa.jpg")
             .build();
 
     User userA = User.builder()
             .id("cherrymommy")
-            .profile(ProfileImage.builder()
-                    .url("USER/12345678/1232132313dsfadskfakfsa.jpg")
-                    .build())
+            .profilePath("USER/12345678/1232132313dsfadskfakfsa.jpg")
             .nickname("체리엄마")
             .build();
 
@@ -839,7 +832,7 @@ class DiaryServiceTest {
         assertEquals(response.title(), diary.getTitle());
         assertEquals(response.content(), diary.getContent());
         assertEquals(response.images().size(), 1);
-        assertEquals(response.writer().profilePath(), user.getProfile().getUrl());
+        assertEquals(response.writer().profilePath(), user.getProfilePath());
         assertEquals(response.commentCount(), 3);
         assertEquals(response.writer().nickname(), user.getNickname());
         assertFalse(response.isCurrentUserLiked());
