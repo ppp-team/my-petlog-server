@@ -10,9 +10,12 @@ import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.video.exception.VideoException;
 import com.ppp.common.service.FileStorageManageService;
 import com.ppp.common.service.ThumbnailService;
+import com.ppp.domain.common.constant.Domain;
+import com.ppp.domain.common.constant.FileType;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryMedia;
 import com.ppp.domain.diary.constant.DiaryMediaType;
+import com.ppp.domain.diary.constant.DiaryPolicy;
 import com.ppp.domain.diary.repository.DiaryRepository;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.pet.Pet;
@@ -932,5 +935,90 @@ class DiaryServiceTest {
         //then
         assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
     }
+
+    @Test
+    @DisplayName("썸네일 저장 성공")
+    void saveThumbnail_success() throws Exception {
+        //given
+        Diary diary = Diary.builder()
+                .title("우리집 강아지")
+                .content("츄르를 싫어해")
+                .date(LocalDate.of(2020, 11, 11))
+                .user(user)
+                .pet(pet).build();
+        diary.addDiaryMedias(List.of(
+                DiaryMedia.builder()
+                        .type(DiaryMediaType.IMAGE)
+                        .path("DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg")
+                        .build()));
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(diary));
+        given(thumbnailService.uploadThumbnailFromStorageFile(anyString(), any(), any()))
+                .willReturn("DIARY/2024-01-31/generatedThumbnailPath");
+        //when
+        diaryService.saveThumbnail(1L);
+        //then
+        verify(thumbnailService, times(1)).uploadThumbnailFromStorageFile(any(), any(), any());
+        assertEquals("DIARY/2024-01-31/generatedThumbnailPath", diary.getThumbnailPath());
+    }
+
+    @Test
+    @DisplayName("썸네일 저장 성공-썸네일 미디어가 비어있는 경우")
+    void saveThumbnail_success_WhenDiaryMediasIsEmpty() throws Exception {
+        //given
+        Diary diary = Diary.builder()
+                .title("우리집 강아지")
+                .content("츄르를 싫어해")
+                .date(LocalDate.of(2020, 11, 11))
+                .user(user)
+                .pet(pet).build();
+        diary.addDiaryMedias(new ArrayList<>());
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(diary));
+        //when
+        diaryService.saveThumbnail(1L);
+        //then
+        verify(thumbnailService, times(0)).uploadThumbnailFromStorageFile(any(), any(), any());
+        assertEquals(DiaryPolicy.DEFAULT_THUMBNAIL_PATH, diary.getThumbnailPath());
+    }
+
+    @Test
+    @DisplayName("썸네일 저장 성공-썸네일 추출 중 익셉션 발생시")
+    void saveThumbnail_success_WhenExceptionIsOccurred() throws Exception {
+        //given
+        Diary diary = Diary.builder()
+                .title("우리집 강아지")
+                .content("츄르를 싫어해")
+                .date(LocalDate.of(2020, 11, 11))
+                .user(user)
+                .pet(pet).build();
+        diary.addDiaryMedias(List.of(
+                DiaryMedia.builder()
+                        .type(DiaryMediaType.IMAGE)
+                        .path("DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg")
+                        .build()));
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.of(diary));
+        given(thumbnailService.uploadThumbnailFromStorageFile(anyString(), any(), any()))
+                .willThrow(Exception.class);
+        //when
+        diaryService.saveThumbnail(1L);
+        //then
+        verify(thumbnailService, times(1)).uploadThumbnailFromStorageFile(any(), any(), any());
+        assertEquals(DiaryPolicy.DEFAULT_THUMBNAIL_PATH, diary.getThumbnailPath());
+    }
+
+    @Test
+    @DisplayName("썸네일 저장 실패-diary not found")
+    void saveThumbnail_fail_DIARY_NOT_FOUND() throws Exception {
+        //given
+        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
+                .willReturn(Optional.empty());
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.saveThumbnail(1L));
+        //then
+        assertEquals(DIARY_NOT_FOUND.getCode(), exception.getCode());
+    }
+
 
 }

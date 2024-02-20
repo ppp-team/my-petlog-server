@@ -1,6 +1,7 @@
 package com.ppp.api.diary.service;
 
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
+import com.ppp.api.user.exception.UserException;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryDocument;
 import com.ppp.domain.diary.repository.DiarySearchRepository;
@@ -8,6 +9,7 @@ import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.UserDocument;
+import com.ppp.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +22,9 @@ import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+import static com.ppp.api.user.exception.ErrorCode.NOT_FOUND_USER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -34,7 +38,8 @@ class DiarySearchServiceTest {
 
     @Mock
     private DiaryCommentRedisService diaryCommentRedisService;
-
+    @Mock
+    private UserRepository userRepository;
     @Mock
     private GuardianRepository guardianRepository;
 
@@ -152,5 +157,45 @@ class DiarySearchServiceTest {
         assertEquals(response.getContent().get(1).diaries().get(0).writer().id(), "abcde1234");
         assertEquals(response.getContent().get(1).diaries().get(0).writer().nickname(), "엄마");
         assertTrue(response.getContent().get(1).diaries().get(0).writer().isCurrentUser());
+    }
+
+    @Test
+    @DisplayName("유저 정보 elastic search 에 저장 성공")
+    void updateUser_success() {
+        //given
+        List<DiaryDocument> documents = List.of(DiaryDocument.builder()
+                .id("3")
+                .title("우리집 강아지")
+                .content("츄르를 좋아해")
+                .thumbnailPath("/DIARY/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg")
+                .date(LocalDate.MIN.toEpochDay())
+                .user(UserDocument.builder()
+                        .nickname("첫째누나")
+                        .id("abcde1234")
+                        .build())
+                .petId(1L).build());
+        given(userRepository.findByIdAndIsDeletedFalse(anyString()))
+                .willReturn(Optional.of(user));
+        given(diarySearchRepository.findByUser_Id(anyString()))
+                .willReturn(documents);
+        //when
+        ArgumentCaptor<UserDocument> captor = ArgumentCaptor.forClass(UserDocument.class);
+        diarySearchService.updateUser("abcde1234");
+        //then
+        verify(diarySearchRepository, times(1)).saveAll(anyCollection());
+        assertEquals("abcde1234", documents.get(0).getUser().getId());
+        assertEquals("엄마", documents.get(0).getUser().getNickname());
+    }
+
+    @Test
+    @DisplayName("유저 정보 elastic search 에 저장 실패_not found user")
+    void update_fail_NOT_FOUND_USER() {
+        //given
+        given(userRepository.findByIdAndIsDeletedFalse(anyString()))
+                .willReturn(Optional.empty());
+        //when
+        UserException exception = assertThrows(UserException.class, () -> diarySearchService.updateUser("abcde1234"));
+        //then
+        assertEquals(NOT_FOUND_USER.getCode(), exception.getCode());
     }
 }
