@@ -40,8 +40,8 @@ public class UserService {
     public void createProfile(User user, MultipartFile profileImage, String nickname) {
         User userFromDB = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
+
         userFromDB.setNickname(nickname);
-        // save image
         saveProfileImage(userFromDB, profileImage);
     }
 

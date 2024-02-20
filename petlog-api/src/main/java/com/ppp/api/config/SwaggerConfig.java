@@ -31,7 +31,6 @@ public class SwaggerConfig {
                 .title("My PetLog Server API")
                 .description("My PetLog api 명세서");
 
-        // Security 스키마 설정
         SecurityScheme bearerAuth = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
@@ -39,18 +38,14 @@ public class SwaggerConfig {
                 .in(SecurityScheme.In.HEADER)
                 .name(HttpHeaders.AUTHORIZATION);
 
-        // Security 요청 설정
         SecurityRequirement addSecurityItem = new SecurityRequirement();
         addSecurityItem.addList("Authorization");
 
-        // 경로 설정
         Paths paths = new Paths();
-        // OpenAPI 설정
+
         return new OpenAPI()
                 .info(info)
-                // Security 인증 컴포넌트 설정
                 .components(new Components().addSecuritySchemes("Authorization", bearerAuth))
-                // API 마다 Security 인증 컴포넌트 설정
                 .addSecurityItem(addSecurityItem)
                 .paths(paths);
     }
