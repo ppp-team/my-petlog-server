@@ -49,6 +49,8 @@ public class UserService {
         if (profileImage != null && !profileImage.isEmpty()) {
             String savedPath = uploadImageToS3(profileImage);
             user.updateProfilePath(savedPath);
+        } else {
+            user.updateProfilePath(null);
         }
     }
 
