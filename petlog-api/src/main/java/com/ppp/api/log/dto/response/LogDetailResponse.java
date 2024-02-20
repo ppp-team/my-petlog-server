@@ -32,6 +32,7 @@ public record LogDetailResponse(
                 .type(log.getTypeMap().get("type"))
                 .subType(log.getTypeMap().get("subType"))
                 .memo(log.getMemo())
+                .isImportant(log.isImportant())
                 .location(Location.from(log.getLocation()))
                 .build();
     }
