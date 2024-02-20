@@ -17,9 +17,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
+import java.nio.charset.StandardCharsets;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,8 +58,8 @@ class UserControllerTest {
         //when
         mockMvc.perform(
                 post("/api/v1/users/check/nickname")
-                .content(json)
-                .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .contentType(MediaType.APPLICATION_JSON)
         ).andDo(print()).andExpect(status().isOk());
 
     }
@@ -88,11 +89,14 @@ class UserControllerTest {
         MockMultipartFile file = new MockMultipartFile("profileImage", "test.jpg",
                 MediaType.IMAGE_JPEG_VALUE, "test data".getBytes());
         //when
-        mockMvc.perform(multipart("/api/v1/users/profile",1L,1L)
-                .file(file)
-                .param("nickname","닉네임")
-                .header("Authorization", TOKEN)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
+        mockMvc.perform(multipart("/api/v1/users/profile", 1L, 1L)
+                        .file(file)
+                        .file(new MockMultipartFile("nickname", "json",
+                                MediaType.APPLICATION_JSON_VALUE,
+                                objectMapper.writeValueAsString("abcde").getBytes(StandardCharsets.UTF_8)))
+                        .param("nickname", "닉네임")
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
                 ).andDo(print())
                 .andExpect(status().isOk());
         //then
@@ -107,10 +111,14 @@ class UserControllerTest {
         MockMultipartFile file = new MockMultipartFile("profileImage", "test.jpg",
                 MediaType.IMAGE_JPEG_VALUE, "test data".getBytes());
         //when
-        mockMvc.perform(multipart("/api/v1/users/profile",1L,1L)
+        mockMvc.perform(multipart("/api/v1/users/profile", 1L, 1L)
                         .file(file)
-                        .param("nickname","새로운닉네임")
-                        .param("password","새로운비밀번호")
+                        .file(new MockMultipartFile("nickname", "json",
+                                MediaType.APPLICATION_JSON_VALUE,
+                                objectMapper.writeValueAsString("abcde").getBytes(StandardCharsets.UTF_8)))
+                        .file(new MockMultipartFile("password", "json",
+                                MediaType.APPLICATION_JSON_VALUE,
+                                objectMapper.writeValueAsString("afsdfasf").getBytes(StandardCharsets.UTF_8)))
                         .header("Authorization", TOKEN)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                 ).andDo(print())

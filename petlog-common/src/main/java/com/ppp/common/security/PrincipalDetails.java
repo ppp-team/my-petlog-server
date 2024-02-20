@@ -20,7 +20,6 @@ public class PrincipalDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // ROLE 리스트를 GrantedAuthority 컬렉션 객체로 반환
         return List.of(()->String.valueOf(user.getRole()));
     }
 

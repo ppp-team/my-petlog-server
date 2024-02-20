@@ -25,7 +25,7 @@ public record UserResponse(
     public static UserResponse from(User user, String currentUserId) {
         return UserResponse.builder()
                 .id(user.getId())
-                .profilePath(user.getProfile().getUrl())
+                .profilePath(user.getProfilePath())
                 .nickname(user.getNickname())
                 .isCurrentUser(Objects.equals(user.getId(), currentUserId))
                 .build();

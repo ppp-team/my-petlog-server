@@ -15,9 +15,7 @@ import com.ppp.domain.invitation.constant.InviteStatus;
 import com.ppp.domain.invitation.repository.InvitationRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.repository.PetRepository;
-import com.ppp.domain.user.ProfileImage;
 import com.ppp.domain.user.User;
-import com.ppp.domain.user.repository.ProfileImageRepository;
 import com.ppp.domain.user.repository.UserQuerydslRepository;
 import com.ppp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +35,6 @@ import static com.ppp.api.pet.exception.ErrorCode.PET_NOT_FOUND;
 @RequiredArgsConstructor
 public class GuardianService {
     private final GuardianRepository guardianRepository;
-    private final ProfileImageRepository profileImageRepository;
     private final UserRepository userRepository;
     private final PetRepository petRepository;
     private final InvitationRepository invitationRepository;
@@ -50,10 +47,7 @@ public class GuardianService {
         List<GuardianResponse> guardianResponseList = new ArrayList<>();
         List<Guardian> guardianList = guardianRepository.findAllByPetIdOrderByCreatedAtDesc(petId);
         for (Guardian guardian : guardianList) {
-            ProfileImage profileImage = profileImageRepository.findByUser(guardian.getUser())
-                    .orElse(new ProfileImage());
-
-            guardianResponseList.add(GuardianResponse.from(guardian, profileImage));
+            guardianResponseList.add(GuardianResponse.from(guardian));
         }
 
         return new GuardiansResponse(guardianList.size(), guardianResponseList);
