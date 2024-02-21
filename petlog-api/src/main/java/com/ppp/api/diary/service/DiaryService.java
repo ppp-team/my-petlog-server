@@ -116,10 +116,8 @@ public class DiaryService {
                 .filter(foundDiary -> Objects.equals(foundDiary.getPet().getId(), petId))
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateModifyDiary(diary, user, petId);
-        List<DiaryMedia> keepingVideos = diary.getVideoMedias().stream()
-                .filter(video -> !request.getDeletedMediaIds().contains(video.getId())).toList();
-        List<DiaryMedia> keepingImages = diary.getImageMedias().stream()
-                .filter(image -> !request.getDeletedMediaIds().contains(image.getId())).toList();
+        List<DiaryMedia> keepingVideos = diary.getKeepingVideos(request.getDeletedMediaIds());
+        List<DiaryMedia> keepingImages = diary.getKeepingImages(request.getDeletedMediaIds());
         validateMediaSize(keepingVideos.size(), keepingImages.size(),
                 request.getUploadedVideoIds().size(), images == null ? 0 : images.size());
         List<TempVideo> newlyUploadedVideos = getUploadedVideos(request.getUploadedVideoIds(), user);

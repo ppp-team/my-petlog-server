@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.FetchType.LAZY;
 
 @Getter
@@ -96,6 +95,16 @@ public class Diary extends BaseTimeEntity {
             images.removeAll(getVideoMedias());
         }
         return images;
+    }
+
+    public List<DiaryMedia> getKeepingVideos(Set<Long> deletedMediaIds) {
+        return getVideoMedias().stream()
+                .filter(video -> !deletedMediaIds.contains(video.getId())).toList();
+    }
+
+    public List<DiaryMedia> getKeepingImages(Set<Long> deletedMediaIds) {
+        return getImageMedias().stream()
+                .filter(image -> !deletedMediaIds.contains(image.getId())).toList();
     }
 
     public void addThumbnail(String thumbnailPath) {
