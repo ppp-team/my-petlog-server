@@ -60,7 +60,7 @@ public class DiarySearchService {
         validateQueryDiaries(user, petId);
         return getGroupedDiariesPage(diarySearchRepository.
                 findByTitleContainsOrContentContainsAndPetIdOrderByDateDesc(keyword, petId,
-                        PageRequest.of(page, size, Sort.by("date").descending())), user.getId());
+                        PageRequest.of(page, size, Sort.by(Sort.Order.desc("date")))), user.getId());
     }
 
     private void validateQueryDiaries(User user, Long petId) {
@@ -70,8 +70,7 @@ public class DiarySearchService {
 
     private Page<DiaryGroupByDateResponse> getGroupedDiariesPage(Page<DiaryDocument> documentPage, String userId) {
         if (documentPage.getContent().isEmpty())
-            return new PageImpl<>(new ArrayList<>(), documentPage.getPageable(), documentPage.getTotalPages());
-
+            return new PageImpl<>(new ArrayList<>(), documentPage.getPageable(), documentPage.getTotalElements());
         List<DiaryGroupByDateResponse> content = new ArrayList<>();
         List<DiaryResponse> sameDaysDiaries = new ArrayList<>();
         LocalDate prevDate = LocalDate.ofEpochDay(documentPage.getContent().get(0).getDate());
@@ -87,6 +86,6 @@ public class DiarySearchService {
                             diaryCommentRedisService.getDiaryCommentCountByDiaryId(Long.parseLong(document.getId()))));
         }
         content.add(DiaryGroupByDateResponse.of(prevDate, sameDaysDiaries));
-        return new PageImpl<>(content, documentPage.getPageable(), documentPage.getTotalPages());
+        return new PageImpl<>(content, documentPage.getPageable(), documentPage.getTotalElements());
     }
 }
