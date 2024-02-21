@@ -40,4 +40,7 @@ public class GenerationUtil {
         int randomInt = 1000 + random.nextInt(9000);
         return String.valueOf(randomInt);
     }
+
+    private GenerationUtil() {
+    }
 }
