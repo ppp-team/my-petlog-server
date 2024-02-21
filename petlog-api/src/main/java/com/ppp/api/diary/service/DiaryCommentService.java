@@ -41,23 +41,23 @@ public class DiaryCommentService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public void createComment(User user, Long petId, Long diaryId, DiaryCommentRequest request) {
+    public DiaryCommentResponse createComment(User user, Long petId, Long diaryId, DiaryCommentRequest request) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .filter(foundDiary -> Objects.equals(foundDiary.getPet().getId(), petId))
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateCreateComment(petId, user);
 
-        diaryCommentRepository.save(DiaryComment.builder()
+        applicationEventPublisher.publishEvent(new DiaryCommentCreatedEvent(diaryId));
+        return DiaryCommentResponse.from(diaryCommentRepository.save(DiaryComment.builder()
                 .content(request.getContent())
                 .taggedUsersIdNicknameMap(getTaggedUsersIdNicknameMap(petId, request.getTaggedUserIds()))
                 .diary(diary)
                 .user(user)
-                .build());
-        applicationEventPublisher.publishEvent(new DiaryCommentCreatedEvent(diaryId));
+                .build()), user.getId());
     }
 
     private Map<String, String> getTaggedUsersIdNicknameMap(Long petId, List<String> taggedUsers) {
-        if(taggedUsers.isEmpty()) return new HashMap<>();
+        if (taggedUsers.isEmpty()) return new HashMap<>();
         Map<String, String> taggedUsersIdNicknameMap = new HashMap<>();
         userRepository.findByGuardianUsersByPetIdAndUserIdsContaining(petId, taggedUsers)
                 .forEach(taggedUser -> taggedUsersIdNicknameMap.put(taggedUser.getId(), taggedUser.getNickname()));

@@ -12,6 +12,8 @@ import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,6 +77,17 @@ class DiaryCommentServiceTest {
 
     Map<String, String> taggedUserIdNicknameMap = Map.of("ljf123", "둘째누나");
 
+    static MockedStatic<TimeUtil> mockTimeUtil = mockStatic(TimeUtil.class);
+    @BeforeAll
+    static void init() {
+        mockTimeUtil.when(() -> TimeUtil.calculateTerm(any())).thenReturn("2분");
+    }
+
+    @AfterAll
+    static void tearDown(){
+        mockTimeUtil.close();
+    }
+
     @Test
     @DisplayName("다이어리 댓글 생성 성공")
     void createComment_success() {
@@ -86,8 +99,14 @@ class DiaryCommentServiceTest {
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(true);
         given(userRepository.findByGuardianUsersByPetIdAndUserIdsContaining(anyLong(), anyList())).willReturn(List.of(userA));
+        given(diaryCommentRepository.save(any()))
+                .willReturn(DiaryComment.builder()
+                        .content("오늘은 바다로 산책을 갔어요")
+                        .taggedUsersIdNicknameMap(taggedUserIdNicknameMap)
+                        .user(user)
+                        .build());
         //when
-        diaryCommentService.createComment(user, 1L, 1L, request);
+        DiaryCommentResponse response = diaryCommentService.createComment(user, 1L, 1L, request);
         ArgumentCaptor<DiaryComment> diaryCommentArgumentCaptor = ArgumentCaptor.forClass(DiaryComment.class);
         //then
         verify(diaryCommentRepository, times(1)).save(diaryCommentArgumentCaptor.capture());
@@ -98,6 +117,14 @@ class DiaryCommentServiceTest {
         assertTrue(diaryCommentArgumentCaptor.getValue().getTaggedUsersIdNicknameMap().containsKey("abc123"));
         assertFalse(diaryCommentArgumentCaptor.getValue().getTaggedUsersIdNicknameMap().containsKey("dab456"));
         assertTrue(diaryCommentArgumentCaptor.getValue().getTaggedUsersIdNicknameMap().containsValue("첫째누나"));
+        assertEquals(response.writer().id(), "abcde1234");
+        assertEquals(response.writer().nickname(), "hi");
+        assertFalse(response.isCurrentUserLiked());
+        assertEquals(response.likeCount(), 0);
+        assertEquals(response.content(), "오늘은 바다로 산책을 갔어요");
+        assertEquals(response.taggedUsers().size(), 1);
+        assertEquals(response.taggedUsers().get(0).nickname(), "둘째누나");
+        assertEquals(response.taggedUsers().get(0).id(), "ljf123");
     }
 
     @Test
@@ -110,8 +137,14 @@ class DiaryCommentServiceTest {
                 .willReturn(Optional.of(diary));
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(true);
+        given(diaryCommentRepository.save(any()))
+                .willReturn(DiaryComment.builder()
+                        .content("오늘은 바다로 산책을 갔어요")
+                        .taggedUsersIdNicknameMap(new HashMap<>())
+                        .user(user)
+                        .build());
         //when
-        diaryCommentService.createComment(user, 1L, 1L, request);
+        DiaryCommentResponse response = diaryCommentService.createComment(user, 1L, 1L, request);
         ArgumentCaptor<DiaryComment> diaryCommentArgumentCaptor = ArgumentCaptor.forClass(DiaryComment.class);
         //then
         verify(diaryCommentRepository, times(1)).save(diaryCommentArgumentCaptor.capture());
@@ -119,6 +152,12 @@ class DiaryCommentServiceTest {
         assertEquals(diaryCommentArgumentCaptor.getValue().getUser(), user);
         assertEquals(diaryCommentArgumentCaptor.getValue().getContent(), "오늘은 산으로 산책을 갔어요");
         assertEquals(diaryCommentArgumentCaptor.getValue().getTaggedUsersIdNicknameMap().size(), 0);
+        assertEquals(response.writer().id(), "abcde1234");
+        assertEquals(response.writer().nickname(), "hi");
+        assertFalse(response.isCurrentUserLiked());
+        assertEquals(response.likeCount(), 0);
+        assertEquals(response.content(), "오늘은 바다로 산책을 갔어요");
+        assertEquals(response.taggedUsers().size(), 0);
     }
 
     @Test
@@ -349,8 +388,6 @@ class DiaryCommentServiceTest {
                                 .user(user)
                                 .taggedUsersIdNicknameMap(new HashMap<>())
                                 .build())));
-        MockedStatic<TimeUtil> mockTimeUtil = mockStatic(TimeUtil.class);
-        mockTimeUtil.when(() -> TimeUtil.calculateTerm(any())).thenReturn("2분");
         //when
         Slice<DiaryCommentResponse> response = diaryCommentService.displayComments(user, 1L, 1L, 1, 10);
         //then
