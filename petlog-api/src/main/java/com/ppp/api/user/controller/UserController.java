@@ -77,12 +77,25 @@ public class UserController {
     })
     @PutMapping(value = "/v1/users/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateProfile(
-            @RequestPart(required = false, value = "profileImage") MultipartFile profileImage,
             @RequestPart(required = false, value = "nickname") String nickname,
             @RequestPart(required = false, value = "password") String password,
             @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        userService.updateProfile(principalDetails.getUser(), profileImage, nickname, password);
+        userService.updateProfile(principalDetails.getUser(), nickname, password);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "이미지 수정")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "User not found", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+    })
+    @PostMapping(value = "/v1/users/profile/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateProfileImage(
+            @RequestPart(required = false, value = "profileImage") MultipartFile profileImage,
+            @AuthenticationPrincipal PrincipalDetails principalDetails
+    ) {
+        userService.updateImage(principalDetails.getUser(), profileImage);
         return ResponseEntity.ok().build();
     }
 

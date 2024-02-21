@@ -114,7 +114,7 @@ class UserServiceTest {
         lenient().when(fileStorageManageService.uploadImage((MultipartFile) any(), any()))
                 .thenReturn(Optional.of("/USER/2024-01-31/805496ad51ee46ab94394c5635a2abd820240131183104956.jpg"));
 
-        userService.updateProfile(user, null, user.getNickname(), user.getPassword());
+        userService.updateProfile(user, user.getNickname(), user.getPassword());
 
         //then
         verify(userRepository, times(1)).findByEmail(any());
