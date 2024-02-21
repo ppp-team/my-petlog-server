@@ -17,7 +17,7 @@ import static com.ppp.domain.user.QUser.user;
 public class InvitationQuerydslRepository {
     private final JPAQueryFactory queryFactory;
 
-    public List<MyInvitationDto> findMyInvitationByInviterId(String inviterId) {
+    public List<MyInvitationDto> findMyInvitationByInviterId(Long petId, String inviterId) {
         return queryFactory
                 .select(Projections.fields(MyInvitationDto.class,
                         invitation.id.as("invitationId"),
@@ -28,6 +28,7 @@ public class InvitationQuerydslRepository {
                 ))
                 .from(invitation)
                 .leftJoin(user).on(invitation.inviteeId.eq(user.id))
+                .where(invitation.pet.id.eq(petId))
                 .where(invitation.inviterId.eq(inviterId))
                 .where(invitation.inviteStatus.in(InviteStatus.PENDING, InviteStatus.REJECTED))
                 .fetch();

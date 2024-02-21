@@ -76,8 +76,8 @@ public class InvitationService {
         invitation.updateInviteStatus(InviteStatus.REJECTED);
     }
 
-    public List<MyInvitationDto> displayMyInvitations(User user) {
-        List<MyInvitationDto> myInvitationDtoResponseList = invitationQuerydslRepository.findMyInvitationByInviterId(user.getId());
+    public List<MyInvitationDto> displayMyInvitations(Long petId, User user) {
+        List<MyInvitationDto> myInvitationDtoResponseList = invitationQuerydslRepository.findMyInvitationByInviterId(petId, user.getId());
         myInvitationDtoResponseList.forEach(myInvitationDto -> {
                 String status = null;
                 if (InviteStatus.PENDING.name().equals(myInvitationDto.getInviteStatus())) {

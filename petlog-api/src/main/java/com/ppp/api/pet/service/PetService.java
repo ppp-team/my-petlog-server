@@ -11,6 +11,8 @@ import com.ppp.domain.common.GenerationUtil;
 import com.ppp.domain.common.constant.Domain;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
+import com.ppp.domain.guardian.dto.MyPetResponseDto;
+import com.ppp.domain.guardian.repository.GuardianQuerydslRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.constant.RepStatus;
@@ -35,6 +37,7 @@ public class PetService {
     private final PetImageRepository petImageRepository;
     private final FileStorageManageService fileStorageManageService;
     private final GuardianService guardianService;
+    private final GuardianQuerydslRepository guardianQuerydslRepository;
 
     @Transactional
     public void createPet(PetRequest petRequest, User user, MultipartFile petImage) {
@@ -81,15 +84,14 @@ public class PetService {
         }
     }
 
-    public MyPetsResponse findMyPets(User user) {
+    public MyPetsResponse findMyPetByInGuardian(User user) {
         List<MyPetResponse> myPetResponseList = new ArrayList<>();
-        List<Pet> myPets = petRepository.findAllByUserId(user.getId());
-        for (Pet pet : myPets) {
-            PetImage petImage = petImageRepository.findByPet(pet)
-                    .orElse(new PetImage());
 
-            myPetResponseList.add(MyPetResponse.from(pet, petImage));
-        }
+        List<MyPetResponseDto> myPetResponseDtos = guardianQuerydslRepository.findMyPetByInGuardian(user.getId());
+        myPetResponseDtos.forEach(
+                myPetResponseDto -> myPetResponseList.add(MyPetResponse.from(myPetResponseDto))
+        );
+
         return new MyPetsResponse(myPetResponseList.size(), myPetResponseList);
     }
 

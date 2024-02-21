@@ -30,7 +30,8 @@ public class Guardian extends BaseTimeEntity {
     private User user;
 
     @Builder
-    public Guardian(GuardianRole guardianRole, Pet pet, User user) {
+    public Guardian(Long id, GuardianRole guardianRole, Pet pet, User user) {
+        this.id = id;
         this.guardianRole = guardianRole;
         this.pet = pet;
         this.user = user;

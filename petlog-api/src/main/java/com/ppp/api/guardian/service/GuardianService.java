@@ -55,7 +55,7 @@ public class GuardianService {
 
     public void createGuardian(Pet pet, User user, GuardianRole guardianRole) {
         validateIsGuardian(user.getId(), pet.getId());
-        guardianRepository.save(new Guardian(guardianRole, pet, user));
+        guardianRepository.save(Guardian.builder().guardianRole(guardianRole).pet(pet).user(user).build());
     }
 
     @Transactional
