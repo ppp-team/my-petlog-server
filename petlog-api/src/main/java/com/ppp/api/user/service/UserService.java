@@ -50,7 +50,7 @@ public class UserService {
             String savedPath = uploadImageToS3(profileImage);
             user.updateProfilePath(savedPath);
         } else {
-            user.updateProfilePath(null);
+            user.deleteProfilePath();
         }
     }
 

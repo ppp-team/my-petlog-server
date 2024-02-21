@@ -70,6 +70,10 @@ public class User extends BaseTimeEntity {
         this.profilePath = path;
     }
 
+    public void deleteProfilePath() {
+        this.profilePath = null;
+    }
+
     public void setEmail(String email) {
         this.email = email;
     }
