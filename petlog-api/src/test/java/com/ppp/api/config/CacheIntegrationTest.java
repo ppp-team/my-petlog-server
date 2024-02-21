@@ -65,7 +65,7 @@ public class CacheIntegrationTest {
             .user(userA)
             .build();
 
-    Guardian guardian = new Guardian(GuardianRole.MEMBER, pet, userA);
+    Guardian guardian = Guardian.builder().guardianRole(GuardianRole.MEMBER).pet(pet).user(userA).build();
 
 
     @BeforeEach

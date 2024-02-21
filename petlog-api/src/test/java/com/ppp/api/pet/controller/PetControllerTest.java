@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 
 import java.nio.charset.StandardCharsets;
@@ -127,6 +128,14 @@ class PetControllerTest {
                 get("/api/v1/my/pets")
         ).andDo(print()).andExpect(status().isOk());
 
+    }
+
+    @Test
+    @DisplayName("반려동물 삭제")
+    @WithMockCustomUser
+    void deletePetTest() throws Exception {
+        ResultActions response = mockMvc.perform(delete("/api/v1/my/pets/{petId}",1L));
+        response.andDo(print()).andExpect(status().isOk());
     }
 
     @Test
