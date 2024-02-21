@@ -65,9 +65,9 @@ public class InvitationController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(array = @ArraySchema(schema = @Schema(implementation = MyInvitationDto.class)))}),
     })
-    @GetMapping("/v1/my/invitations/my-invitations")
-    public ResponseEntity<List<MyInvitationDto>> displayMyInvitations(@AuthenticationPrincipal PrincipalDetails principalDetails) {
-        return ResponseEntity.ok(invitationService.displayMyInvitations(principalDetails.getUser()));
+    @GetMapping("/v1/my/invitations/{petId}/my-invitations")
+    public ResponseEntity<List<MyInvitationDto>> displayMyInvitations(@PathVariable Long petId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(invitationService.displayMyInvitations(petId, principalDetails.getUser()));
     }
 
     @Operation(summary = "초대 취소", description = "펫메이트 초대 내역에서 내가 초대한 사람을 취소합니다.")
