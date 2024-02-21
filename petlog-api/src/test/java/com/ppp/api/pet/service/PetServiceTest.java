@@ -5,7 +5,10 @@ import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
 import com.ppp.common.service.FileStorageManageService;
+import com.ppp.domain.guardian.dto.MyPetResponseDto;
+import com.ppp.domain.guardian.repository.GuardianQuerydslRepository;
 import com.ppp.domain.pet.Pet;
+import com.ppp.domain.pet.constant.Gender;
 import com.ppp.domain.pet.constant.RepStatus;
 import com.ppp.domain.pet.repository.PetImageRepository;
 import com.ppp.domain.pet.repository.PetRepository;
@@ -22,7 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,6 +46,9 @@ class PetServiceTest {
 
     @Mock
     private GuardianService guardianService;
+
+    @Mock
+    private GuardianQuerydslRepository guardianQuerydslRepository;
 
     @InjectMocks
     private PetService petService;
@@ -117,12 +123,29 @@ class PetServiceTest {
     @Test
     @DisplayName("반려동물 리스트")
     void displayPetsTest() {
-        List<Pet> myPets = new ArrayList<>();
-        myPets.add(pet);
+        MyPetResponseDto myPetResponseDto = MyPetResponseDto.builder()
+                .petId(15L)
+                .ownerId("j22031")
+                .invitedCode("1021vc9h")
+                .name("이름")
+                .type("타입")
+                .breed("품종")
+                .gender(Gender.FEMALE)
+                .isNeutered(true)
+                .birth(LocalDateTime.parse("2020-01-01T00:00:00"))
+                .firstMeetDate(LocalDateTime.parse("2020-01-01T00:00:00"))
+                .weight(5.5)
+                .registeredNumber("1234")
+                .repStatus(RepStatus.NORMAL)
+                .petImageUrl(null)
+                .build();
 
-        when(petRepository.findAllByUserId(user.getId())).thenReturn(myPets);
 
-        MyPetsResponse MyPetsResponse = petService.findMyPets(user);
+        when(guardianQuerydslRepository.findMyPetByInGuardian(user.getId())).thenReturn(
+                List.of(myPetResponseDto)
+        );
+
+        MyPetsResponse MyPetsResponse = petService.findMyPetByInGuardian(user);
 
         Assertions.assertThat(MyPetsResponse).isNotNull();
     }

@@ -91,7 +91,7 @@ public class PetController {
     })
     @GetMapping("/v1/my/pets")
     public ResponseEntity<MyPetsResponse> displayPets(@AuthenticationPrincipal PrincipalDetails principalDetails) {
-        return ResponseEntity.ok(petService.findMyPets(principalDetails.getUser()));
+        return ResponseEntity.ok(petService.findMyPetByInGuardian(principalDetails.getUser()));
     }
 
     @Operation(summary = "반려동물 삭제")

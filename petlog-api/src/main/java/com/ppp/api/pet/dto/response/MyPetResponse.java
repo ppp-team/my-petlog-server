@@ -1,5 +1,6 @@
 package com.ppp.api.pet.dto.response;
 
+import com.ppp.domain.guardian.dto.MyPetResponseDto;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.constant.Gender;
@@ -78,6 +79,26 @@ public class MyPetResponse {
                 .registeredNumber(pet.getRegisteredNumber())
                 .repStatus(pet.getRepStatus())
                 .petImageUrl(petImage.getUrl())
+                .build();
+    }
+
+    public static MyPetResponse from(MyPetResponseDto myPetResponseDto) {
+
+        return MyPetResponse.builder()
+                .petId(myPetResponseDto.getPetId())
+                .ownerId(myPetResponseDto.getOwnerId())
+                .inviteCode(myPetResponseDto.getInvitedCode())
+                .name(myPetResponseDto.getName())
+                .type(myPetResponseDto.getType())
+                .breed(myPetResponseDto.getBreed())
+                .gender(myPetResponseDto.getGender())
+                .isNeutered(myPetResponseDto.getIsNeutered() == null ? null : (myPetResponseDto.getIsNeutered() ? "Y" : "N"))
+                .birth(myPetResponseDto.getBirth())
+                .firstMeetDate(myPetResponseDto.getFirstMeetDate())
+                .weight(myPetResponseDto.getWeight() == 0 ? null : String.valueOf(myPetResponseDto.getWeight()))
+                .registeredNumber(myPetResponseDto.getRegisteredNumber())
+                .repStatus(myPetResponseDto.getRepStatus())
+                .petImageUrl(myPetResponseDto.getPetImageUrl())
                 .build();
     }
 }
