@@ -50,6 +50,8 @@ public class UserService {
             String savedPath = uploadImageToS3(profileImage);
             user.updateProfilePath(savedPath);
         } else {
+            if (user.getProfilePath() != null && !user.getProfilePath().isEmpty())
+                fileStorageManageService.deleteImage(user.getProfilePath());
             user.deleteProfilePath();
         }
     }
@@ -59,15 +61,21 @@ public class UserService {
                 .orElseThrow(() -> new UserException(ErrorCode.PROFILE_REGISTRATION_FAILED));
     }
 
-
     @Transactional
-    public void updateProfile(User user, MultipartFile profileImage, String nickname, String password) {
+    public void updateProfile(User user, String nickname, String password) {
         User userFromDb = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
+
         if (nickname != null && !nickname.isEmpty())
             userFromDb.setNickname(nickname);
         if (password != null && !password.isEmpty())
             userFromDb.setPassword(authService.encodePassword(password));
+    }
+
+    @Transactional
+    public void updateImage(User user, MultipartFile profileImage) {
+        User userFromDb = userRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
 
         saveProfileImage(userFromDb, profileImage);
         applicationEventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
