@@ -84,10 +84,8 @@ class LogServiceTest {
                 .build();
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
                 .willReturn(Optional.of(userA));
-        given(guardianRepository.existsByUserIdAndPetId("abc123", 1L))
-                .willReturn(true);
         given(guardianRepository.existsByUserIdAndPetId("abcde1234", 1L))
                 .willReturn(true);
         //when
@@ -121,10 +119,8 @@ class LogServiceTest {
                 .build();
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
                 .willReturn(Optional.of(userA));
-        given(guardianRepository.existsByUserIdAndPetId("abc123", 1L))
-                .willReturn(true);
         given(guardianRepository.existsByUserIdAndPetId("abcde1234", 1L))
                 .willReturn(true);
         //when
@@ -161,10 +157,8 @@ class LogServiceTest {
                 .build();
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
                 .willReturn(Optional.of(userA));
-        given(guardianRepository.existsByUserIdAndPetId("abc123", 1L))
-                .willReturn(true);
         given(guardianRepository.existsByUserIdAndPetId("abcde1234", 1L))
                 .willReturn(true);
         //when
@@ -199,10 +193,8 @@ class LogServiceTest {
                 .build();
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
                 .willReturn(Optional.of(userA));
-        given(guardianRepository.existsByUserIdAndPetId("abc123", 1L))
-                .willReturn(true);
         given(guardianRepository.existsByUserIdAndPetId("abcde1234", 1L))
                 .willReturn(true);
         //when
@@ -240,10 +232,8 @@ class LogServiceTest {
                 .build();
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
                 .willReturn(Optional.of(userA));
-        given(guardianRepository.existsByUserIdAndPetId("abc123", 1L))
-                .willReturn(true);
         given(guardianRepository.existsByUserIdAndPetId("abcde1234", 1L))
                 .willReturn(true);
         //when
@@ -290,7 +280,7 @@ class LogServiceTest {
                 .build();
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
                 .willReturn(Optional.empty());
         //when
         UserException exception = assertThrows(UserException.class, () -> logService.createLog(user, 1L, request));
@@ -314,10 +304,8 @@ class LogServiceTest {
                 .build();
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
-                .willReturn(Optional.of(userA));
-        given(guardianRepository.existsByUserIdAndPetId("abc123", 1L))
-                .willReturn(false);
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
+                .willReturn(Optional.empty());
         //when
         UserException exception = assertThrows(UserException.class, () -> logService.createLog(user, 1L, request));
         //then
@@ -340,10 +328,8 @@ class LogServiceTest {
                 .build();
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
                 .willReturn(Optional.of(userA));
-        given(guardianRepository.existsByUserIdAndPetId("abc123", 1L))
-                .willReturn(true);
         given(guardianRepository.existsByUserIdAndPetId("abcde1234", 1L))
                 .willReturn(false);
         //when
@@ -378,10 +364,8 @@ class LogServiceTest {
                 .build();
         given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(log));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
                 .willReturn(Optional.of(userA));
-        given(guardianRepository.existsByUserIdAndPetId("abc123", 1L))
-                .willReturn(true);
         given(guardianRepository.existsByUserIdAndPetId("abcde1234", 1L))
                 .willReturn(true);
         //when
@@ -477,7 +461,7 @@ class LogServiceTest {
                 .build();
         given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(log));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
                 .willReturn(Optional.empty());
         //when
         UserException exception = assertThrows(UserException.class, () -> logService.updateLog(user, 1L, 1L, request));
@@ -511,10 +495,8 @@ class LogServiceTest {
                 .build();
         given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(log));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
-                .willReturn(Optional.of(userA));
-        given(guardianRepository.existsByUserIdAndPetId("abc123", 1L))
-                .willReturn(false);
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
+                .willReturn(Optional.empty());
         //when
         UserException exception = assertThrows(UserException.class, () -> logService.updateLog(user, 1L, 1L, request));
         //then
@@ -547,10 +529,8 @@ class LogServiceTest {
                 .build();
         given(logRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(log));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123"))
+        given(userRepository.findByGuardianUserByPetIdAndUserId(1L, "abc123"))
                 .willReturn(Optional.of(userA));
-        given(guardianRepository.existsByUserIdAndPetId("abc123", 1L))
-                .willReturn(true);
         given(guardianRepository.existsByUserIdAndPetId("abcde1234", 1L))
                 .willReturn(false);
         //when

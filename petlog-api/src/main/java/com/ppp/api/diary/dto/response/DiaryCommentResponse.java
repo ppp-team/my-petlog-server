@@ -42,4 +42,17 @@ public record DiaryCommentResponse(
                         .collect(Collectors.toList()))
                 .build();
     }
+
+    public static DiaryCommentResponse from(DiaryComment comment, String currentUserId) {
+        return DiaryCommentResponse.builder()
+                .commentId(comment.getId())
+                .content(comment.getContent())
+                .createdAt(TimeUtil.calculateTerm(comment.getCreatedAt()))
+                .writer(UserResponse.from(comment.getUser(), currentUserId))
+                .taggedUsers(comment.getTaggedUsersIdNicknameMap().keySet()
+                        .stream().map(id -> com.ppp.api.user.dto.response.UserResponse.of(id,
+                                comment.getTaggedUsersIdNicknameMap().get(id), currentUserId))
+                        .collect(Collectors.toList()))
+                .build();
+    }
 }

@@ -41,28 +41,26 @@ public class DiaryCommentService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public void createComment(User user, Long petId, Long diaryId, DiaryCommentRequest request) {
+    public DiaryCommentResponse createComment(User user, Long petId, Long diaryId, DiaryCommentRequest request) {
         Diary diary = diaryRepository.findByIdAndIsDeletedFalse(diaryId)
                 .filter(foundDiary -> Objects.equals(foundDiary.getPet().getId(), petId))
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateCreateComment(petId, user);
 
-        diaryCommentRepository.save(DiaryComment.builder()
+        applicationEventPublisher.publishEvent(new DiaryCommentCreatedEvent(diaryId));
+        return DiaryCommentResponse.from(diaryCommentRepository.save(DiaryComment.builder()
                 .content(request.getContent())
-                .taggedUsersIdNicknameMap(getTaggedUsersIdNicknameMap(request.getTaggedUserIds()))
+                .taggedUsersIdNicknameMap(getTaggedUsersIdNicknameMap(petId, request.getTaggedUserIds()))
                 .diary(diary)
                 .user(user)
-                .build());
-        applicationEventPublisher.publishEvent(new DiaryCommentCreatedEvent(diaryId));
+                .build()), user.getId());
     }
 
-    private Map<String, String> getTaggedUsersIdNicknameMap(List<String> taggedUsers) {
+    private Map<String, String> getTaggedUsersIdNicknameMap(Long petId, List<String> taggedUsers) {
+        if (taggedUsers.isEmpty()) return new HashMap<>();
         Map<String, String> taggedUsersIdNicknameMap = new HashMap<>();
-        for (String id : taggedUsers) {
-            userRepository.findByIdAndIsDeletedFalse(id)
-                    .ifPresent(taggedUser ->
-                            taggedUsersIdNicknameMap.put(id, taggedUser.getNickname()));
-        }
+        userRepository.findByGuardianUsersByPetIdAndUserIdsContaining(petId, taggedUsers)
+                .forEach(taggedUser -> taggedUsersIdNicknameMap.put(taggedUser.getId(), taggedUser.getNickname()));
         return taggedUsersIdNicknameMap;
     }
 
@@ -77,7 +75,7 @@ public class DiaryCommentService {
                 .orElseThrow(() -> new DiaryException(DIARY_COMMENT_NOT_FOUND));
         validateModifyComment(comment, user, petId);
 
-        comment.update(request.getContent(), getTaggedUsersIdNicknameMap(request.getTaggedUserIds()));
+        comment.update(request.getContent(), getTaggedUsersIdNicknameMap(petId, request.getTaggedUserIds()));
     }
 
     private void validateModifyComment(DiaryComment comment, User user, Long petId) {

@@ -50,8 +50,7 @@ public class LogService {
     public void createLog(User user, Long petId, LogRequest request) {
         Pet pet = petRepository.findByIdAndIsDeletedFalse(petId)
                 .orElseThrow(() -> new PetException(PET_NOT_FOUND));
-        User mangerUser = userRepository.findByIdAndIsDeletedFalse(request.getManagerId())
-                .filter(maybeUser -> guardianRepository.existsByUserIdAndPetId(maybeUser.getId(), petId))
+        User mangerUser = userRepository.findByGuardianUserByPetIdAndUserId(petId, request.getManagerId())
                 .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
         validateAccessLog(petId, user);
 
@@ -102,8 +101,7 @@ public class LogService {
         Log log = logRepository.findByIdAndIsDeletedFalse(logId)
                 .filter(foundLog -> Objects.equals(foundLog.getPet().getId(), petId))
                 .orElseThrow(() -> new LogException(LOG_NOT_FOUND));
-        User mangerUser = userRepository.findByIdAndIsDeletedFalse(request.getManagerId())
-                .filter(maybeUser -> guardianRepository.existsByUserIdAndPetId(maybeUser.getId(), petId))
+        User mangerUser = userRepository.findByGuardianUserByPetIdAndUserId(petId, request.getManagerId())
                 .orElseThrow(() -> new UserException(ErrorCode.NOT_FOUND_USER));
         validateAccessLog(petId, user);
 

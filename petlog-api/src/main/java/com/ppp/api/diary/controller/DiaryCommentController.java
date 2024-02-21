@@ -36,12 +36,11 @@ public class DiaryCommentController {
             @ApiResponse(responseCode = "404", description = "일치하는 일기 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PostMapping(value = "/{diaryId}/comments")
-    private ResponseEntity<Void> createComment(@PathVariable Long petId,
-                                               @PathVariable Long diaryId,
-                                               @Valid @RequestBody DiaryCommentRequest request,
-                                               @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        diaryCommentService.createComment(principalDetails.getUser(), petId, diaryId, request);
-        return ResponseEntity.ok().build();
+    private ResponseEntity<DiaryCommentResponse> createComment(@PathVariable Long petId,
+                                                               @PathVariable Long diaryId,
+                                                               @Valid @RequestBody DiaryCommentRequest request,
+                                                               @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(diaryCommentService.createComment(principalDetails.getUser(), petId, diaryId, request));
     }
 
     @Operation(summary = "댓글 수정")
