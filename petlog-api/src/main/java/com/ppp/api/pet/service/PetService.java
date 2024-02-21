@@ -7,7 +7,7 @@ import com.ppp.api.pet.dto.response.MyPetsResponse;
 import com.ppp.api.pet.exception.ErrorCode;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.service.FileStorageManageService;
-import com.ppp.domain.common.GenerationUtil;
+import com.ppp.domain.common.util.GenerationUtil;
 import com.ppp.domain.common.constant.Domain;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
