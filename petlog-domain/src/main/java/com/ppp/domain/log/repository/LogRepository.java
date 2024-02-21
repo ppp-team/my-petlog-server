@@ -18,7 +18,9 @@ public interface LogRepository extends JpaRepository<Log, Long> {
 
     Optional<Log> findByIdAndIsDeletedFalse(Long id);
 
+    @EntityGraph(attributePaths = {"manager"}, type = EntityGraph.EntityGraphType.LOAD)
     List<Log> findByPetIdAndAndDatetimeBetweenAndIsDeletedFalse(Long petId, LocalDateTime start, LocalDateTime end);
 
+    @EntityGraph(attributePaths = {"manager"}, type = EntityGraph.EntityGraphType.LOAD)
     Slice<Log> findByPetIdAndAndDatetimeAfterAndIsDeletedFalse(Long petId, LocalDateTime start, PageRequest request);
 }

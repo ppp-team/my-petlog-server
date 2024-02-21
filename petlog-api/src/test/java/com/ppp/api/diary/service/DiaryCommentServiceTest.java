@@ -85,8 +85,7 @@ class DiaryCommentServiceTest {
                 .willReturn(Optional.of(diary));
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(true);
-        given(userRepository.findByIdAndIsDeletedFalse("abc123")).willReturn(Optional.of(userA));
-        given(userRepository.findByIdAndIsDeletedFalse("dab456")).willReturn(Optional.empty());
+        given(userRepository.findByGuardianUsersByPetIdAndUserIdsContaining(anyLong(), anyList())).willReturn(List.of(userA));
         //when
         diaryCommentService.createComment(user, 1L, 1L, request);
         ArgumentCaptor<DiaryComment> diaryCommentArgumentCaptor = ArgumentCaptor.forClass(DiaryComment.class);
@@ -180,8 +179,7 @@ class DiaryCommentServiceTest {
                 .build();
         given(diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(anyLong(), anyLong()))
                 .willReturn(Optional.of(diaryComment));
-        given(userRepository.findByIdAndIsDeletedFalse("abc123")).willReturn(Optional.of(userA));
-        given(userRepository.findByIdAndIsDeletedFalse("dab456")).willReturn(Optional.empty());
+        given(userRepository.findByGuardianUsersByPetIdAndUserIdsContaining(anyLong(), anyList())).willReturn(List.of(userA));
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(true);
         //when

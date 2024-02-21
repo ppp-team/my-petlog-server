@@ -52,7 +52,7 @@ public class Log extends BaseTimeEntity {
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 
-    @ManyToOne(fetch = EAGER)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "manager_id", nullable = false)
     private User manager;
 
