@@ -70,6 +70,7 @@ public class UserService {
             userFromDb.setNickname(nickname);
         if (password != null && !password.isEmpty())
             userFromDb.setPassword(authService.encodePassword(password));
+        applicationEventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
     }
 
     @Transactional
@@ -78,7 +79,6 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
 
         saveProfileImage(userFromDb, profileImage);
-        applicationEventPublisher.publishEvent(new UserProfileUpdatedEvent(user.getId()));
     }
 
     public ProfileResponse displayMe(User user) {
