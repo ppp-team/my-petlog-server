@@ -92,4 +92,8 @@ public class Pet extends BaseTimeEntity {
             this.registeredNumber = registeredNumber;
         }
     }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
 }

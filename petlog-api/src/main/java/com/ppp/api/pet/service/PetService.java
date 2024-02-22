@@ -82,6 +82,14 @@ public class PetService {
         }
     }
 
+    private void deletePetImage(Pet pet, PetImage petImage) {
+        if (petImage != null) {
+            fileStorageManageService.deleteImage(petImage.getUrl());
+            petImageRepository.delete(petImage);
+            pet.delete();
+        }
+    }
+
     public MyPetsResponse findMyPetByInGuardian(User user) {
         List<MyPetResponse> myPetResponseList = new ArrayList<>();
 
@@ -122,7 +130,9 @@ public class PetService {
     public void deleteMyPet(Long petId, User user) {
         Guardian guardian = guardianService.findByUserIdAndPetId(user, petId);
         guardianService.deleteReaderGuardian(guardian, petId);
-
-        petRepository.deleteById(petId);
+        petRepository.findMyPetById(petId, user.getId()).ifPresent(pet -> {
+            PetImage petImage = petImageRepository.findByPet(pet).orElse(new PetImage());
+            deletePetImage(pet, petImage);
+        });
     }
 }
