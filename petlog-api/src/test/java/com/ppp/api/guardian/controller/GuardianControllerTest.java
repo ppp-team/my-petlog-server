@@ -40,8 +40,8 @@ class GuardianControllerTest {
 
     @Test
     @WithMockCustomUser
-    @DisplayName("일기 리스트 조회 성공")
-    void displayDiaries_success() throws Exception {
+    @DisplayName("공동 집사 조회 성공")
+    void displayGuardiansByPetId_success() throws Exception {
         //given
         //when
         mockMvc.perform(get("/api/v1/pets/{petId}/guardians", 1L)
