@@ -6,6 +6,7 @@ import com.ppp.api.guardian.exception.GuardianException;
 import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
+import com.ppp.domain.guardian.constant.RepStatus;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.invitation.Invitation;
 import com.ppp.domain.invitation.constant.InviteStatus;
@@ -213,5 +214,25 @@ class GuardianServiceTest {
         GuardianException exception = assertThrows(GuardianException.class, () -> guardianService.displayGuardiansByPetId(user, 1L));
         //then
         assertEquals(exception.getCode(), FORBIDDEN_PET_SPACE.getCode());
+    }
+
+    @Test
+    @DisplayName("대표 반려동물 지정")
+    void selectRepresentativePet_switchFromNormalToRepresentative() {
+        //given
+        Pet pet1 = Pet.builder().id(1L).user(user).isNeutered(false).build();
+        Pet pet2 = Pet.builder().id(2L).user(user).isNeutered(false).build();
+        Guardian guardian1 = Guardian.builder().pet(pet1).user(user).repStatus(RepStatus.REPRESENTATIVE).build();
+        Guardian guardian2 = Guardian.builder().pet(pet2).user(user).repStatus(RepStatus.NORMAL).build();
+
+        when(guardianRepository.findByUserIdAndRepStatus(user.getId(), RepStatus.REPRESENTATIVE)).thenReturn(Optional.of(guardian1));
+        when(guardianRepository.findByUserIdAndPetId(user.getId(), pet2.getId())).thenReturn(Optional.of(guardian2));
+
+        //when
+        guardianService.selectRepresentative(pet2.getId(), user);
+
+        //then
+        assertEquals(RepStatus.NORMAL, guardian1.getRepStatus());
+        assertEquals(RepStatus.REPRESENTATIVE, guardian2.getRepStatus());
     }
 }

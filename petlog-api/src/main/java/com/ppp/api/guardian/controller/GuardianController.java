@@ -29,6 +29,7 @@ import java.util.List;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class GuardianController {
+
     private final GuardianService guardianService;
 
     @Operation(summary = "공동집사 목록 조회", description = "펫메이트 그룹관리 목록을 조회합니다.")
@@ -85,5 +86,16 @@ public class GuardianController {
     public ResponseEntity<List<UserResponse>> displayGuardiansByPetId(@PathVariable Long petId,
                                                                       @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(guardianService.displayGuardiansByPetId(principalDetails.getUser(), petId));
+    }
+
+    @Operation(summary = "대표 반려동물 지정")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "해당 그룹에서 공동집사를 찾을 수 없습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+    })
+    @PostMapping("/v1/my/guardians/{petId}/selectRep")
+    public ResponseEntity<Void> selectRepresentative(@PathVariable("petId") Long petId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        guardianService.selectRepresentative(petId, principalDetails.getUser());
+        return ResponseEntity.ok().build();
     }
 }

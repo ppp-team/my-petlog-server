@@ -1,15 +1,13 @@
 package com.ppp.api.pet.service;
 
-import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
-import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.guardian.dto.MyPetResponseDto;
 import com.ppp.domain.guardian.repository.GuardianQuerydslRepository;
 import com.ppp.domain.pet.Pet;
+import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.constant.Gender;
-import com.ppp.domain.pet.constant.RepStatus;
 import com.ppp.domain.pet.repository.PetImageRepository;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
@@ -40,12 +38,6 @@ class PetServiceTest {
 
     @Mock
     private PetImageRepository petImageRepository;
-
-    @Mock
-    private FileStorageManageService fileStorageManageService;
-
-    @Mock
-    private GuardianService guardianService;
 
     @Mock
     private GuardianQuerydslRepository guardianQuerydslRepository;
@@ -136,7 +128,6 @@ class PetServiceTest {
                 .firstMeetDate(LocalDateTime.parse("2020-01-01T00:00:00"))
                 .weight(5.5)
                 .registeredNumber("1234")
-                .repStatus(RepStatus.NORMAL)
                 .petImageUrl(null)
                 .build();
 
@@ -151,26 +142,38 @@ class PetServiceTest {
     }
 
     @Test
-    @DisplayName("반려동물 삭제")
+    @DisplayName("반려동물 삭제 - 이미지 있을 때")
     void deleteMyPet() {
-        Long petId = 1L;
-        petService.deleteMyPet(petId, user);
+        //given
+        Pet pet = Pet.builder().id(1L).user(user).isDeleted(false).build();
+        when(petRepository.findMyPetById(pet.getId(), user.getId())).thenReturn(Optional.of(pet));
 
-        verify(petRepository, times(1)).deleteById(petId);
+        PetImage petImage = PetImage.builder().url("url").build();
+        when(petImageRepository.findByPet(pet)).thenReturn(Optional.of(petImage));
+
+        //when
+        petService.deleteMyPet(pet.getId(), user);
+
+        //then
+        assertEquals(true, pet.getIsDeleted());
+        verify(petImageRepository, times(1)).delete(petImage);
     }
 
     @Test
-    @DisplayName("대표 반려동물 지정")
-    void selectRepresentativePet_switchFromNormalToRepresentative() {
-        Pet pet1 = Pet.builder().id(1L).user(user).repStatus(RepStatus.REPRESENTATIVE).isNeutered(false).build();
-        Pet pet2 = Pet.builder().id(2L).user(user).repStatus(RepStatus.NORMAL).isNeutered(false).build();
+    @DisplayName("반려동물 삭제 - 이미지 없을 때")
+    void deleteMyPet_noImage() {
+        //given
+        Pet pet = Pet.builder().id(1L).user(user).isDeleted(false).build();
+        when(petRepository.findMyPetById(pet.getId(), user.getId())).thenReturn(Optional.of(pet));
 
-        when(petRepository.findRepresentativePet(user.getId())).thenReturn(Optional.of(pet1));
-        when(petRepository.findMyPetById(2L, user.getId())).thenReturn(Optional.of(pet2));
+        PetImage petImage = PetImage.builder().build();
+        when(petImageRepository.findByPet(pet)).thenReturn(Optional.of(petImage));
 
-        petService.selectRepresentative(pet2.getId(), user);
+        //when
+        petService.deleteMyPet(pet.getId(), user);
 
-        assertEquals(RepStatus.NORMAL, pet1.getRepStatus());
-        assertEquals(RepStatus.REPRESENTATIVE, pet2.getRepStatus());
+        //then
+        assertEquals(true, pet.getIsDeleted());
+        verify(petImageRepository, times(0)).delete(petImage);
     }
 }

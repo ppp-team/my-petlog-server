@@ -14,6 +14,7 @@ import com.ppp.domain.invitation.Invitation;
 import com.ppp.domain.invitation.constant.InviteStatus;
 import com.ppp.domain.invitation.repository.InvitationRepository;
 import com.ppp.domain.pet.Pet;
+import com.ppp.domain.guardian.constant.RepStatus;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.UserQuerydslRepository;
@@ -55,7 +56,7 @@ public class GuardianService {
 
     public void createGuardian(Pet pet, User user, GuardianRole guardianRole) {
         validateIsGuardian(user.getId(), pet.getId());
-        guardianRepository.save(Guardian.builder().guardianRole(guardianRole).pet(pet).user(user).build());
+        guardianRepository.save(Guardian.builder().guardianRole(guardianRole).pet(pet).user(user).repStatus(RepStatus.NORMAL).build());
     }
 
     @Transactional
@@ -146,5 +147,17 @@ public class GuardianService {
     private void validateQueryGuardians(String userId, Long petId) {
         if (!guardianRepository.existsByUserIdAndPetId(userId, petId))
             throw new GuardianException(ErrorCode.FORBIDDEN_PET_SPACE);
+    }
+
+    @Transactional
+    public void selectRepresentative(Long petId, User user) {
+        guardianRepository.findByUserIdAndRepStatus(user.getId(), RepStatus.REPRESENTATIVE).ifPresent(guardian -> {
+            guardian.updateRepStatus(RepStatus.NORMAL);
+            guardianRepository.save(guardian);
+        });
+
+        Guardian guardian = guardianRepository.findByUserIdAndPetId(user.getId(), petId)
+                .orElseThrow(() -> new GuardianException(ErrorCode.GUARDIAN_NOT_FOUND));
+        guardian.updateRepStatus(RepStatus.REPRESENTATIVE);
     }
 }

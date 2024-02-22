@@ -104,11 +104,4 @@ public class PetController {
         petService.deleteMyPet(petId, principalDetails.getUser());
         return ResponseEntity.ok().build();
     }
-
-    @Operation(summary = "대표 반려동물 지정")
-    @PostMapping("/v1/my/pets/{petId}/selectRep")
-    public ResponseEntity<Void> selectRepresentative(@PathVariable("petId") Long petId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        petService.selectRepresentative(petId, principalDetails.getUser());
-        return ResponseEntity.ok().build();
-    }
 }

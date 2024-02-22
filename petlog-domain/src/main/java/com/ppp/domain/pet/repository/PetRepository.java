@@ -6,14 +6,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface PetRepository extends JpaRepository<Pet, Long> {
     Optional<Pet> findByIdAndIsDeletedFalse(Long id);
-
-    List<Pet> findAllByUserId(String userId);
 
     @Query("SELECT p " +
             "FROM Pet p " +
@@ -22,16 +19,10 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
             "AND p.isDeleted = false")
     Optional<Pet> findMyPetById(@Param("petId") Long petId, @Param("userId") String userId);
 
-    @Query("SELECT p " +
-            "FROM Pet p " +
-            "WHERE p.user.id = :userId " +
-            "AND p.isDeleted = false " +
-            "AND p.repStatus = 'REPRESENTATIVE'")
-    Optional<Pet> findRepresentativePet(@Param("userId") String userId);
-
     Optional<Pet> findByInvitedCode(String inviteCode);
 
     @Query("SELECT p.invitedCode FROM Pet p " +
-            "WHERE p.id = :petId ")
+            "WHERE p.id = :petId " +
+            "AND p.isDeleted = false")
     Optional<String> findPetCodeById(@Param("petId") Long petId);
 }

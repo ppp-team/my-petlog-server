@@ -2,6 +2,7 @@ package com.ppp.domain.guardian.repository;
 
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
+import com.ppp.domain.guardian.constant.RepStatus;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -18,5 +19,7 @@ public interface GuardianRepository extends JpaRepository<Guardian, Long> {
 
     List<Guardian> findAllByPetIdOrderByCreatedAtDesc(Long petId);
 
-    Optional<Guardian> findByUserIdAndPetId(String id, Long petId);
+    Optional<Guardian> findByUserIdAndPetId(String userId, Long petId);
+
+    Optional<Guardian> findByUserIdAndRepStatus(String id, RepStatus repStatus);
 }
