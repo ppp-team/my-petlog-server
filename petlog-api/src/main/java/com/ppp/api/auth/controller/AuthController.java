@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,8 +49,11 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Invalid password", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
     @PostMapping("/signin")
-    public ResponseEntity<AuthenticationResponse> signin(@Valid @RequestBody SigninRequest signinRequest) {
-        return ResponseEntity.ok(authService.signin(signinRequest));
+    public ResponseEntity<AuthenticationResponse> signin(@Valid @RequestBody SigninRequest signinRequest, HttpServletResponse response) {
+        AuthenticationResponse authenticationResponse = authService.signin(signinRequest);
+        authService.setHeaderAccessToken(response, authenticationResponse.getAccessToken());
+        authService.setHeaderRefreshToken(response, authenticationResponse.getRefreshToken());
+        return ResponseEntity.ok(authenticationResponse);
     }
 
     @Operation(description = "소셜 로그인 성공시 해당 유저를 회원가입/로그인 시켜 토큰을 반환합니다.")
