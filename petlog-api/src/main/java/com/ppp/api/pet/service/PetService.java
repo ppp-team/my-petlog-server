@@ -82,11 +82,10 @@ public class PetService {
         }
     }
 
-    private void deletePetImage(Pet pet, PetImage petImage) {
-        if (petImage != null) {
+    private void deletePetImage(PetImage petImage) {
+        if (petImage.getUrl() != null) {
             fileStorageManageService.deleteImage(petImage.getUrl());
             petImageRepository.delete(petImage);
-            pet.delete();
         }
     }
 
@@ -132,7 +131,8 @@ public class PetService {
         guardianService.deleteReaderGuardian(guardian, petId);
         petRepository.findMyPetById(petId, user.getId()).ifPresent(pet -> {
             PetImage petImage = petImageRepository.findByPet(pet).orElse(new PetImage());
-            deletePetImage(pet, petImage);
+            deletePetImage(petImage);
+            pet.delete();
         });
     }
 }

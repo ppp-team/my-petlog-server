@@ -1,13 +1,12 @@
 package com.ppp.api.pet.service;
 
-import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
-import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.guardian.dto.MyPetResponseDto;
 import com.ppp.domain.guardian.repository.GuardianQuerydslRepository;
 import com.ppp.domain.pet.Pet;
+import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.constant.Gender;
 import com.ppp.domain.pet.repository.PetImageRepository;
 import com.ppp.domain.pet.repository.PetRepository;
@@ -39,12 +38,6 @@ class PetServiceTest {
 
     @Mock
     private PetImageRepository petImageRepository;
-
-    @Mock
-    private FileStorageManageService fileStorageManageService;
-
-    @Mock
-    private GuardianService guardianService;
 
     @Mock
     private GuardianQuerydslRepository guardianQuerydslRepository;
@@ -149,11 +142,38 @@ class PetServiceTest {
     }
 
     @Test
-    @DisplayName("반려동물 삭제")
+    @DisplayName("반려동물 삭제 - 이미지 있을 때")
     void deleteMyPet() {
-        Long petId = 1L;
-        petService.deleteMyPet(petId, user);
+        //given
+        Pet pet = Pet.builder().id(1L).user(user).isDeleted(false).build();
+        when(petRepository.findMyPetById(pet.getId(), user.getId())).thenReturn(Optional.of(pet));
 
-        verify(petRepository, times(1)).deleteById(petId);
+        PetImage petImage = PetImage.builder().url("url").build();
+        when(petImageRepository.findByPet(pet)).thenReturn(Optional.of(petImage));
+
+        //when
+        petService.deleteMyPet(pet.getId(), user);
+
+        //then
+        assertEquals(true, pet.getIsDeleted());
+        verify(petImageRepository, times(1)).delete(petImage);
+    }
+
+    @Test
+    @DisplayName("반려동물 삭제 - 이미지 없을 때")
+    void deleteMyPet_noImage() {
+        //given
+        Pet pet = Pet.builder().id(1L).user(user).isDeleted(false).build();
+        when(petRepository.findMyPetById(pet.getId(), user.getId())).thenReturn(Optional.of(pet));
+
+        PetImage petImage = PetImage.builder().build();
+        when(petImageRepository.findByPet(pet)).thenReturn(Optional.of(petImage));
+
+        //when
+        petService.deleteMyPet(pet.getId(), user);
+
+        //then
+        assertEquals(true, pet.getIsDeleted());
+        verify(petImageRepository, times(0)).delete(petImage);
     }
 }
