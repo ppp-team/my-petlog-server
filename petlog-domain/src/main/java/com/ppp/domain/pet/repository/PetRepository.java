@@ -22,13 +22,6 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
             "AND p.isDeleted = false")
     Optional<Pet> findMyPetById(@Param("petId") Long petId, @Param("userId") String userId);
 
-    @Query("SELECT p " +
-            "FROM Pet p " +
-            "WHERE p.user.id = :userId " +
-            "AND p.isDeleted = false " +
-            "AND p.repStatus = 'REPRESENTATIVE'")
-    Optional<Pet> findRepresentativePet(@Param("userId") String userId);
-
     Optional<Pet> findByInvitedCode(String inviteCode);
 
     @Query("SELECT p.invitedCode FROM Pet p " +

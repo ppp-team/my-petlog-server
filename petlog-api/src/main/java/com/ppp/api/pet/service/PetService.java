@@ -7,15 +7,14 @@ import com.ppp.api.pet.dto.response.MyPetsResponse;
 import com.ppp.api.pet.exception.ErrorCode;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.service.FileStorageManageService;
-import com.ppp.domain.common.util.GenerationUtil;
 import com.ppp.domain.common.constant.Domain;
+import com.ppp.domain.common.util.GenerationUtil;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
 import com.ppp.domain.guardian.dto.MyPetResponseDto;
 import com.ppp.domain.guardian.repository.GuardianQuerydslRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
-import com.ppp.domain.pet.constant.RepStatus;
 import com.ppp.domain.pet.repository.PetImageRepository;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
@@ -54,7 +53,6 @@ public class PetService {
                 .firstMeetDate(petRequest.convertToFirstMeetDateLocalDateTime())
                 .weight(petRequest.getWeight())
                 .registeredNumber(petRequest.getRegisteredNumber())
-                .repStatus(RepStatus.NORMAL)
                 .isDeleted(false)
                 .invitedCode(inviteCode)
                 .build();
@@ -118,19 +116,6 @@ public class PetService {
                 , petRequest.getIsNeutered(), petRequest.getBirth(), petRequest.getFirstMeetDate(), petRequest.getWeight(), petRequest.getRegisteredNumber());
 
         savePetImage(pet, petImage);
-    }
-
-    @Transactional
-    public void selectRepresentative(Long petId, User user) {
-        // 기존 REP 있다면 NORMAL 로 바꿉니다.
-        petRepository.findRepresentativePet(user.getId()).ifPresent(pet -> {
-            pet.updateRepStatus(RepStatus.NORMAL);
-            petRepository.save(pet);
-        });
-
-        Pet pet = petRepository.findMyPetById(petId, user.getId())
-                .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
-        pet.updateRepStatus(RepStatus.REPRESENTATIVE);
     }
 
     @Transactional

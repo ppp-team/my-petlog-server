@@ -77,7 +77,6 @@ public class MyPetResponse {
                 .firstMeetDate(pet.getFirstMeetDate())
                 .weight(pet.getWeight() == 0 ? null : String.valueOf(pet.getWeight()))
                 .registeredNumber(pet.getRegisteredNumber())
-                .repStatus(pet.getRepStatus())
                 .petImageUrl(petImage.getUrl())
                 .build();
     }

@@ -39,7 +39,6 @@ public class GuardianQuerydslRepository {
                         pet.firstMeetDate,
                         pet.weight,
                         pet.registeredNumber,
-                        pet.repStatus,
                         petImage.url.as("petImageUrl")
                 ))
                 .from(pet)

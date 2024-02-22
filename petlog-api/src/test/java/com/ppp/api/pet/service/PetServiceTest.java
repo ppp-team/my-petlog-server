@@ -9,7 +9,6 @@ import com.ppp.domain.guardian.dto.MyPetResponseDto;
 import com.ppp.domain.guardian.repository.GuardianQuerydslRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.constant.Gender;
-import com.ppp.domain.pet.constant.RepStatus;
 import com.ppp.domain.pet.repository.PetImageRepository;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
@@ -136,7 +135,6 @@ class PetServiceTest {
                 .firstMeetDate(LocalDateTime.parse("2020-01-01T00:00:00"))
                 .weight(5.5)
                 .registeredNumber("1234")
-                .repStatus(RepStatus.NORMAL)
                 .petImageUrl(null)
                 .build();
 
@@ -157,20 +155,5 @@ class PetServiceTest {
         petService.deleteMyPet(petId, user);
 
         verify(petRepository, times(1)).deleteById(petId);
-    }
-
-    @Test
-    @DisplayName("대표 반려동물 지정")
-    void selectRepresentativePet_switchFromNormalToRepresentative() {
-        Pet pet1 = Pet.builder().id(1L).user(user).repStatus(RepStatus.REPRESENTATIVE).isNeutered(false).build();
-        Pet pet2 = Pet.builder().id(2L).user(user).repStatus(RepStatus.NORMAL).isNeutered(false).build();
-
-        when(petRepository.findRepresentativePet(user.getId())).thenReturn(Optional.of(pet1));
-        when(petRepository.findMyPetById(2L, user.getId())).thenReturn(Optional.of(pet2));
-
-        petService.selectRepresentative(pet2.getId(), user);
-
-        assertEquals(RepStatus.NORMAL, pet1.getRepStatus());
-        assertEquals(RepStatus.REPRESENTATIVE, pet2.getRepStatus());
     }
 }
