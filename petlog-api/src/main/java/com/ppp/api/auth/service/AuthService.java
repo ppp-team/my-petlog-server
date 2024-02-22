@@ -13,6 +13,8 @@ import com.ppp.common.security.jwt.JwtTokenProvider;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.constant.Role;
 import com.ppp.domain.user.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -59,7 +61,6 @@ public class AuthService {
             String accessToken = jwtTokenProvider.generateAccessToken(user);
             String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
-            // 레디스 토큰 저장
             redisClient.setValues(email, refreshToken, Duration.ofMillis(jwtTokenProvider.getRefreshExpiration(refreshToken)));
 
             return AuthenticationResponse.builder()
@@ -123,4 +124,23 @@ public class AuthService {
     public String encodePassword(String rowPassword) {
         return passwordEncoder.encode(rowPassword);
     }
+
+    public void setHeaderAccessToken(HttpServletResponse response, String accessToken) {
+        Long accessExpiration = jwtTokenProvider.getAccessExpiration(accessToken);
+        Cookie cookie = new Cookie("accessToken", accessToken);
+        cookie.setMaxAge(accessExpiration.intValue());
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+    }
+
+    public void setHeaderRefreshToken(HttpServletResponse response, String refreshToken) {
+        Long refreshExpiration = jwtTokenProvider.getRefreshExpiration(refreshToken);
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setMaxAge(refreshExpiration.intValue());
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+    }
+
 }
