@@ -3,7 +3,6 @@ package com.ppp.domain.pet;
 import com.ppp.domain.common.BaseTimeEntity;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.pet.constant.Gender;
-import com.ppp.domain.pet.constant.RepStatus;
 import com.ppp.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -57,9 +56,6 @@ public class Pet extends BaseTimeEntity {
     @Column(length = 50)
     private String registeredNumber;
 
-    @Enumerated(EnumType.STRING)
-    private RepStatus repStatus;
-
     @Column(columnDefinition = "BIT default 0")
     private Boolean isDeleted;
 
@@ -95,9 +91,5 @@ public class Pet extends BaseTimeEntity {
         if (registeredNumber != null) {
             this.registeredNumber = registeredNumber;
         }
-    }
-
-    public void updateRepStatus(RepStatus repStatus) {
-        this.repStatus = repStatus;
     }
 }
