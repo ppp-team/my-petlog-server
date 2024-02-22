@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -55,10 +53,10 @@ public class Diary extends BaseTimeEntity {
     private List<DiaryMedia> diaryMedias = new ArrayList<>();
 
     @Transient
-    private Set<DiaryMedia> videos = new HashSet<>();
+    private List<DiaryMedia> videos = new ArrayList<>();
 
     @Transient
-    private Set<DiaryMedia> images = new HashSet<>();
+    private List<DiaryMedia> images = new ArrayList<>();
 
     public void deleteDiaryMedias() {
         diaryMedias.clear();
@@ -81,17 +79,17 @@ public class Diary extends BaseTimeEntity {
         deleteDiaryMedias();
     }
 
-    public Set<DiaryMedia> getVideoMedias() {
+    public List<DiaryMedia> getVideoMedias() {
         if (videos.isEmpty())
-            videos = new HashSet<>(diaryMedias.stream()
+            videos = diaryMedias.stream()
                     .filter(diaryMedia -> DiaryMediaType.VIDEO.equals(diaryMedia.getType()))
-                    .toList());
+                    .toList();
         return videos;
     }
 
-    public Set<DiaryMedia> getImageMedias() {
+    public List<DiaryMedia> getImageMedias() {
         if (images.isEmpty()) {
-            images = new HashSet<>(this.diaryMedias);
+            images = new ArrayList<>(this.diaryMedias);
             images.removeAll(getVideoMedias());
         }
         return images;

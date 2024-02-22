@@ -2,7 +2,7 @@ package com.ppp.domain.user;
 
 
 import com.ppp.domain.common.BaseTimeEntity;
-import com.ppp.domain.common.GenerationUtil;
+import com.ppp.domain.common.util.GenerationUtil;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.user.constant.Role;
 import jakarta.persistence.*;

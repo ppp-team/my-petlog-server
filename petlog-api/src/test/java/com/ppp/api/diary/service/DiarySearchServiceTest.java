@@ -179,7 +179,6 @@ class DiarySearchServiceTest {
         given(diarySearchRepository.findByUser_Id(anyString()))
                 .willReturn(documents);
         //when
-        ArgumentCaptor<UserDocument> captor = ArgumentCaptor.forClass(UserDocument.class);
         diarySearchService.updateUser("abcde1234");
         //then
         verify(diarySearchRepository, times(1)).saveAll(anyCollection());
