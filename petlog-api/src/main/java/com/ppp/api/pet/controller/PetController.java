@@ -63,7 +63,7 @@ public class PetController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "반려동물 조회", description = "반려동물를 조회합니다.")
+    @Operation(summary = "반려동물 조회", description = "공동집사로 관리하고 있는 반려동물를 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = MyPetResponse.class))}),
             @ApiResponse(responseCode = "404", description = "반려동물을 찾을 수 없습니다", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),

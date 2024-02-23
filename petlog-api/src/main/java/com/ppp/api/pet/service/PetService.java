@@ -11,7 +11,7 @@ import com.ppp.domain.common.constant.Domain;
 import com.ppp.domain.common.util.GenerationUtil;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
-import com.ppp.domain.guardian.dto.MyPetResponseDto;
+import com.ppp.domain.guardian.dto.MyPetDto;
 import com.ppp.domain.guardian.repository.GuardianQuerydslRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
@@ -92,19 +92,18 @@ public class PetService {
     public MyPetsResponse findMyPetByInGuardian(User user) {
         List<MyPetResponse> myPetResponseList = new ArrayList<>();
 
-        List<MyPetResponseDto> myPetResponseDtos = guardianQuerydslRepository.findMyPetByInGuardian(user.getId());
-        myPetResponseDtos.forEach(
-                myPetResponseDto -> myPetResponseList.add(MyPetResponse.from(myPetResponseDto))
+        List<MyPetDto> myPetDtos = guardianQuerydslRepository.findMyPetByInGuardian(user.getId());
+        myPetDtos.forEach(
+                myPetDto -> myPetResponseList.add(MyPetResponse.from(myPetDto))
         );
 
         return new MyPetsResponse(myPetResponseList.size(), myPetResponseList);
     }
 
     public MyPetResponse findMyPetById(Long petId, User user) {
-        Pet pet = petRepository.findMyPetById(petId, user.getId())
-                .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
-        PetImage petImage = petImageRepository.findByPet(pet).orElse(new PetImage());
-        return MyPetResponse.from(pet, petImage);
+        MyPetDto myPetDto = guardianQuerydslRepository.findOneMyPetByInGuardian(petId, user.getId());
+        if (myPetDto == null) throw new PetException(ErrorCode.PET_NOT_FOUND);
+        return MyPetResponse.from(myPetDto);
     }
 
     public String findPetCode(Long petId) {
