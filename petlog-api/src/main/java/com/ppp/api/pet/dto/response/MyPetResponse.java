@@ -4,7 +4,7 @@ import com.ppp.domain.guardian.dto.MyPetResponseDto;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.constant.Gender;
-import com.ppp.domain.pet.constant.RepStatus;
+import com.ppp.domain.guardian.constant.RepStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
