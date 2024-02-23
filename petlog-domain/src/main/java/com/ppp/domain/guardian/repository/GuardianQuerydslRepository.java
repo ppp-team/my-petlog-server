@@ -20,7 +20,7 @@ public class GuardianQuerydslRepository {
     public List<MyPetResponseDto> findMyPetByInGuardian(String userId) {
         return queryFactory
                 .select(Projections.fields(MyPetResponseDto.class,
-                        guardian.id.as("petId"),
+                        guardian.pet.id.as("petId"),
                         guardian.user.id.as("ownerId"),
                         guardian.repStatus,
                         pet.invitedCode,
