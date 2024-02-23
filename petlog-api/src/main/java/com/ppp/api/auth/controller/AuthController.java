@@ -53,6 +53,9 @@ public class AuthController {
         AuthenticationResponse authenticationResponse = authService.signin(signinRequest);
         authService.setHeaderAccessToken(response, authenticationResponse.getAccessToken());
         authService.setHeaderRefreshToken(response, authenticationResponse.getRefreshToken());
+
+        response.addHeader("Authorization", "Bearer " + authenticationResponse.getAccessToken());
+        response.addHeader("refreshToken", authenticationResponse.getRefreshToken());
         return ResponseEntity.ok(authenticationResponse);
     }
 

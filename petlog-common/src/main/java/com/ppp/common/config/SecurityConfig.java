@@ -80,7 +80,9 @@ public class SecurityConfig {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:3000")
                         .allowedMethods("*")
-                        .allowCredentials(true);
+                        .allowCredentials(true)
+                        .allowedHeaders("*")
+                        .maxAge(7200L);
             }
         };
     }

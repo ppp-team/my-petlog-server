@@ -131,6 +131,8 @@ public class AuthService {
         cookie.setMaxAge(accessExpiration.intValue());
         cookie.setHttpOnly(true);
         cookie.setPath("/");
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
     }
 
@@ -140,6 +142,8 @@ public class AuthService {
         cookie.setMaxAge(refreshExpiration.intValue());
         cookie.setHttpOnly(true);
         cookie.setPath("/");
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
     }
 
