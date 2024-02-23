@@ -1,7 +1,7 @@
 package com.ppp.domain.guardian.dto;
 
 import com.ppp.domain.pet.constant.Gender;
-import com.ppp.domain.pet.constant.RepStatus;
+import com.ppp.domain.guardian.constant.RepStatus;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Builder;
 import lombok.Data;

@@ -18,17 +18,11 @@ public class GuardianQuerydslRepository {
     private final JPAQueryFactory queryFactory;
 
     public List<MyPetResponseDto> findMyPetByInGuardian(String userId) {
-
-        List<Long> petIds = queryFactory
-                .select(pet.id)
-                .from(guardian)
-                .where(guardian.user.id.eq(userId))
-                .fetch();
-
         return queryFactory
                 .select(Projections.fields(MyPetResponseDto.class,
-                        pet.id.as("petId"),
-                        pet.user.id.as("ownerId"),
+                        guardian.id.as("petId"),
+                        guardian.user.id.as("ownerId"),
+                        guardian.repStatus,
                         pet.invitedCode,
                         pet.name,
                         pet.type,
@@ -41,10 +35,11 @@ public class GuardianQuerydslRepository {
                         pet.registeredNumber,
                         petImage.url.as("petImageUrl")
                 ))
-                .from(pet)
+                .from(guardian)
+                .innerJoin(pet).on(guardian.pet.id.eq(pet.id))
                 .leftJoin(petImage).on(pet.id.eq(petImage.pet.id))
-                .where(pet.id.in(petIds))
-                .orderBy(pet.createdAt.asc())
+                .where(guardian.user.id.eq(userId))
+                .orderBy(guardian.createdAt.asc())
                 .fetch();
     }
 }
