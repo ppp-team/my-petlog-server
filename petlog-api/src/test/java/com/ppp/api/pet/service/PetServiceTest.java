@@ -1,8 +1,11 @@
 package com.ppp.api.pet.service;
 
+import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
+import com.ppp.common.service.FileStorageManageService;
+import com.ppp.domain.guardian.constant.RepStatus;
 import com.ppp.domain.guardian.dto.MyPetResponseDto;
 import com.ppp.domain.guardian.repository.GuardianQuerydslRepository;
 import com.ppp.domain.pet.Pet;
@@ -40,7 +43,13 @@ class PetServiceTest {
     private PetImageRepository petImageRepository;
 
     @Mock
+    private FileStorageManageService fileStorageManageService;
+
+    @Mock
     private GuardianQuerydslRepository guardianQuerydslRepository;
+
+    @Mock
+    private GuardianService guardianService;
 
     @InjectMocks
     private PetService petService;
@@ -63,6 +72,7 @@ class PetServiceTest {
     @Test
     @DisplayName("반려동물 추가")
     void createPetTest() {
+        //given
         PetRequest petRequest = PetRequest.builder()
                 .name("name")
                 .type("type")
@@ -75,14 +85,17 @@ class PetServiceTest {
                 .registeredNumber("1234")
                 .build();
 
+        //when
         petService.createPet(petRequest, user, null);
 
+        //then
         verify(petRepository, times(1)).save(any(Pet.class));
     }
 
     @Test
     @DisplayName("반려동물 수정")
     void updatePetTest() {
+        //given
         PetRequest petRequest = PetRequest.builder()
                 .name("name")
                 .type("type")
@@ -94,27 +107,19 @@ class PetServiceTest {
                 .weight(5.0)
                 .registeredNumber("1234")
                 .build();
-
         when(petRepository.findMyPetById(1L, user.getId())).thenReturn(Optional.of(pet));
 
+        //when
         petService.updatePet(1L, petRequest, user, null);
 
+        //then
         assertEquals("name", pet.getName());
     }
 
     @Test
     @DisplayName("반려동물 조회")
     void displayPetTest() {
-        when(petRepository.findMyPetById(1L, user.getId())).thenReturn(Optional.of(pet));
-
-        MyPetResponse myPetResponse = petService.findMyPetById(1L, user);
-
-        Assertions.assertThat(myPetResponse).isNotNull();
-    }
-
-    @Test
-    @DisplayName("반려동물 리스트")
-    void displayPetsTest() {
+        //given
         MyPetResponseDto myPetResponseDto = MyPetResponseDto.builder()
                 .petId(15L)
                 .ownerId("j22031")
@@ -129,15 +134,45 @@ class PetServiceTest {
                 .weight(5.5)
                 .registeredNumber("1234")
                 .petImageUrl(null)
+                .repStatus(RepStatus.NORMAL)
                 .build();
+        when(guardianQuerydslRepository.findOneMyPetByInGuardian(1L, user.getId())).thenReturn(myPetResponseDto);
 
+        //when
+        MyPetResponse myPetResponse = petService.findMyPetById(1L, user);
 
+        //then
+        Assertions.assertThat(myPetResponse).isNotNull();
+    }
+
+    @Test
+    @DisplayName("반려동물 리스트")
+    void displayPetsTest() {
+        //given
+        MyPetResponseDto myPetResponseDto = MyPetResponseDto.builder()
+                .petId(15L)
+                .ownerId("j22031")
+                .invitedCode("1021vc9h")
+                .name("이름")
+                .type("타입")
+                .breed("품종")
+                .gender(Gender.FEMALE)
+                .isNeutered(true)
+                .birth(LocalDateTime.parse("2020-01-01T00:00:00"))
+                .firstMeetDate(LocalDateTime.parse("2020-01-01T00:00:00"))
+                .weight(5.5)
+                .registeredNumber("1234")
+                .petImageUrl(null)
+                .repStatus(RepStatus.NORMAL)
+                .build();
         when(guardianQuerydslRepository.findMyPetByInGuardian(user.getId())).thenReturn(
                 List.of(myPetResponseDto)
         );
 
+        //when
         MyPetsResponse MyPetsResponse = petService.findMyPetByInGuardian(user);
 
+        //then
         Assertions.assertThat(MyPetsResponse).isNotNull();
     }
 
