@@ -2,6 +2,7 @@ package com.ppp.domain.guardian.repository;
 
 import com.ppp.domain.guardian.dto.MyPetResponseDto;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -38,8 +39,8 @@ public class GuardianQuerydslRepository {
                 .from(guardian)
                 .innerJoin(pet).on(guardian.pet.id.eq(pet.id))
                 .leftJoin(petImage).on(pet.id.eq(petImage.pet.id))
-                .where(guardian.user.id.eq(userId),
-                        pet.id.eq(petId))
+                .where(hasUserIdInGuardian(userId),
+                        hasPetIdInPet(petId))
                 .fetchOne();
     }
 
@@ -64,8 +65,17 @@ public class GuardianQuerydslRepository {
                 .from(guardian)
                 .innerJoin(pet).on(guardian.pet.id.eq(pet.id))
                 .leftJoin(petImage).on(pet.id.eq(petImage.pet.id))
-                .where(guardian.user.id.eq(userId))
+                .where(hasUserIdInGuardian(userId))
                 .orderBy(guardian.createdAt.asc())
                 .fetch();
     }
+
+    private BooleanExpression hasUserIdInGuardian(String userId) {
+        return guardian.user.id.eq(userId);
+    }
+
+    private BooleanExpression hasPetIdInPet(Long petId) {
+        return pet.id.eq(petId);
+    }
+
 }
