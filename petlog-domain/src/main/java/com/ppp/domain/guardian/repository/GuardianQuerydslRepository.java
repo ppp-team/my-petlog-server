@@ -17,6 +17,32 @@ import static com.ppp.domain.pet.QPetImage.petImage;
 public class GuardianQuerydslRepository {
     private final JPAQueryFactory queryFactory;
 
+    public MyPetResponseDto findOneMyPetByInGuardian(Long petId, String userId) {
+        return queryFactory
+                .select(Projections.fields(MyPetResponseDto.class,
+                        guardian.pet.id.as("petId"),
+                        guardian.user.id.as("ownerId"),
+                        guardian.repStatus,
+                        pet.invitedCode,
+                        pet.name,
+                        pet.type,
+                        pet.breed,
+                        pet.gender,
+                        pet.isNeutered,
+                        pet.birth,
+                        pet.firstMeetDate,
+                        pet.weight,
+                        pet.registeredNumber,
+                        petImage.url.as("petImageUrl")
+                ))
+                .from(guardian)
+                .innerJoin(pet).on(guardian.pet.id.eq(pet.id))
+                .leftJoin(petImage).on(pet.id.eq(petImage.pet.id))
+                .where(guardian.user.id.eq(userId),
+                        pet.id.eq(petId))
+                .fetchOne();
+    }
+
     public List<MyPetResponseDto> findMyPetByInGuardian(String userId) {
         return queryFactory
                 .select(Projections.fields(MyPetResponseDto.class,

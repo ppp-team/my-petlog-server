@@ -1,10 +1,8 @@
 package com.ppp.api.pet.dto.response;
 
-import com.ppp.domain.guardian.dto.MyPetResponseDto;
-import com.ppp.domain.pet.Pet;
-import com.ppp.domain.pet.PetImage;
-import com.ppp.domain.pet.constant.Gender;
 import com.ppp.domain.guardian.constant.RepStatus;
+import com.ppp.domain.guardian.dto.MyPetResponseDto;
+import com.ppp.domain.pet.constant.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -62,24 +60,6 @@ public class MyPetResponse {
 
     @Schema(description = "반려동물 경로")
     private String petImageUrl;
-
-    public static MyPetResponse from(Pet pet, PetImage petImage) {
-        return MyPetResponse.builder()
-                .petId(pet.getId())
-                .ownerId(pet.getUser().getId())
-                .inviteCode(pet.getInvitedCode())
-                .name(pet.getName())
-                .type(pet.getType())
-                .breed(pet.getBreed())
-                .gender(pet.getGender())
-                .isNeutered(pet.getIsNeutered() == null ? null : (pet.getIsNeutered() ? "Y" : "N"))
-                .birth(pet.getBirth())
-                .firstMeetDate(pet.getFirstMeetDate())
-                .weight(pet.getWeight() == 0 ? null : String.valueOf(pet.getWeight()))
-                .registeredNumber(pet.getRegisteredNumber())
-                .petImageUrl(petImage.getUrl())
-                .build();
-    }
 
     public static MyPetResponse from(MyPetResponseDto myPetResponseDto) {
 

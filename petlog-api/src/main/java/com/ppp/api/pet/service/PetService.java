@@ -101,10 +101,9 @@ public class PetService {
     }
 
     public MyPetResponse findMyPetById(Long petId, User user) {
-        Pet pet = petRepository.findMyPetById(petId, user.getId())
-                .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
-        PetImage petImage = petImageRepository.findByPet(pet).orElse(new PetImage());
-        return MyPetResponse.from(pet, petImage);
+        MyPetResponseDto myPetResponseDto = guardianQuerydslRepository.findOneMyPetByInGuardian(petId, user.getId());
+        if (myPetResponseDto == null) throw new PetException(ErrorCode.PET_NOT_FOUND);
+        return MyPetResponse.from(myPetResponseDto);
     }
 
     public String findPetCode(Long petId) {
