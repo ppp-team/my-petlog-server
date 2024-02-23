@@ -1,7 +1,7 @@
 package com.ppp.api.pet.dto.response;
 
 import com.ppp.domain.guardian.constant.RepStatus;
-import com.ppp.domain.guardian.dto.MyPetResponseDto;
+import com.ppp.domain.guardian.dto.MyPetDto;
 import com.ppp.domain.pet.constant.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -61,23 +61,23 @@ public class MyPetResponse {
     @Schema(description = "반려동물 경로")
     private String petImageUrl;
 
-    public static MyPetResponse from(MyPetResponseDto myPetResponseDto) {
+    public static MyPetResponse from(MyPetDto myPetDto) {
 
         return MyPetResponse.builder()
-                .petId(myPetResponseDto.getPetId())
-                .ownerId(myPetResponseDto.getOwnerId())
-                .inviteCode(myPetResponseDto.getInvitedCode())
-                .name(myPetResponseDto.getName())
-                .type(myPetResponseDto.getType())
-                .breed(myPetResponseDto.getBreed())
-                .gender(myPetResponseDto.getGender())
-                .isNeutered(myPetResponseDto.getIsNeutered() == null ? null : (myPetResponseDto.getIsNeutered() ? "Y" : "N"))
-                .birth(myPetResponseDto.getBirth())
-                .firstMeetDate(myPetResponseDto.getFirstMeetDate())
-                .weight(myPetResponseDto.getWeight() == 0 ? null : String.valueOf(myPetResponseDto.getWeight()))
-                .registeredNumber(myPetResponseDto.getRegisteredNumber())
-                .repStatus(myPetResponseDto.getRepStatus())
-                .petImageUrl(myPetResponseDto.getPetImageUrl())
+                .petId(myPetDto.getPetId())
+                .ownerId(myPetDto.getOwnerId())
+                .inviteCode(myPetDto.getInvitedCode())
+                .name(myPetDto.getName())
+                .type(myPetDto.getType())
+                .breed(myPetDto.getBreed())
+                .gender(myPetDto.getGender())
+                .isNeutered(myPetDto.getIsNeutered() == null ? null : (myPetDto.getIsNeutered() ? "Y" : "N"))
+                .birth(myPetDto.getBirth())
+                .firstMeetDate(myPetDto.getFirstMeetDate())
+                .weight(myPetDto.getWeight() == 0 ? null : String.valueOf(myPetDto.getWeight()))
+                .registeredNumber(myPetDto.getRegisteredNumber())
+                .repStatus(myPetDto.getRepStatus())
+                .petImageUrl(myPetDto.getPetImageUrl())
                 .build();
     }
 }

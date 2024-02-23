@@ -1,6 +1,6 @@
 package com.ppp.domain.guardian.repository;
 
-import com.ppp.domain.guardian.dto.MyPetResponseDto;
+import com.ppp.domain.guardian.dto.MyPetDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -18,9 +18,9 @@ import static com.ppp.domain.pet.QPetImage.petImage;
 public class GuardianQuerydslRepository {
     private final JPAQueryFactory queryFactory;
 
-    public MyPetResponseDto findOneMyPetByInGuardian(Long petId, String userId) {
+    public MyPetDto findOneMyPetByInGuardian(Long petId, String userId) {
         return queryFactory
-                .select(Projections.fields(MyPetResponseDto.class,
+                .select(Projections.fields(MyPetDto.class,
                         guardian.pet.id.as("petId"),
                         guardian.user.id.as("ownerId"),
                         guardian.repStatus,
@@ -44,9 +44,9 @@ public class GuardianQuerydslRepository {
                 .fetchOne();
     }
 
-    public List<MyPetResponseDto> findMyPetByInGuardian(String userId) {
+    public List<MyPetDto> findMyPetByInGuardian(String userId) {
         return queryFactory
-                .select(Projections.fields(MyPetResponseDto.class,
+                .select(Projections.fields(MyPetDto.class,
                         guardian.pet.id.as("petId"),
                         guardian.user.id.as("ownerId"),
                         guardian.repStatus,

@@ -1,7 +1,7 @@
 package com.ppp.domain.guardian.dto;
 
-import com.ppp.domain.pet.constant.Gender;
 import com.ppp.domain.guardian.constant.RepStatus;
+import com.ppp.domain.pet.constant.Gender;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-public class MyPetResponseDto {
+public class MyPetDto {
     private Long petId;
 
     private String ownerId;
@@ -42,7 +42,7 @@ public class MyPetResponseDto {
 
     @Builder
     @QueryProjection
-    public MyPetResponseDto(Long petId, String ownerId, String invitedCode, String name, String type, String breed, Gender gender, Boolean isNeutered, LocalDateTime birth, LocalDateTime firstMeetDate, Double weight, String registeredNumber, RepStatus repStatus, String petImageUrl) {
+    public MyPetDto(Long petId, String ownerId, String invitedCode, String name, String type, String breed, Gender gender, Boolean isNeutered, LocalDateTime birth, LocalDateTime firstMeetDate, Double weight, String registeredNumber, RepStatus repStatus, String petImageUrl) {
         this.petId = petId;
         this.ownerId = ownerId;
         this.invitedCode = invitedCode;

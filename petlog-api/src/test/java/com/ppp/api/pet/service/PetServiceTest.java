@@ -6,7 +6,7 @@ import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
 import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.guardian.constant.RepStatus;
-import com.ppp.domain.guardian.dto.MyPetResponseDto;
+import com.ppp.domain.guardian.dto.MyPetDto;
 import com.ppp.domain.guardian.repository.GuardianQuerydslRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
@@ -120,7 +120,7 @@ class PetServiceTest {
     @DisplayName("반려동물 조회")
     void displayPetTest() {
         //given
-        MyPetResponseDto myPetResponseDto = MyPetResponseDto.builder()
+        MyPetDto myPetDto = MyPetDto.builder()
                 .petId(15L)
                 .ownerId("j22031")
                 .invitedCode("1021vc9h")
@@ -136,7 +136,7 @@ class PetServiceTest {
                 .petImageUrl(null)
                 .repStatus(RepStatus.NORMAL)
                 .build();
-        when(guardianQuerydslRepository.findOneMyPetByInGuardian(1L, user.getId())).thenReturn(myPetResponseDto);
+        when(guardianQuerydslRepository.findOneMyPetByInGuardian(1L, user.getId())).thenReturn(myPetDto);
 
         //when
         MyPetResponse myPetResponse = petService.findMyPetById(1L, user);
@@ -149,7 +149,7 @@ class PetServiceTest {
     @DisplayName("반려동물 리스트")
     void displayPetsTest() {
         //given
-        MyPetResponseDto myPetResponseDto = MyPetResponseDto.builder()
+        MyPetDto myPetDto = MyPetDto.builder()
                 .petId(15L)
                 .ownerId("j22031")
                 .invitedCode("1021vc9h")
@@ -166,7 +166,7 @@ class PetServiceTest {
                 .repStatus(RepStatus.NORMAL)
                 .build();
         when(guardianQuerydslRepository.findMyPetByInGuardian(user.getId())).thenReturn(
-                List.of(myPetResponseDto)
+                List.of(myPetDto)
         );
 
         //when
