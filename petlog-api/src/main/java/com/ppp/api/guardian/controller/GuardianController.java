@@ -37,8 +37,8 @@ public class GuardianController {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = GuardianResponse.class))})
     })
     @GetMapping("/v1/my/guardians/{petId}")
-    public ResponseEntity<GuardiansResponse> displayGuardians(@PathVariable Long petId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        return ResponseEntity.ok(guardianService.displayGuardians(petId, principalDetails.getUser()));
+    public ResponseEntity<GuardiansResponse> displayGuardians(@PathVariable Long petId) {
+        return ResponseEntity.ok(guardianService.displayGuardians(petId));
     }
 
     @Operation(summary = "집사 삭제 및 탈퇴")

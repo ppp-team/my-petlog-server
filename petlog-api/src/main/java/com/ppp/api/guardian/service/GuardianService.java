@@ -41,14 +41,10 @@ public class GuardianService {
     private final InvitationRepository invitationRepository;
     private final UserQuerydslRepository userQuerydslRepository;
 
-    public GuardiansResponse displayGuardians(Long petId, User user) {
-        validateIsGuardian(petId, user.getId());
-
+    public GuardiansResponse displayGuardians(Long petId) {
         List<GuardianResponse> guardianResponseList = new ArrayList<>();
         List<Guardian> guardianList = guardianRepository.findAllByPetIdOrderByCreatedAtDesc(petId);
-        for (Guardian guardian : guardianList) {
-            guardianResponseList.add(GuardianResponse.from(guardian));
-        }
+        guardianList.stream().map(GuardianResponse::from).forEach(guardianResponseList::add);
 
         return new GuardiansResponse(guardianList.size(), guardianResponseList);
     }
