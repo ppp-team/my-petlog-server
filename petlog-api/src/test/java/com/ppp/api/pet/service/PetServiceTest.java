@@ -8,6 +8,7 @@ import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.guardian.constant.RepStatus;
 import com.ppp.domain.guardian.dto.MyPetDto;
 import com.ppp.domain.guardian.repository.GuardianQuerydslRepository;
+import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.constant.Gender;
@@ -50,6 +51,9 @@ class PetServiceTest {
 
     @Mock
     private GuardianService guardianService;
+
+    @Mock
+    private GuardianRepository guardianRepository;
 
     @InjectMocks
     private PetService petService;
@@ -107,8 +111,8 @@ class PetServiceTest {
                 .weight(5.0)
                 .registeredNumber("1234")
                 .build();
-        when(petRepository.findMyPetById(1L, user.getId())).thenReturn(Optional.of(pet));
-
+        when(petRepository.findByIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(pet));
+        when(guardianRepository.existsByPetIdAndUserId(1L, user.getId())).thenReturn(true);
         //when
         petService.updatePet(1L, petRequest, user, null);
 

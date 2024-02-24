@@ -1,5 +1,6 @@
 package com.ppp.api.pet.service;
 
+import com.ppp.api.guardian.exception.GuardianException;
 import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
@@ -13,6 +14,7 @@ import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
 import com.ppp.domain.guardian.dto.MyPetDto;
 import com.ppp.domain.guardian.repository.GuardianQuerydslRepository;
+import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.repository.PetImageRepository;
@@ -28,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.ppp.api.guardian.exception.ErrorCode.GUARDIAN_NOT_FOUND;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -37,6 +41,7 @@ public class PetService {
     private final FileStorageManageService fileStorageManageService;
     private final GuardianService guardianService;
     private final GuardianQuerydslRepository guardianQuerydslRepository;
+    private final GuardianRepository guardianRepository;
 
     @Transactional
     public void createPet(PetRequest petRequest, User user, MultipartFile petImage) {
@@ -112,7 +117,10 @@ public class PetService {
 
     @Transactional
     public void updatePet(Long petId, PetRequest petRequest, User user, MultipartFile petImage) {
-        Pet pet = petRepository.findMyPetById(petId, user.getId())
+        if(!guardianRepository.existsByPetIdAndUserId(petId, user.getId()))
+            throw new GuardianException(GUARDIAN_NOT_FOUND);
+
+        Pet pet = petRepository.findByIdAndIsDeletedFalse(petId)
                 .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
 
         petImageRepository.findByPet(pet).ifPresent(
