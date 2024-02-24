@@ -126,7 +126,7 @@ public class PetService {
 
     @Transactional
     public void deleteMyPet(Long petId, User user) {
-        Guardian guardian = guardianService.findByUserIdAndPetId(user, petId);
+        Guardian guardian = guardianService.findByUserIdAndPetId(user.getId(), petId);
         guardianService.deleteReaderGuardian(guardian, petId);
         petRepository.findMyPetById(petId, user.getId()).ifPresent(pet -> {
             PetImage petImage = petImageRepository.findByPet(pet).orElse(new PetImage());
