@@ -99,7 +99,7 @@ public class InvitationService {
     }
 
     public void registerInvitation(RegisterInvitationRequest registerInvitationRequest, User user) {
-        Pet pet = petRepository.findByInvitedCode(registerInvitationRequest.getInviteCode())
+        Pet pet = petRepository.findByInvitedCodeAndIsDeletedFalse(registerInvitationRequest.getInviteCode())
                 .orElseThrow(() -> new PetException(PET_NOT_FOUND));
         guardianService.createGuardian(pet, user, GuardianRole.MEMBER);
     }

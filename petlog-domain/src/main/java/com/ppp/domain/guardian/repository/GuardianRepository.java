@@ -22,4 +22,6 @@ public interface GuardianRepository extends JpaRepository<Guardian, Long> {
     Optional<Guardian> findByUserIdAndPetId(String userId, Long petId);
 
     Optional<Guardian> findByUserIdAndRepStatus(String id, RepStatus repStatus);
+
+    boolean existsByPetIdAndUserId(Long petId, String userId);
 }

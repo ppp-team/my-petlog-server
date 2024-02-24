@@ -9,12 +9,12 @@ import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
+import com.ppp.domain.guardian.constant.RepStatus;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.invitation.Invitation;
 import com.ppp.domain.invitation.constant.InviteStatus;
 import com.ppp.domain.invitation.repository.InvitationRepository;
 import com.ppp.domain.pet.Pet;
-import com.ppp.domain.guardian.constant.RepStatus;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.UserQuerydslRepository;
@@ -42,20 +42,18 @@ public class GuardianService {
     private final UserQuerydslRepository userQuerydslRepository;
 
     public GuardiansResponse displayGuardians(Long petId, User user) {
-        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
+        if (!guardianRepository.existsByPetIdAndUserId(petId, user.getId()))
             throw new GuardianException(ErrorCode.GUARDIAN_NOT_FOUND);
 
         List<GuardianResponse> guardianResponseList = new ArrayList<>();
         List<Guardian> guardianList = guardianRepository.findAllByPetIdOrderByCreatedAtDesc(petId);
-        for (Guardian guardian : guardianList) {
-            guardianResponseList.add(GuardianResponse.from(guardian));
-        }
+        guardianList.stream().map(GuardianResponse::from).forEach(guardianResponseList::add);
 
         return new GuardiansResponse(guardianList.size(), guardianResponseList);
     }
 
     public void createGuardian(Pet pet, User user, GuardianRole guardianRole) {
-        validateIsGuardian(user.getId(), pet.getId());
+        validateIsGuardian(pet.getId(), user.getId());
         guardianRepository.save(Guardian.builder().guardianRole(guardianRole).pet(pet).user(user).repStatus(RepStatus.NORMAL).build());
     }
 
@@ -67,18 +65,14 @@ public class GuardianService {
         Guardian guardianMe = guardianRepository.findByUserIdAndPetId(user.getId(), petId)
                 .orElseThrow(() -> new GuardianException(ErrorCode.GUARDIAN_NOT_FOUND));
 
-        if (requestedGuardian.getId() == guardianMe.getId()) { // 탈퇴과정
-            // 본인 탈퇴일 때 - 리더이면 관리자 문의 요청 메시지
+        if (requestedGuardian.getId() == guardianMe.getId()) {
             if (isReaderGuardian(guardianMe)) {
                 throw new GuardianException(ErrorCode.NOT_DELETED_IF_READER);
             } else {
                 guardianRepository.deleteById(requestedGuardian.getId());
             }
-        } else {
-            // 삭제 과정 - 본인이 이방의 리더일 때
-            if (isReaderGuardian(guardianMe)) {
-                guardianRepository.deleteById(requestedGuardian.getId());
-            }
+        } else if (isReaderGuardian(guardianMe)) {
+            guardianRepository.deleteById(requestedGuardian.getId());
         }
     }
 
@@ -99,7 +93,7 @@ public class GuardianService {
 
         validateInvitation(petId, inviteeUser, inviterUser);
 
-        Pet pet = petRepository.findById(petId)
+        Pet pet = petRepository.findByIdAndIsDeletedFalse(petId)
                 .orElseThrow(() -> new PetException(PET_NOT_FOUND));
         Invitation invitation = Invitation.builder()
                 .inviterId(inviterUser.getId())
@@ -115,10 +109,17 @@ public class GuardianService {
         if (inviteeUser.getEmail().equals(inviterUser.getEmail()))
             throw new GuardianException(ErrorCode.NOT_INVITED_EMAIL);
 
-        // 이미 공동집사일 때
-        validateIsGuardian(inviteeUser.getId(), petId);
+        validateIsGuardian(petId, inviteeUser.getId());
 
-        // 이미 초대한 사용자일 때
+        checkIfAlreadyInvited(inviteeUser, petId);
+    }
+
+    public void validateIsGuardian(Long petId, String userId) {
+        if (guardianRepository.existsByPetIdAndUserId(petId, userId))
+            throw new GuardianException(ErrorCode.NOT_INVITED_ALREADY_GUARDIAN);
+    }
+
+    private void checkIfAlreadyInvited(User inviteeUser, Long petId) {
         Optional<Invitation> invitationOfInvitee = invitationRepository.findByInviteeIdAndPetId(inviteeUser.getId(), petId);
         invitationOfInvitee.ifPresent(invitation -> {
             if (InviteStatus.PENDING.name().equals(invitation.getInviteStatus().name()) ||
@@ -127,13 +128,8 @@ public class GuardianService {
         });
     }
 
-    private void validateIsGuardian(String userId, Long petId) {
-        if (guardianRepository.existsByUserIdAndPetId(userId, petId))
-            throw new GuardianException(ErrorCode.NOT_INVITED_ALREADY_GUARDIAN);
-    }
-
-    public Guardian findByUserIdAndPetId(User user, Long petId) {
-        return guardianRepository.findByUserIdAndPetId(user.getId(), petId)
+    public Guardian findByUserIdAndPetId(String userId, Long petId) {
+        return guardianRepository.findByUserIdAndPetId(userId, petId)
                 .orElseThrow(() -> new GuardianException(ErrorCode.GUARDIAN_NOT_FOUND));
     }
 
@@ -156,8 +152,7 @@ public class GuardianService {
             guardianRepository.save(guardian);
         });
 
-        Guardian guardian = guardianRepository.findByUserIdAndPetId(user.getId(), petId)
-                .orElseThrow(() -> new GuardianException(ErrorCode.GUARDIAN_NOT_FOUND));
+        Guardian guardian = findByUserIdAndPetId(user.getId(), petId);
         guardian.updateRepStatus(RepStatus.REPRESENTATIVE);
     }
 }

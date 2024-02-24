@@ -72,15 +72,13 @@ class GuardianServiceTest {
     @DisplayName("집사 리스트")
     void displayGuardians_ReturnsGuardianResponse() {
         //given
-        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong())).willReturn(true);
-
         given(guardianRepository.findAllByPetIdOrderByCreatedAtDesc(anyLong())).willReturn(
                 List.of(Guardian.builder().user(user).guardianRole(GuardianRole.LEADER).build(),
                         Guardian.builder().user(user2).guardianRole(GuardianRole.MEMBER).build())
         );
 
         //when
-        GuardiansResponse guardiansResponse = guardianService.displayGuardians(1L, user);
+        GuardiansResponse guardiansResponse = guardianService.displayGuardians(1L, user2);
 
         //then
         Assertions.assertThat(guardiansResponse).isNotNull();
@@ -129,13 +127,13 @@ class GuardianServiceTest {
     void inviteGuardian_ReturnVoid() {
         //given
         User inviterUser = User.builder().id("inviterId").nickname("inviter").email("inviter@test.com").build();
-        Pet pet = Pet.builder().id(1L).user(inviterUser).build();
+        Pet pet = Pet.builder().id(1L).user(inviterUser).isDeleted(false).build();
         String inviteeEmail = "invitee@test.com";
         InviteGuardianRequest inviteGuardianRequest = new InviteGuardianRequest(inviteeEmail);
 
         User inviteeUser = User.builder().id("inviteeId").nickname("invitee").email(inviteeEmail).build();
         when(userRepository.findByEmail(inviteeEmail)).thenReturn(Optional.of(inviteeUser));
-        when(petRepository.findById(pet.getId())).thenReturn(Optional.of(pet));
+        when(petRepository.findByIdAndIsDeletedFalse(pet.getId())).thenReturn(Optional.of(pet));
 
         assertAll(()-> guardianService.inviteGuardian(pet.getId(), inviteGuardianRequest, inviterUser));
     }
@@ -152,7 +150,7 @@ class GuardianServiceTest {
         InviteGuardianRequest inviteGuardianRequest = new InviteGuardianRequest(inviteeEmail);
 
         when(userRepository.findByEmail(inviteeEmail)).thenReturn(Optional.of(inviteeUser));
-        when(guardianRepository.existsByUserIdAndPetId(inviteeUser.getId(), pet.getId())).thenReturn(true);
+        when(guardianRepository.existsByPetIdAndUserId(pet.getId(), inviteeUser.getId())).thenReturn(true);
 
         //when
         GuardianException guardianException = assertThrows(GuardianException.class, () -> guardianService.inviteGuardian(pet.getId(), inviteGuardianRequest, inviterUser));
