@@ -65,18 +65,14 @@ public class GuardianService {
         Guardian guardianMe = guardianRepository.findByUserIdAndPetId(user.getId(), petId)
                 .orElseThrow(() -> new GuardianException(ErrorCode.GUARDIAN_NOT_FOUND));
 
-        if (requestedGuardian.getId() == guardianMe.getId()) { // 탈퇴과정
-            // 본인 탈퇴일 때 - 리더이면 관리자 문의 요청 메시지
+        if (requestedGuardian.getId() == guardianMe.getId()) {
             if (isReaderGuardian(guardianMe)) {
                 throw new GuardianException(ErrorCode.NOT_DELETED_IF_READER);
             } else {
                 guardianRepository.deleteById(requestedGuardian.getId());
             }
-        } else {
-            // 삭제 과정 - 본인이 이방의 리더일 때
-            if (isReaderGuardian(guardianMe)) {
-                guardianRepository.deleteById(requestedGuardian.getId());
-            }
+        } else if (isReaderGuardian(guardianMe)) {
+            guardianRepository.deleteById(requestedGuardian.getId());
         }
     }
 
@@ -113,21 +109,23 @@ public class GuardianService {
         if (inviteeUser.getEmail().equals(inviterUser.getEmail()))
             throw new GuardianException(ErrorCode.NOT_INVITED_EMAIL);
 
-        // 이미 공동집사일 때
         validateIsGuardian(petId, inviteeUser.getId());
 
-        // 이미 초대한 사용자일 때
+        checkIfAlreadyInvited(inviteeUser, petId);
+    }
+
+    public void validateIsGuardian(Long petId, String userId) {
+        if (guardianRepository.existsByPetIdAndUserId(petId, userId))
+            throw new GuardianException(ErrorCode.NOT_INVITED_ALREADY_GUARDIAN);
+    }
+
+    private void checkIfAlreadyInvited(User inviteeUser, Long petId) {
         Optional<Invitation> invitationOfInvitee = invitationRepository.findByInviteeIdAndPetId(inviteeUser.getId(), petId);
         invitationOfInvitee.ifPresent(invitation -> {
             if (InviteStatus.PENDING.name().equals(invitation.getInviteStatus().name()) ||
                     InviteStatus.ACCEPTED.name().equals(invitation.getInviteStatus().name()))
                 throw new GuardianException(ErrorCode.NOT_INVITED);
         });
-    }
-
-    public void validateIsGuardian(Long petId, String userId) {
-        if (guardianRepository.existsByPetIdAndUserId(petId, userId))
-            throw new GuardianException(ErrorCode.NOT_INVITED_ALREADY_GUARDIAN);
     }
 
     public Guardian findByUserIdAndPetId(String userId, Long petId) {
