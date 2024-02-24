@@ -48,7 +48,7 @@ public class GuardianQuerydslRepository {
         return queryFactory
                 .select(Projections.fields(MyPetDto.class,
                         guardian.pet.id.as("petId"),
-                        guardian.user.id.as("ownerId"),
+                        pet.user.id.as("ownerId"),
                         guardian.repStatus,
                         pet.invitedCode,
                         pet.name,
