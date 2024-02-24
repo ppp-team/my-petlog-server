@@ -17,12 +17,12 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
             "WHERE p.id = :petId " +
             "AND p.user.id = :userId " +
             "AND p.isDeleted = false")
-    Optional<Pet> findMyPetById(@Param("petId") Long petId, @Param("userId") String userId);
+    Optional<Pet> findMyPetByIdAndIsDeletedFalse(@Param("petId") Long petId, @Param("userId") String userId);
 
-    Optional<Pet> findByInvitedCode(String inviteCode);
+    Optional<Pet> findByInvitedCodeAndIsDeletedFalse(String inviteCode);
 
     @Query("SELECT p.invitedCode FROM Pet p " +
             "WHERE p.id = :petId " +
             "AND p.isDeleted = false")
-    Optional<String> findPetCodeById(@Param("petId") Long petId);
+    Optional<String> findPetCodeByIdAndIsDeletedFalse(@Param("petId") Long petId);
 }

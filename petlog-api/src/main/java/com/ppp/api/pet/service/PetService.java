@@ -112,7 +112,7 @@ public class PetService {
     }
 
     public String findPetCode(Long petId) {
-        return petRepository.findPetCodeById(petId).orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
+        return petRepository.findPetCodeByIdAndIsDeletedFalse(petId).orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
     }
 
     @Transactional
@@ -136,7 +136,7 @@ public class PetService {
     public void deleteMyPet(Long petId, User user) {
         Guardian guardian = guardianService.findByUserIdAndPetId(user.getId(), petId);
         guardianService.deleteReaderGuardian(guardian, petId);
-        petRepository.findMyPetById(petId, user.getId()).ifPresent(pet -> {
+        petRepository.findMyPetByIdAndIsDeletedFalse(petId, user.getId()).ifPresent(pet -> {
             PetImage petImage = petImageRepository.findByPet(pet).orElse(new PetImage());
             deletePetImage(petImage);
             pet.delete();

@@ -185,7 +185,7 @@ class PetServiceTest {
     void deleteMyPet() {
         //given
         Pet pet = Pet.builder().id(1L).user(user).isDeleted(false).build();
-        when(petRepository.findMyPetById(pet.getId(), user.getId())).thenReturn(Optional.of(pet));
+        when(petRepository.findMyPetByIdAndIsDeletedFalse(pet.getId(), user.getId())).thenReturn(Optional.of(pet));
 
         PetImage petImage = PetImage.builder().url("url").build();
         when(petImageRepository.findByPet(pet)).thenReturn(Optional.of(petImage));
@@ -203,7 +203,7 @@ class PetServiceTest {
     void deleteMyPet_noImage() {
         //given
         Pet pet = Pet.builder().id(1L).user(user).isDeleted(false).build();
-        when(petRepository.findMyPetById(pet.getId(), user.getId())).thenReturn(Optional.of(pet));
+        when(petRepository.findMyPetByIdAndIsDeletedFalse(pet.getId(), user.getId())).thenReturn(Optional.of(pet));
 
         PetImage petImage = PetImage.builder().build();
         when(petImageRepository.findByPet(pet)).thenReturn(Optional.of(petImage));
