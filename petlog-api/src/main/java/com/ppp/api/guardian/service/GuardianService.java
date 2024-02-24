@@ -41,7 +41,10 @@ public class GuardianService {
     private final InvitationRepository invitationRepository;
     private final UserQuerydslRepository userQuerydslRepository;
 
-    public GuardiansResponse displayGuardians(Long petId) {
+    public GuardiansResponse displayGuardians(Long petId, User user) {
+        if (!guardianRepository.existsByPetIdAndUserId(petId, user.getId()))
+            throw new GuardianException(ErrorCode.GUARDIAN_NOT_FOUND);
+
         List<GuardianResponse> guardianResponseList = new ArrayList<>();
         List<Guardian> guardianList = guardianRepository.findAllByPetIdOrderByCreatedAtDesc(petId);
         guardianList.stream().map(GuardianResponse::from).forEach(guardianResponseList::add);

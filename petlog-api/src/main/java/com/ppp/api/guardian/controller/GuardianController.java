@@ -34,11 +34,12 @@ public class GuardianController {
 
     @Operation(summary = "공동집사 목록 조회", description = "펫메이트 그룹관리 목록을 조회합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = GuardianResponse.class))})
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation = GuardianResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "해당 그룹에서 공동집사를 찾을 수 없습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
     @GetMapping("/v1/my/guardians/{petId}")
-    public ResponseEntity<GuardiansResponse> displayGuardians(@PathVariable Long petId) {
-        return ResponseEntity.ok(guardianService.displayGuardians(petId));
+    public ResponseEntity<GuardiansResponse> displayGuardians(@PathVariable Long petId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(guardianService.displayGuardians(petId, principalDetails.getUser()));
     }
 
     @Operation(summary = "집사 삭제 및 탈퇴")

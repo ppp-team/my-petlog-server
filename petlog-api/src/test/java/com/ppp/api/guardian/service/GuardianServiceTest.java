@@ -78,7 +78,7 @@ class GuardianServiceTest {
         );
 
         //when
-        GuardiansResponse guardiansResponse = guardianService.displayGuardians(1L);
+        GuardiansResponse guardiansResponse = guardianService.displayGuardians(1L, user2);
 
         //then
         Assertions.assertThat(guardiansResponse).isNotNull();
