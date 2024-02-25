@@ -76,21 +76,17 @@ public class Pet extends BaseTimeEntity {
         if (gender != null) {
             this.gender = gender.equals("MALE") ? Gender.MALE : Gender.FEMALE;
         }
-        if (isNeutered != null) {
-            this.isNeutered = isNeutered;
-        }
-        if (birth != null) {
-            this.birth = birth.atStartOfDay();
-        }
-        if (firstMeetDate != null) {
-            this.firstMeetDate = firstMeetDate.atStartOfDay();
-        }
-        if (weight != 0) {
-            this.weight = weight;
-        }
-        if (registeredNumber != null) {
-            this.registeredNumber = registeredNumber;
-        }
+        this.isNeutered = isNeutered;
+
+        if (birth == null) this.birth = null;
+        else this.birth = birth.atStartOfDay();
+
+        if (firstMeetDate == null) this.firstMeetDate = null;
+        else this.firstMeetDate = firstMeetDate.atStartOfDay();
+
+        this.weight = weight;
+
+        this.registeredNumber = registeredNumber;
     }
 
     public void delete() {
