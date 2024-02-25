@@ -4,6 +4,7 @@ import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.invitation.dto.request.InvitationRequest;
 import com.ppp.api.invitation.dto.request.RegisterInvitationRequest;
 import com.ppp.api.invitation.dto.response.InvitationResponse;
+import com.ppp.api.invitation.dto.response.MyInvitationResponse;
 import com.ppp.api.invitation.exception.ErrorCode;
 import com.ppp.api.invitation.exception.InvitationException;
 import com.ppp.api.pet.exception.PetException;
@@ -76,19 +77,13 @@ public class InvitationService {
         invitation.updateInviteStatus(InviteStatus.REJECTED);
     }
 
-    public List<MyInvitationDto> displayMyInvitations(Long petId, User user) {
+    public List<MyInvitationResponse> displayMyInvitations(Long petId, User user) {
         List<MyInvitationDto> myInvitationDtoResponseList = invitationQuerydslRepository.findMyInvitationByInviterId(petId, user.getId());
-        myInvitationDtoResponseList.forEach(myInvitationDto -> {
-                String status = null;
-                if (InviteStatus.PENDING.name().equals(myInvitationDto.getInviteStatus())) {
-                    status = InviteStatus.PENDING.getValue();
-                } else if (InviteStatus.REJECTED.name().equals(myInvitationDto.getInviteStatus())) {
-                    status = InviteStatus.REJECTED.getValue();
-                }
-                myInvitationDto.setInviteStatus(status);
-                myInvitationDto.setInvitedAt(TimeUtil.calculateTerm(myInvitationDto.getCreatedAt()));
-        });
-        return myInvitationDtoResponseList;
+        List<MyInvitationResponse> myInvitationResponseList = new ArrayList<>();
+        myInvitationDtoResponseList.forEach(myInvitationDto ->
+            myInvitationResponseList.add(MyInvitationResponse.from(myInvitationDto))
+        );
+        return myInvitationResponseList;
     }
 
     @Transactional
