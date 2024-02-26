@@ -173,7 +173,7 @@ class GuardianServiceTest {
         when(userRepository.findByEmail(inviteeEmail)).thenReturn(Optional.of(inviteeUser));
 
         Invitation invitation = Invitation.builder().pet(pet).inviteStatus(InviteStatus.PENDING).inviterId(inviterUser.getId()).inviteeId(inviteeUser.getId()).build();
-        when(invitationRepository.findByInviteeIdAndPetId(inviteeUser.getId(), pet.getId())).thenReturn(Optional.of(invitation));
+        when(invitationRepository.findFirstByInviteeIdAndPetIdOrderByCreatedAtDesc(inviteeUser.getId(), pet.getId())).thenReturn(Optional.of(invitation));
 
         //when
         GuardianException guardianException = assertThrows(GuardianException.class, () -> guardianService.inviteGuardian(pet.getId(), inviteGuardianRequest, inviterUser));

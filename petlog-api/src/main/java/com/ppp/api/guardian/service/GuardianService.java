@@ -120,7 +120,7 @@ public class GuardianService {
     }
 
     private void checkIfAlreadyInvited(User inviteeUser, Long petId) {
-        Optional<Invitation> invitationOfInvitee = invitationRepository.findByInviteeIdAndPetId(inviteeUser.getId(), petId);
+        Optional<Invitation> invitationOfInvitee = invitationRepository.findFirstByInviteeIdAndPetIdOrderByCreatedAtDesc(inviteeUser.getId(), petId);
         invitationOfInvitee.ifPresent(invitation -> {
             if (InviteStatus.PENDING.name().equals(invitation.getInviteStatus().name()) ||
                     InviteStatus.ACCEPTED.name().equals(invitation.getInviteStatus().name()))
