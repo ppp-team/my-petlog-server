@@ -117,7 +117,7 @@ public class PetService {
 
     @Transactional
     public void updatePet(Long petId, PetRequest petRequest, User user, MultipartFile petImage) {
-        if(!guardianRepository.existsByPetIdAndUserId(petId, user.getId()))
+        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
             throw new GuardianException(GUARDIAN_NOT_FOUND);
 
         Pet pet = petRepository.findByIdAndIsDeletedFalse(petId)

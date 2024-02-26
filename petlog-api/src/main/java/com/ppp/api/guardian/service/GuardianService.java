@@ -7,6 +7,7 @@ import com.ppp.api.guardian.exception.ErrorCode;
 import com.ppp.api.guardian.exception.GuardianException;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.user.dto.response.UserResponse;
+import com.ppp.common.service.CacheManageService;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
 import com.ppp.domain.guardian.constant.RepStatus;
@@ -40,9 +41,10 @@ public class GuardianService {
     private final PetRepository petRepository;
     private final InvitationRepository invitationRepository;
     private final UserQuerydslRepository userQuerydslRepository;
+    private final CacheManageService cacheManageService;
 
     public GuardiansResponse displayGuardians(Long petId, User user) {
-        if (!guardianRepository.existsByPetIdAndUserId(petId, user.getId()))
+        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
             throw new GuardianException(ErrorCode.GUARDIAN_NOT_FOUND);
 
         List<GuardianResponse> guardianResponseList = new ArrayList<>();
@@ -74,6 +76,11 @@ public class GuardianService {
         } else if (isReaderGuardian(guardianMe)) {
             guardianRepository.deleteById(requestedGuardian.getId());
         }
+        deleteCachedGuardianAuthority(requestedGuardian.getUser().getId(), petId);
+    }
+
+    private void deleteCachedGuardianAuthority(String userId, Long petId) {
+        cacheManageService.deleteCachedPetSpaceAuthority(userId, petId);
     }
 
     private boolean isReaderGuardian(Guardian guardian) {
@@ -115,7 +122,7 @@ public class GuardianService {
     }
 
     public void validateIsGuardian(Long petId, String userId) {
-        if (guardianRepository.existsByPetIdAndUserId(petId, userId))
+        if (guardianRepository.existsByUserIdAndPetId(userId, petId))
             throw new GuardianException(ErrorCode.NOT_INVITED_ALREADY_GUARDIAN);
     }
 
