@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
 
-    Optional<Invitation> findByInviteeIdAndPetId(String inviteeId, Long petId);
+    Optional<Invitation> findFirstByInviteeIdAndPetIdOrderByCreatedAtDesc(String inviteeId, Long petId);
 
     List<Invitation> findByInviteeIdAndInviteStatus(String inviteeId, InviteStatus inviteStatus);
 
