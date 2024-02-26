@@ -79,11 +79,6 @@ public class CacheIntegrationTest {
             .pet(pet)
             .user(userA).build();
 
-    Guardian guardianB = Guardian.builder()
-            .guardianRole(GuardianRole.MEMBER)
-            .pet(pet)
-            .user(userB).build();
-
 
     @BeforeEach
     void setUp() {
