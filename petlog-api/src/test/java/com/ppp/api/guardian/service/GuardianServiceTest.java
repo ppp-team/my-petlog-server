@@ -4,6 +4,7 @@ import com.ppp.api.guardian.dto.request.InviteGuardianRequest;
 import com.ppp.api.guardian.dto.response.GuardiansResponse;
 import com.ppp.api.guardian.exception.GuardianException;
 import com.ppp.api.user.dto.response.UserResponse;
+import com.ppp.common.service.CacheManageService;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
 import com.ppp.domain.guardian.constant.RepStatus;
@@ -49,15 +50,18 @@ class GuardianServiceTest {
     private InvitationRepository invitationRepository;
     @Mock
     private UserQuerydslRepository userQuerydslRepository;
+    @Mock
+    private CacheManageService cacheManageService;
     @InjectMocks
     private GuardianService guardianService;
 
     private User user;
 
     private User user2;
+
     @BeforeEach
     public void init() {
-        user= User.builder()
+        user = User.builder()
                 .id("abcde1234")
                 .nickname("hi")
                 .build();
@@ -72,6 +76,7 @@ class GuardianServiceTest {
     @DisplayName("집사 리스트")
     void displayGuardians_ReturnsGuardianResponse() {
         //given
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong())).willReturn(true);
         given(guardianRepository.findAllByPetIdOrderByCreatedAtDesc(anyLong())).willReturn(
                 List.of(Guardian.builder().user(user).guardianRole(GuardianRole.LEADER).build(),
                         Guardian.builder().user(user2).guardianRole(GuardianRole.MEMBER).build())
@@ -101,7 +106,7 @@ class GuardianServiceTest {
         lenient().when(guardianRepository.findByUserIdAndPetId(user.getId(), pet.getId())).thenReturn(Optional.of(guardianMe));
 
         //then
-        assertAll(() -> guardianService.deleteGuardian(requestedGuardian.getId(),pet.getId(),user));
+        assertAll(() -> guardianService.deleteGuardian(requestedGuardian.getId(), pet.getId(), user));
     }
 
     @Test
@@ -119,7 +124,7 @@ class GuardianServiceTest {
         given(guardianRepository.findByUserIdAndPetId(user.getId(), pet.getId())).willReturn(Optional.of(guardianMe));
 
         //then
-        assertThrows(GuardianException.class, () -> guardianService.deleteGuardian(requestedGuardian.getId(),pet.getId(),user));
+        assertThrows(GuardianException.class, () -> guardianService.deleteGuardian(requestedGuardian.getId(), pet.getId(), user));
     }
 
     @Test
@@ -135,7 +140,7 @@ class GuardianServiceTest {
         when(userRepository.findByEmail(inviteeEmail)).thenReturn(Optional.of(inviteeUser));
         when(petRepository.findByIdAndIsDeletedFalse(pet.getId())).thenReturn(Optional.of(pet));
 
-        assertAll(()-> guardianService.inviteGuardian(pet.getId(), inviteGuardianRequest, inviterUser));
+        assertAll(() -> guardianService.inviteGuardian(pet.getId(), inviteGuardianRequest, inviterUser));
     }
 
     @Test
@@ -150,7 +155,7 @@ class GuardianServiceTest {
         InviteGuardianRequest inviteGuardianRequest = new InviteGuardianRequest(inviteeEmail);
 
         when(userRepository.findByEmail(inviteeEmail)).thenReturn(Optional.of(inviteeUser));
-        when(guardianRepository.existsByPetIdAndUserId(pet.getId(), inviteeUser.getId())).thenReturn(true);
+        when(guardianRepository.existsByUserIdAndPetId(inviteeUser.getId(), pet.getId())).thenReturn(true);
 
         //when
         GuardianException guardianException = assertThrows(GuardianException.class, () -> guardianService.inviteGuardian(pet.getId(), inviteGuardianRequest, inviterUser));

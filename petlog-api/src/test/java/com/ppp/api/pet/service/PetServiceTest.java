@@ -112,7 +112,7 @@ class PetServiceTest {
                 .registeredNumber("1234")
                 .build();
         when(petRepository.findByIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(pet));
-        when(guardianRepository.existsByPetIdAndUserId(1L, user.getId())).thenReturn(true);
+        when(guardianRepository.existsByUserIdAndPetId(user.getId(), 1L)).thenReturn(true);
         //when
         petService.updatePet(1L, petRequest, user, null);
 

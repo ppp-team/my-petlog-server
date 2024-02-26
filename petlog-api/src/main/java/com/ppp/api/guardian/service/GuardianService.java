@@ -44,7 +44,7 @@ public class GuardianService {
     private final CacheManageService cacheManageService;
 
     public GuardiansResponse displayGuardians(Long petId, User user) {
-        if (!guardianRepository.existsByPetIdAndUserId(petId, user.getId()))
+        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
             throw new GuardianException(ErrorCode.GUARDIAN_NOT_FOUND);
 
         List<GuardianResponse> guardianResponseList = new ArrayList<>();
@@ -122,7 +122,7 @@ public class GuardianService {
     }
 
     public void validateIsGuardian(Long petId, String userId) {
-        if (guardianRepository.existsByPetIdAndUserId(petId, userId))
+        if (guardianRepository.existsByUserIdAndPetId(userId, petId))
             throw new GuardianException(ErrorCode.NOT_INVITED_ALREADY_GUARDIAN);
     }
 
