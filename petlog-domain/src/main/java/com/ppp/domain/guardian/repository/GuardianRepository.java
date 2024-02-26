@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface GuardianRepository extends JpaRepository<Guardian, Long> {
-    @Cacheable(value = "petSpaceAuthority", key = "{#a0, #a1}")
+    @Cacheable(value = "petSpaceAuthority", key = "{#a0, #a1}", unless = "#result == false")
     boolean existsByUserIdAndPetId(String userId, Long petId);
 
     boolean existsByPetIdAndGuardianRole(Long petId, GuardianRole guardianRole);
