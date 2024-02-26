@@ -7,6 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum VideoCompressType {
     LOW(480),
-    MEDIUM(540);
+    MEDIUM(512);
     private final int resolution;
 }
