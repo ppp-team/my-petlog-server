@@ -64,6 +64,7 @@ public class GuardianController {
             @ApiResponse(responseCode = "400", description = "자신의 이메일은 초대가 불가능 합니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "400", description = "해당 반려동물의 공동집사입니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "400", description = "초대가 불가능합니다. 다시 확인해주세요.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "이미 초대되었습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "404", description = "일치하는 반려 동물이 없습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "404", description = "초대한 사용자를 찾을 수 없습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
