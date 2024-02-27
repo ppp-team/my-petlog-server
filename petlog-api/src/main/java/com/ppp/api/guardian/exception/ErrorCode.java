@@ -14,7 +14,9 @@ public enum ErrorCode {
     NOT_INVITED_ALREADY_GUARDIAN(HttpStatus.BAD_REQUEST, "GUARDIAN-0005", "해당 반려동물의 공동집사입니다."),
     NOT_INVITED(HttpStatus.BAD_REQUEST, "GUARDIAN-0006", "초대가 불가능합니다. 다시 확인해주세요."),
     NOT_DELETED_IF_READER(HttpStatus.BAD_REQUEST, "GUARDIAN-0007", "그룹 생성자의 경우, 탈퇴는 관리자에게 문의해주세요."),
-    FORBIDDEN_PET_SPACE(HttpStatus.FORBIDDEN, "GUARDIAN-0008", "해당 공간에 대한 권한이 없습니다.");
+    FORBIDDEN_PET_SPACE(HttpStatus.FORBIDDEN, "GUARDIAN-0008", "해당 공간에 대한 권한이 없습니다."),
+    ALREADY_INVITED(HttpStatus.BAD_REQUEST, "GUARDIAN-0009", "이미 초대되었습니다."),
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;

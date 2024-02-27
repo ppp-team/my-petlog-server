@@ -166,7 +166,7 @@ class GuardianServiceTest {
 
     @Test
     @DisplayName("집사 초대 - 이미 초대한 사용자일 때")
-    void inviteGuardian_AlreadyGuardian() {
+    void inviteGuardian_alreadyInvited() {
         //given
         String inviterEmail = "inviter@test.com";
         String inviteeEmail = "invitee@test.com";
@@ -184,7 +184,31 @@ class GuardianServiceTest {
         GuardianException guardianException = assertThrows(GuardianException.class, () -> guardianService.inviteGuardian(pet.getId(), inviteGuardianRequest, inviterUser));
 
         //then
-        assertEquals(guardianException.getCode(), NOT_INVITED.getCode());
+        assertEquals(guardianException.getCode(), ALREADY_INVITED.getCode());
+    }
+
+    @Test
+    @DisplayName("집사 초대 - ACCEPTED 이고 집사가 아닐때")
+    void inviteGuardian_alreadyGuardian() {
+        //given
+        String inviterEmail = "inviter@test.com";
+        String inviteeEmail = "invitee@test.com";
+        User inviterUser = User.builder().id("inviterId").nickname("inviter").email(inviterEmail).build();
+        User inviteeUser = User.builder().id("inviteeId").nickname("invitee").email(inviteeEmail).build();
+        Pet pet = Pet.builder().id(1L).user(inviterUser).build();
+        InviteGuardianRequest inviteGuardianRequest = new InviteGuardianRequest(inviteeEmail);
+
+        when(userRepository.findByEmail(inviteeEmail)).thenReturn(Optional.of(inviteeUser));
+        when(petRepository.findByIdAndIsDeletedFalse(pet.getId())).thenReturn(Optional.of(pet));
+
+        Invitation invitation = Invitation.builder().pet(pet).inviteStatus(InviteStatus.ACCEPTED).inviterId(inviterUser.getId()).inviteeId(inviteeUser.getId()).build();
+        when(invitationRepository.findFirstByInviteeIdAndPetIdOrderByCreatedAtDesc(inviteeUser.getId(), pet.getId())).thenReturn(Optional.of(invitation));
+
+        //when
+        when(guardianRepository.existsByUserIdAndPetId(inviteeUser.getId(), pet.getId())).thenReturn(false);
+
+        //then
+        assertAll(() -> guardianService.inviteGuardian(pet.getId(), inviteGuardianRequest, inviterUser));
     }
 
     @Test
