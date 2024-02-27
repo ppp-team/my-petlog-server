@@ -44,7 +44,7 @@ public class FfmpegClient implements VideoConvertClient, ThumbnailExtractClient 
                             .overrideOutputFiles(true)
                             .setInput(inputPath.toString())
                             .addOutput(outputPath.toString())
-                            .addExtraArgs("-vf", String.format("scale='if(gt(iw,ih),%d,-1)':'if(gt(iw,ih),-1,%d)'",
+                            .addExtraArgs("-vf", String.format("scale='if(gt(iw,ih),%d,trunc(oh*a/2)*2)':'if(gt(iw,ih),trunc(ow/a/2)*2,%d)'",
                                     compressType.getResolution(), compressType.getResolution()))
                             .done(), progress -> log.info(getClass() + " : resolution proceeding " + progress)).run();
             Files.delete(inputPath);
