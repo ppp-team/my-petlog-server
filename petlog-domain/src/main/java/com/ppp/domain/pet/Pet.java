@@ -32,7 +32,7 @@ public class Pet extends BaseTimeEntity {
     @Column(length = 20)
     private String invitedCode;
 
-    @Column(length = 100)
+    @Column(length = 100, unique = true)
     private String name;
 
     @Column(length = 50)

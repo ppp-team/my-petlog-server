@@ -36,6 +36,7 @@ public class PetController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "이미 사용되고 있는 이름입니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
     @PostMapping(value = "/v1/my/pets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> createPet(
@@ -51,6 +52,7 @@ public class PetController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "이미 사용되고 있는 이름입니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "404", description = "해당 그룹에서 공동집사를 찾을 수 없습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
     @PutMapping(value = "/v1/my/pets/{petId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

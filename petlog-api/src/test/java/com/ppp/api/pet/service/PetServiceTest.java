@@ -4,6 +4,7 @@ import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
+import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.guardian.constant.RepStatus;
 import com.ppp.domain.guardian.dto.MyPetDto;
@@ -31,7 +32,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.ppp.api.pet.exception.ErrorCode.NAME_CONFLICT_ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -70,7 +73,7 @@ class PetServiceTest {
                 .build();
         file = new MockMultipartFile("petImage", "test.jpg",
                 MediaType.IMAGE_JPEG_VALUE, "test data" .getBytes());
-        pet = Pet.builder().id(1L).user(user).isNeutered(false).build();
+        pet = Pet.builder().id(1L).name("petName").user(user).isNeutered(false).build();
     }
 
     @Test
@@ -118,6 +121,32 @@ class PetServiceTest {
 
         //then
         assertEquals("name", pet.getName());
+    }
+
+    @Test
+    @DisplayName("반려동물 수정 - 이름 중복일 때 ERROR")
+    void updatePet_duplicationNameTest() {
+        //given
+        PetRequest petRequest = PetRequest.builder()
+                .name("updatedPetName")
+                .type("type")
+                .breed("breed")
+                .gender("MALE")
+                .isNeutered(true)
+                .birth(LocalDate.of(2023, 1, 1))
+                .firstMeetDate(LocalDate.of(2022, 1, 1))
+                .weight(5.0)
+                .registeredNumber("1234")
+                .build();
+        when(petRepository.findByIdAndIsDeletedFalse(1L)).thenReturn(Optional.of(pet));
+        when(guardianRepository.existsByUserIdAndPetId(user.getId(), 1L)).thenReturn(true);
+        when(petRepository.existsByName(petRequest.getName())).thenReturn(true);
+
+        //then
+        PetException petException = assertThrows(PetException.class, () -> petService.updatePet(pet.getId(), petRequest, user, null));
+
+        //then
+        assertEquals(petException.getCode(), NAME_CONFLICT_ERROR.getCode());
     }
 
     @Test

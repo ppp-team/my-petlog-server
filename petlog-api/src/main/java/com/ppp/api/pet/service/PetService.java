@@ -45,6 +45,8 @@ public class PetService {
 
     @Transactional
     public void createPet(PetRequest petRequest, User user, MultipartFile petImage) {
+        if (petRepository.existsByName(petRequest.getName())) throw new PetException(ErrorCode.NAME_CONFLICT_ERROR);
+
         String inviteCode = GenerationUtil.generateCode();
 
         Pet pet = Pet.builder()
@@ -117,11 +119,10 @@ public class PetService {
 
     @Transactional
     public void updatePet(Long petId, PetRequest petRequest, User user, MultipartFile petImage) {
-        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
-            throw new GuardianException(GUARDIAN_NOT_FOUND);
-
         Pet pet = petRepository.findByIdAndIsDeletedFalse(petId)
                 .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
+
+        validatePetUpdate(petId, petRequest, user, pet);
 
         petImageRepository.findByPet(pet).ifPresent(
                 image -> fileStorageManageService.deleteImage(image.getUrl()));
@@ -130,6 +131,14 @@ public class PetService {
                 , petRequest.getIsNeutered(), petRequest.getBirth(), petRequest.getFirstMeetDate(), petRequest.getWeight(), petRequest.getRegisteredNumber());
 
         savePetImage(pet, petImage);
+    }
+
+    private void validatePetUpdate(Long petId, PetRequest petRequest, User user, Pet pet) {
+        if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
+            throw new GuardianException(GUARDIAN_NOT_FOUND);
+
+        if (!pet.getName().equals(petRequest.getName()) && petRepository.existsByName(petRequest.getName()))
+            throw new PetException(ErrorCode.NAME_CONFLICT_ERROR);
     }
 
     @Transactional
@@ -142,4 +151,5 @@ public class PetService {
             pet.delete();
         });
     }
+
 }
