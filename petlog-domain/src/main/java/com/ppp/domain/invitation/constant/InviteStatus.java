@@ -9,7 +9,8 @@ public enum InviteStatus {
     PENDING("대기중"),
     ACCEPTED("수락"),
     REJECTED("거절"),
-    CANCELED("취소됨")
+    CANCELED("취소됨"),
+    CONFIRMED("확인됨"),
     ;
 
     private final String value;
