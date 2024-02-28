@@ -1,9 +1,13 @@
 package com.ppp.api.diary.service;
 
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
+import com.ppp.api.diary.dto.response.DiaryMostUsedTermsResponse;
+import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.user.exception.UserException;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryDocument;
+import com.ppp.domain.diary.dto.DiaryPopularTermsDto;
+import com.ppp.domain.diary.repository.DiarySearchQuerydslRepository;
 import com.ppp.domain.diary.repository.DiarySearchRepository;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.pet.Pet;
@@ -23,7 +27,9 @@ import org.springframework.data.domain.PageImpl;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import static com.ppp.api.diary.exception.ErrorCode.FORBIDDEN_PET_SPACE;
 import static com.ppp.api.user.exception.ErrorCode.NOT_FOUND_USER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -42,7 +48,8 @@ class DiarySearchServiceTest {
     private UserRepository userRepository;
     @Mock
     private GuardianRepository guardianRepository;
-
+    @Mock
+    private DiarySearchQuerydslRepository diarySearchQuerydslRepository;
     @InjectMocks
     private DiarySearchService diarySearchService;
 
@@ -160,6 +167,18 @@ class DiarySearchServiceTest {
     }
 
     @Test
+    @DisplayName("검색 실패_forbidden pet space")
+    void search_fail_FORBIDDEN_PET_SPACE() {
+        //given
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(false);
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diarySearchService.search(user, "우리집", 1L, 0, 10));
+        //then
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
+    }
+
+    @Test
     @DisplayName("유저 정보 elastic search 에 저장 성공")
     void updateUser_success() {
         //given
@@ -196,5 +215,32 @@ class DiarySearchServiceTest {
         UserException exception = assertThrows(UserException.class, () -> diarySearchService.updateUser("abcde1234"));
         //then
         assertEquals(NOT_FOUND_USER.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("자주 사용한 용어 조회 성공")
+    void findMostUsedTermsByPetId_success() {
+        //given
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(true);
+        given(diarySearchQuerydslRepository.findMostUsedTermsByPetId(anyLong()))
+                .willReturn(new DiaryPopularTermsDto(Set.of("우리집", "강아지", "미용", "산책을")));
+        //when
+        DiaryMostUsedTermsResponse response = diarySearchService.findMostUsedTermsByPetId(user, 1L);
+        //then
+        assertEquals(response.terms().size(), 4);
+        assertTrue(response.terms().contains("우리집"));
+    }
+
+    @Test
+    @DisplayName("자주 사용한 용어 조회 실패_forbidden pet space")
+    void findMostUsedTermsByPetId_fail_FORBIDDEN_PET_SPACE() {
+        //given
+        given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
+                .willReturn(false);
+        //when
+        DiaryException exception = assertThrows(DiaryException.class, () -> diarySearchService.findMostUsedTermsByPetId(user, 1L));
+        //then
+        assertEquals(FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
     }
 }

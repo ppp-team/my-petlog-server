@@ -45,6 +45,8 @@ public class CacheConfig {
                 .withCacheConfiguration(DIARY_COMMENT_COUNT.getValue(),
                         RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(60)))
                 .withCacheConfiguration(DIARY_COMMENT_LIKE_COUNT.getValue(),
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30)));
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30)))
+                .withCacheConfiguration(DIARY_MOST_USED_TERMS.getValue(),
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(40)));
     }
 }

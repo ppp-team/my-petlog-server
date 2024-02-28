@@ -53,4 +53,18 @@ class DiarySearchControllerTest {
                 .andExpect(status().isOk());
         //then
     }
+
+    @Test
+    @WithMockCustomUser
+    @DisplayName("일기에서 자주 사용한 용어 조회")
+    void findMostUsedTermsByPetId_success() throws Exception {
+        //given
+        //when
+        mockMvc.perform(get("/api/v1/pets/{petId}/diaries/search/terms", 1L)
+                        .header("Authorization", TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                ).andDo(print())
+                .andExpect(status().isOk());
+        //then
+    }
 }

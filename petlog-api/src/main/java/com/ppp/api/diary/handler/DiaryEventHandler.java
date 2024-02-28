@@ -30,30 +30,21 @@ public class DiaryEventHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDiaryCreatedEvent(DiaryCreatedEvent event) {
-        CompletableFuture.runAsync(() -> {
-                    log.info("Class : {}, Method : {}", this.getClass(), "handleDiaryCreatedEvent");
-                })
-                .thenRunAsync(() -> diarySearchService.save(diaryService.saveThumbnail(event.getDiaryId())))
+        CompletableFuture.runAsync(() -> diarySearchService.save(diaryService.saveThumbnail(event.getDiaryId())))
                 .thenRunAsync(() -> diaryCommentRedisService.setDiaryCommentCountByDiaryId(event.getDiaryId()));
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDiaryUpdatedEvent(DiaryUpdatedEvent event) {
-        CompletableFuture.runAsync(() -> {
-                    log.info("Class : {}, Method : {}", this.getClass(), "handleDiaryUpdatedEvent");
-                })
-                .thenRunAsync(() -> diarySearchService.update(diaryService.saveThumbnail(event.getDiaryId())))
+        CompletableFuture.runAsync(() -> diarySearchService.update(diaryService.saveThumbnail(event.getDiaryId())))
                 .thenRunAsync(() -> fileStorageManageService.deleteImages(event.getDeletedPaths()));
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDiaryDeletedEvent(DiaryDeletedEvent event) {
-        CompletableFuture.runAsync(() -> {
-                    log.info("Class : {}, Method : {}", this.getClass(), "handleDiaryDeletedEvent");
-                })
-                .thenRunAsync(() -> diarySearchService.delete(event.getDiaryId()))
+        CompletableFuture.runAsync(() -> diarySearchService.delete(event.getDiaryId()))
                 .thenRunAsync(() -> diaryCommentRedisService.deleteDiaryCommentCountByDiaryId(event.getDiaryId()))
                 .thenRunAsync(() -> diaryRedisService.deleteAllLikeByDiaryId(event.getDiaryId()))
                 .thenRunAsync(() -> fileStorageManageService.deleteImages(event.getDeletedPaths()));
