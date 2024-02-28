@@ -1,6 +1,6 @@
 package com.ppp.api.diary.dto.response;
 
-import com.ppp.domain.diary.dto.DiaryPopularTermsDto;
+import com.ppp.domain.diary.dto.DiaryMostUsedTermsDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -11,9 +11,9 @@ import java.util.Set;
 public record DiaryMostUsedTermsResponse(
         Set<String> terms
 ) {
-    public static DiaryMostUsedTermsResponse from(DiaryPopularTermsDto dto) {
+    public static DiaryMostUsedTermsResponse from(DiaryMostUsedTermsDto dto) {
         return DiaryMostUsedTermsResponse.builder()
-                .terms(dto.getPopularTerms())
+                .terms(dto.getMostUsedTerms())
                 .build();
     }
 }

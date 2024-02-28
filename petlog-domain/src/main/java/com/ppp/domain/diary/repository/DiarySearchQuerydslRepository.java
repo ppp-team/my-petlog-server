@@ -6,7 +6,7 @@ import co.elastic.clients.elasticsearch._types.aggregations.TermsAggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
-import com.ppp.domain.diary.dto.DiaryPopularTermsDto;
+import com.ppp.domain.diary.dto.DiaryMostUsedTermsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -17,9 +17,9 @@ import java.io.IOException;
 public class DiarySearchQuerydslRepository {
     private final ElasticsearchClient elasticsearchClient;
 
-    public DiaryPopularTermsDto findMostUsedTermsByPetId(Long petId) {
+    public DiaryMostUsedTermsDto findMostUsedTermsByPetId(Long petId) {
         try {
-            return new DiaryPopularTermsDto(elasticsearchClient.search(new SearchRequest.Builder()
+            return new DiaryMostUsedTermsDto(elasticsearchClient.search(new SearchRequest.Builder()
                     .size(0)
                     .query(petIdEq(petId))
                     .aggregations("title_terms", fieldTermsAggregation("title"))

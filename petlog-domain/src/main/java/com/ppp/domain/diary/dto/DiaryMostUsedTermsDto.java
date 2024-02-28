@@ -11,13 +11,13 @@ import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor
-public class DiaryPopularTermsDto {
-    private final Set<String> popularTerms;
+public class DiaryMostUsedTermsDto {
+    private final Set<String> mostUsedTerms;
 
-    public DiaryPopularTermsDto(SearchResponse<Void> searchResponse) {
+    public DiaryMostUsedTermsDto(SearchResponse<Void> searchResponse) {
         List<StringTermsBucket> buckets = searchResponse.aggregations().get("title_terms").sterms().buckets().array();
         buckets.addAll(searchResponse.aggregations().get("content_terms").sterms().buckets().array());
-        popularTerms = buckets.stream().map(bucket -> bucket.key().stringValue())
+        mostUsedTerms = buckets.stream().map(bucket -> bucket.key().stringValue())
                 .collect(Collectors.toSet());
     }
 }
