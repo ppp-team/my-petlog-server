@@ -70,6 +70,8 @@ public class PetService {
 
     private void savePetImage(Pet pet, MultipartFile petImage) {
         if (petImage != null && !petImage.isEmpty()) {
+            petImageRepository.findByPet(pet).ifPresent(
+                    image -> fileStorageManageService.deleteImage(image.getUrl()));
             String savedPath = fileStorageManageService.uploadImage(petImage, Domain.PET)
                     .orElseThrow(() -> new PetException(ErrorCode.PET_IMAGE_REGISTRATION_FAILED));
             uploadPetImage(pet, savedPath);
@@ -122,9 +124,6 @@ public class PetService {
 
         Pet pet = petRepository.findByIdAndIsDeletedFalse(petId)
                 .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
-
-        petImageRepository.findByPet(pet).ifPresent(
-                image -> fileStorageManageService.deleteImage(image.getUrl()));
 
         pet.updatePet(petRequest.getName(), petRequest.getType(), petRequest.getBreed(), petRequest.getGender()
                 , petRequest.getIsNeutered(), petRequest.getBirth(), petRequest.getFirstMeetDate(), petRequest.getWeight(), petRequest.getRegisteredNumber());
