@@ -39,7 +39,8 @@ public class DiarySearchQuerydslRepository {
 
     private Aggregation fieldTermsAggregation(String fieldName) {
         return new TermsAggregation.Builder().field(fieldName)
-                .minDocCount(10)
+                .minDocCount(3)
+                .size(5)
                 .build()._toAggregation();
     }
 }
