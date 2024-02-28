@@ -1,12 +1,14 @@
 package com.ppp.api.diary.service;
 
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
+import com.ppp.api.diary.dto.response.DiaryMostUsedTermsResponse;
 import com.ppp.api.diary.dto.response.DiaryResponse;
 import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.user.exception.ErrorCode;
 import com.ppp.api.user.exception.UserException;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryDocument;
+import com.ppp.domain.diary.repository.DiarySearchQuerydslRepository;
 import com.ppp.domain.diary.repository.DiarySearchRepository;
 import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.user.User;
@@ -31,6 +33,7 @@ import static com.ppp.api.diary.exception.ErrorCode.FORBIDDEN_PET_SPACE;
 @RequiredArgsConstructor
 public class DiarySearchService {
     private final DiarySearchRepository diarySearchRepository;
+    private final DiarySearchQuerydslRepository diarySearchQuerydslRepository;
     private final DiaryCommentRedisService diaryCommentRedisService;
     private final GuardianRepository guardianRepository;
     private final UserRepository userRepository;
@@ -87,5 +90,10 @@ public class DiarySearchService {
         }
         content.add(DiaryGroupByDateResponse.of(prevDate, sameDaysDiaries));
         return new PageImpl<>(content, documentPage.getPageable(), documentPage.getTotalElements());
+    }
+
+    public DiaryMostUsedTermsResponse findMostUsedTermsByPetId(User user, Long petId) {
+        validateQueryDiaries(user, petId);
+        return DiaryMostUsedTermsResponse.from(diarySearchQuerydslRepository.findMostUsedTermsByPetId(petId));
     }
 }

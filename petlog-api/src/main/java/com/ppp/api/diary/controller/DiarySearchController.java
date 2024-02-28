@@ -1,6 +1,7 @@
 package com.ppp.api.diary.controller;
 
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
+import com.ppp.api.diary.dto.response.DiaryMostUsedTermsResponse;
 import com.ppp.api.diary.service.DiarySearchService;
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.common.security.PrincipalDetails;
@@ -38,5 +39,16 @@ public class DiarySearchController {
                                                                          @RequestParam(defaultValue = "5") int size,
                                                                          @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(diarySearchService.search(principalDetails.getUser(), keyword, petId, page, size));
+    }
+
+    @Operation(summary = "일기에서 자주 사용한 용어 조회")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(array = @ArraySchema(schema = @Schema(implementation = DiaryMostUsedTermsResponse.class)))}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+    })
+    @GetMapping("/terms")
+    private ResponseEntity<DiaryMostUsedTermsResponse> findMostUsedTermsByPetId(@PathVariable Long petId,
+                                                                                @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(diarySearchService.findMostUsedTermsByPetId(principalDetails.getUser(), petId));
     }
 }
