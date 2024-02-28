@@ -22,8 +22,8 @@ public class DiarySearchQuerydslRepository {
             return new DiaryPopularTermsDto(elasticsearchClient.search(new SearchRequest.Builder()
                     .size(0)
                     .query(petIdEq(petId))
-                    .aggregations("title_word", fieldTermsAggregation("title"))
-                    .aggregations("content_word", fieldTermsAggregation("content"))
+                    .aggregations("title_terms", fieldTermsAggregation("title"))
+                    .aggregations("content_terms", fieldTermsAggregation("content"))
                     .build(), Void.class));
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -15,8 +15,8 @@ public class DiaryPopularTermsDto {
     private final Set<String> popularTerms;
 
     public DiaryPopularTermsDto(SearchResponse<Void> searchResponse) {
-        List<StringTermsBucket> buckets = searchResponse.aggregations().get("title_word").sterms().buckets().array();
-        buckets.addAll(searchResponse.aggregations().get("title_word").sterms().buckets().array());
+        List<StringTermsBucket> buckets = searchResponse.aggregations().get("title_terms").sterms().buckets().array();
+        buckets.addAll(searchResponse.aggregations().get("content_terms").sterms().buckets().array());
         popularTerms = buckets.stream().map(bucket -> bucket.key().stringValue())
                 .collect(Collectors.toSet());
     }
