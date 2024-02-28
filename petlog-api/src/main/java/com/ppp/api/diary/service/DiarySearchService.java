@@ -15,6 +15,7 @@ import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -92,6 +93,7 @@ public class DiarySearchService {
         return new PageImpl<>(content, documentPage.getPageable(), documentPage.getTotalElements());
     }
 
+    @Cacheable(value = "diaryMostUsedTerms", key = "#a1")
     public DiaryMostUsedTermsResponse findMostUsedTermsByPetId(User user, Long petId) {
         validateQueryDiaries(user, petId);
         return DiaryMostUsedTermsResponse.from(diarySearchQuerydslRepository.findMostUsedTermsByPetId(petId));
