@@ -64,17 +64,26 @@ public class InvitationService {
 
     @Transactional
     public void acceptInvitation(InvitationRequest invitationRequest, User user) {
-        Invitation invitation = invitationRepository.findByIdAndInviteStatusAndInviteeId(invitationRequest.getInvitationId(), InviteStatus.PENDING, user.getId())
-                .orElseThrow(() -> new InvitationException(ErrorCode.INVITATION_NOT_FOUND));
+        Invitation invitation = updateInvitationByInvitee(invitationRequest.getInvitationId(), user.getId(), InviteStatus.PENDING, InviteStatus.ACCEPTED);
         guardianService.createGuardian(invitation.getPet(), user, GuardianRole.MEMBER);
-        invitation.updateInviteStatus(InviteStatus.ACCEPTED);
     }
 
     @Transactional
     public void refuseInvitation(InvitationRequest invitationRequest, User user) {
-        Invitation invitation = invitationRepository.findByIdAndInviteStatusAndInviteeId(invitationRequest.getInvitationId(), InviteStatus.PENDING, user.getId())
+        updateInvitationByInvitee(invitationRequest.getInvitationId(), user.getId(), InviteStatus.PENDING, InviteStatus.REJECTED);
+    }
+
+    private Invitation updateInvitationByInvitee(Long invitationId, String userId, InviteStatus fromStatus, InviteStatus toStatus) {
+        Invitation invitation = invitationRepository.findByIdAndInviteStatusAndInviteeId(invitationId, fromStatus, userId)
                 .orElseThrow(() -> new InvitationException(ErrorCode.INVITATION_NOT_FOUND));
-        invitation.updateInviteStatus(InviteStatus.REJECTED);
+        invitation.updateInviteStatus(toStatus);
+        return invitation;
+    }
+
+    private void updateInvitationByInviter(Long invitationId, String userId, InviteStatus fromStatus, InviteStatus toStatus) {
+        Invitation invitation = invitationRepository.findByIdAndInviteStatusAndInviterId(invitationId, fromStatus, userId)
+                .orElseThrow(() -> new InvitationException(ErrorCode.INVITATION_NOT_FOUND));
+        invitation.updateInviteStatus(toStatus);
     }
 
     public List<MyInvitationResponse> displayMyInvitations(Long petId, User user) {
@@ -88,14 +97,17 @@ public class InvitationService {
 
     @Transactional
     public void cancelInvitation(InvitationRequest invitationRequest, User user) {
-        Invitation invitation = invitationRepository.findByIdAndInviteStatusAndInviterId(invitationRequest.getInvitationId(), InviteStatus.PENDING, user.getId())
-                .orElseThrow(() -> new InvitationException(ErrorCode.INVITATION_NOT_FOUND));
-        invitation.updateInviteStatus(InviteStatus.CANCELED);
+        updateInvitationByInviter(invitationRequest.getInvitationId(), user.getId(), InviteStatus.PENDING, InviteStatus.CANCELED);
     }
 
     public void registerInvitation(RegisterInvitationRequest registerInvitationRequest, User user) {
         Pet pet = petRepository.findByInvitedCodeAndIsDeletedFalse(registerInvitationRequest.getInviteCode())
                 .orElseThrow(() -> new PetException(PET_NOT_FOUND));
         guardianService.createGuardian(pet, user, GuardianRole.MEMBER);
+    }
+
+    @Transactional
+    public void confirmRejectedInvitation(InvitationRequest invitationRequest, User user) {
+        updateInvitationByInviter(invitationRequest.getInvitationId(), user.getId(), InviteStatus.REJECTED, InviteStatus.CONFIRMED);
     }
 }

@@ -92,4 +92,15 @@ public class InvitationController {
         invitationService.registerInvitation(registerInvitationRequest, principalDetails.getUser());
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "거절된 초대를 확인", description = "펫메이트 초대 내역에서 거절된 내역에 대해 확인하여 제외시킵니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "해당 초대내역이 존재하지 않습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+    })
+    @PostMapping("/v1/my/invitations/confirm")
+    public ResponseEntity<Void> confirmRejectedInvitation(@RequestBody InvitationRequest invitationRequest, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        invitationService.confirmRejectedInvitation(invitationRequest, principalDetails.getUser());
+        return ResponseEntity.ok().build();
+    }
 }
