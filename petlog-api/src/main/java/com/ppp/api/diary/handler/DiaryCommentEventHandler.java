@@ -27,10 +27,7 @@ public class DiaryCommentEventHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDiaryCommentDeletedEvent(DiaryCommentDeletedEvent event) {
-        CompletableFuture.runAsync(() -> {
-                    log.info("Class : {}, Method : {}", this.getClass(), "handleDiaryCommentDeletedEvent");
-                })
-                .thenRunAsync(() -> diaryCommentRedisService.decreaseDiaryCommentCountByDiaryId(event.getDiaryId()))
+        CompletableFuture.runAsync(() -> diaryCommentRedisService.decreaseDiaryCommentCountByDiaryId(event.getDiaryId()))
                 .thenRunAsync(() -> diaryCommentRedisService.deleteAllLikeByCommentId(event.getCommentId()));
     }
 }
