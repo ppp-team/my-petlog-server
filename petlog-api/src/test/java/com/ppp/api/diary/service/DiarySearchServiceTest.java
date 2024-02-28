@@ -6,7 +6,7 @@ import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.api.user.exception.UserException;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryDocument;
-import com.ppp.domain.diary.dto.DiaryPopularTermsDto;
+import com.ppp.domain.diary.dto.DiaryMostUsedTermsDto;
 import com.ppp.domain.diary.repository.DiarySearchQuerydslRepository;
 import com.ppp.domain.diary.repository.DiarySearchRepository;
 import com.ppp.domain.guardian.repository.GuardianRepository;
@@ -224,7 +224,7 @@ class DiarySearchServiceTest {
         given(guardianRepository.existsByUserIdAndPetId(anyString(), anyLong()))
                 .willReturn(true);
         given(diarySearchQuerydslRepository.findMostUsedTermsByPetId(anyLong()))
-                .willReturn(new DiaryPopularTermsDto(Set.of("우리집", "강아지", "미용", "산책을")));
+                .willReturn(new DiaryMostUsedTermsDto(Set.of("우리집", "강아지", "미용", "산책을")));
         //when
         DiaryMostUsedTermsResponse response = diarySearchService.findMostUsedTermsByPetId(user, 1L);
         //then
