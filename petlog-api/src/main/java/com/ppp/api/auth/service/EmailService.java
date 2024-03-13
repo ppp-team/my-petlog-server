@@ -23,7 +23,7 @@ public class EmailService {
 
     public MimeMessage createEmailForm(String mail, int number){
         MimeMessage message = javaMailSender.createMimeMessage();
-        String title = "[마이펫로그] 회원가입 인증 코드를 확인해 주세요";
+        String title = "[마이펫로그] 이메일 인증 코드를 확인해 주세요";
         try {
             message.setFrom(senderEmail);
             message.setRecipients(MimeMessage.RecipientType.TO, mail);
@@ -63,7 +63,6 @@ public class EmailService {
         javaMailSender.send(emailForm);
         return code;
     }
-
 
     public void sendEmail(MimeMessage message) {
         javaMailSender.send(message);
