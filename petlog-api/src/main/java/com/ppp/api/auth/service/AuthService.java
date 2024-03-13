@@ -10,6 +10,8 @@ import com.ppp.api.auth.exception.ErrorCode;
 import com.ppp.api.user.exception.NotFoundUserException;
 import com.ppp.common.client.RedisClient;
 import com.ppp.common.security.jwt.JwtTokenProvider;
+import com.ppp.domain.email.EmailVerification;
+import com.ppp.domain.email.repository.EmailVerificationRepository;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.constant.Role;
 import com.ppp.domain.user.repository.UserRepository;
@@ -17,11 +19,14 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static com.ppp.api.user.exception.ErrorCode.NOT_FOUND_USER;
@@ -38,6 +43,13 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     private final RedisClient redisClient;
+
+    private final EmailService emailService;
+
+    private final EmailVerificationRepository emailVerificationRepository;
+
+    @Value("${mail.auth-code-expiration-millis}")
+    private long codeExpirationMillis;
 
     public void signup(RegisterRequest registerRequest) {
         if(userRepository.existsByEmail(registerRequest.getEmail())) {
@@ -147,4 +159,41 @@ public class AuthService {
         response.addCookie(cookie);
     }
 
+    @Transactional
+    public void sendEmailForm(String email) {
+        emailVerificationRepository.findByEmail(email)
+                .ifPresentOrElse(verification -> {
+                    LocalDateTime now = LocalDateTime.now();
+                    LocalDateTime verificationTime = verification.getCreatedAt();
+                    long minutesElapsed = Duration.between(verificationTime, now).toMinutes();
+
+                    if (minutesElapsed < 10) {
+                        throw new AuthException(ErrorCode.UNABLE_TO_SEND_EMAIL);
+                    } else {
+                        int code = emailService.sendEmailCode(email);
+                        verification.update(code ,LocalDateTime.now(), codeExpirationMillis);
+                    }
+                }, () -> {
+                    int code = emailService.sendEmailCode(email);
+                    emailVerificationRepository.save(EmailVerification.createVerification(email, code, codeExpirationMillis));
+                });
+    }
+
+    private void checkDuplicatedEmail(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            throw new AuthException(ErrorCode.EXISTS_EMAIL);
+        });
+    }
+
+    public void verifiedCode(String email, int verificationCode) {
+        checkDuplicatedEmail(email);
+
+        EmailVerification emailVerification = emailVerificationRepository.findByEmailAndVerificationCode(email, verificationCode).orElseThrow(() -> new AuthException(ErrorCode.VERIFICATION_CODE_NOT_MATCHED));
+        LocalDateTime verificationTime = emailVerification.getExpirationDate();
+        LocalDateTime now = LocalDateTime.now();
+        long minutesElapsed = Duration.between(verificationTime, now).toMinutes();
+        if (minutesElapsed > 10) {
+            throw new AuthException(ErrorCode.CODE_EXPIRATION);
+        }
+    }
 }
