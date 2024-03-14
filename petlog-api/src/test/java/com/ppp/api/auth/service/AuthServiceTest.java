@@ -3,8 +3,11 @@ package com.ppp.api.auth.service;
 import com.ppp.api.auth.dto.request.RegisterRequest;
 import com.ppp.api.auth.dto.request.SigninRequest;
 import com.ppp.api.auth.dto.response.AuthenticationResponse;
+import com.ppp.api.auth.exception.AuthException;
 import com.ppp.common.client.RedisClient;
 import com.ppp.common.security.jwt.JwtTokenProvider;
+import com.ppp.domain.email.EmailVerification;
+import com.ppp.domain.email.repository.EmailVerificationRepository;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -16,12 +19,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -33,6 +35,10 @@ class AuthServiceTest {
     PasswordEncoder passwordEncoder;
     @Mock
     RedisClient redisClient;
+    @Mock
+    EmailService emailService;
+    @Mock
+    EmailVerificationRepository emailVerificationRepository;
     @InjectMocks
     private AuthService authService;
 
@@ -97,9 +103,53 @@ class AuthServiceTest {
         authService.logout(mockAccessToken);
 
         //then
-        // 메소드가 1번 호출되었는지
         verify(redisClient, times(1)).deleteValues(mockUserEmail);
         verify(redisClient, times(1)).setValues(mockAccessToken, "logout", Duration.ofMillis(mockAccessTokenExpiration));
     }
 
+    @Test
+    @DisplayName("인증코드 전송 - 최초 전송")
+    void sendMessageTest_first() {
+
+        //given
+        String email = "test@test.com";
+
+        //when
+        when(emailVerificationRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        //then
+        assertDoesNotThrow(() -> authService.sendEmailForm(email));
+    }
+
+    @Test
+    @DisplayName("인증코드 검증")
+    void verificationEmailTest() {
+        String email = "test@test.com";
+
+        EmailVerification emailVerification = EmailVerification.createVerification(email, 123456, 60000);
+
+        when(emailVerificationRepository.findByEmailAndVerificationCode(email, 123456)).thenReturn(Optional.ofNullable(emailVerification));
+
+        LocalDateTime verificationTime = emailVerification.getExpirationDate();
+
+        LocalDateTime now = LocalDateTime.now().plusMinutes(5);
+        long minutesElapsed = Duration.between(verificationTime, now).toMinutes();
+
+        assertTrue(minutesElapsed < 10);
+        assertDoesNotThrow(() -> authService.verifiedCode(email, 123456));
+    }
+
+    @Test
+    @DisplayName("인증코드 검증 -  10분 초과시 예외 발생 ")
+    void verificationEmailTest_authException() {
+        String email = "test@test.com";
+        int verificationCode = 123456;
+
+        EmailVerification emailVerification = new EmailVerification();
+        emailVerification.setExpirationDate(LocalDateTime.now().minusMinutes(11));
+
+        when(emailVerificationRepository.findByEmailAndVerificationCode(email, verificationCode)).thenReturn(Optional.ofNullable(emailVerification));
+
+        assertThrows(AuthException.class, () -> authService.verifiedCode(email, verificationCode), "10분이 지났으므로 CODE_EXPIRATION 예외가 발생해야 합니다.");
+    }
 }
