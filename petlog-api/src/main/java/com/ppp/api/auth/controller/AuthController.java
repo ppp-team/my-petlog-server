@@ -62,7 +62,7 @@ public class AuthController {
         return ResponseEntity.ok(authenticationResponse);
     }
 
-    @Operation(description = "소셜 로그인 성공시 해당 유저를 회원가입/로그인 시켜 토큰을 반환합니다.")
+    @Operation(summary = "소셜로그인", description = "소셜 로그인 성공시 해당 유저를 회원가입/로그인 시켜 토큰을 반환합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AuthenticationResponse.class))}),
     })
