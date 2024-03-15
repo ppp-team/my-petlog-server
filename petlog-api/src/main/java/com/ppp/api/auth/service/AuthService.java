@@ -161,13 +161,15 @@ public class AuthService {
 
     @Transactional
     public void sendEmailForm(String email) {
+        checkDuplicatedEmail(email);
+
         emailVerificationRepository.findByEmail(email)
                 .ifPresentOrElse(verification -> {
                     LocalDateTime now = LocalDateTime.now();
-                    LocalDateTime verificationTime = verification.getCreatedAt();
-                    long minutesElapsed = Duration.between(verificationTime, now).toMinutes();
+                    LocalDateTime expiredAt = verification.getExpiredAt();
+                    long minutesElapsed = Duration.between(expiredAt, now).toMinutes();
 
-                    if (minutesElapsed < 10) {
+                    if (minutesElapsed < 0) {
                         throw new AuthException(ErrorCode.UNABLE_TO_SEND_EMAIL);
                     } else {
                         int code = emailService.sendEmailCode(email);
@@ -180,19 +182,18 @@ public class AuthService {
     }
 
     private void checkDuplicatedEmail(String email) {
-        userRepository.findByEmail(email).ifPresent(user -> {
+        if (userRepository.existsByEmail(email)) {
             throw new AuthException(ErrorCode.EXISTS_EMAIL);
-        });
+        }
     }
 
     public void verifiedCode(String email, int verificationCode) {
-        checkDuplicatedEmail(email);
-
         EmailVerification emailVerification = emailVerificationRepository.findByEmailAndVerificationCode(email, verificationCode).orElseThrow(() -> new AuthException(ErrorCode.VERIFICATION_CODE_NOT_MATCHED));
-        LocalDateTime verificationTime = emailVerification.getExpirationDate();
         LocalDateTime now = LocalDateTime.now();
-        long minutesElapsed = Duration.between(verificationTime, now).toMinutes();
-        if (minutesElapsed > 10) {
+        LocalDateTime expiredAt = emailVerification.getExpiredAt();
+        long minutesElapsed = Duration.between(expiredAt, now).toMinutes();
+
+        if (minutesElapsed > 0) {
             throw new AuthException(ErrorCode.CODE_EXPIRATION);
         }
     }

@@ -26,30 +26,31 @@ public class EmailVerification {
     private int verificationCode;
 
     @Column(nullable = false)
-    private LocalDateTime expirationDate;
+    private LocalDateTime expiredAt;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
     public static EmailVerification createVerification(String email, int verificationCode, long codeExpirationMillis) {
         long secondsToAdd = codeExpirationMillis / 1000;
-        LocalDateTime expirationDate = LocalDateTime.now().plusSeconds(secondsToAdd);
+        LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(secondsToAdd);
         return EmailVerification.builder()
                 .email(email)
                 .verificationCode(verificationCode)
-                .expirationDate(expirationDate)
+                .expiredAt(expiredAt)
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 
     public void update(int code, LocalDateTime createdAt, long codeExpirationMillis) {
         long secondsToAdd = codeExpirationMillis / 1000;
-        LocalDateTime expirationDate = LocalDateTime.now().plusSeconds(secondsToAdd);
+        LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(secondsToAdd);
         verificationCode = code;
         this.createdAt = createdAt;
-        this.expirationDate = expirationDate;
+        this.expiredAt = expiredAt;
     }
 
-    public void setExpirationDate(LocalDateTime expirationDate) {
-        this.expirationDate = expirationDate;
+    public void setExpirationDate(LocalDateTime expiredAt) {
+        this.expiredAt = expiredAt;
     }
 }
