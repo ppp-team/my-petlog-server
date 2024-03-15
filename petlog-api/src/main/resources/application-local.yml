@@ -76,8 +76,8 @@ ffmpeg:
 mail:
   host: smtp.gmail.com
   port: 587
-  username: llsrrll758@gmail.com
-  password: ENC("JYwzZQLUyPlH2kQf59qHJSi/fBvnCP+m79/zm8mR0JY=")
+  username: mypetlog.contact@gmail.com
+  password: ENC("ImzLNPu/XNXnIS4SJXbR4UIfE9HMfqm0NmaEQ4Am7Q0=")
   properties:
     mail:
       smtp:
@@ -88,4 +88,4 @@ mail:
         connectiontimeout: 5000
         timeout: 5000
         writetimeout: 5000
-  auth-code-expiration-millis: 600000  # 10 * 60 * 1000 == 10분
+  auth-code-expiration-millis: 600000

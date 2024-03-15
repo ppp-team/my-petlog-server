@@ -97,7 +97,8 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "10분이 지나지 않았습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "이메일 전송에 실패하였습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "409", description = "이미 사용 중인 이메일 주소입니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "이메일 전송에 실패하였습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
     @PostMapping("/emails/verification-requests")
     public ResponseEntity<Void> sendMessage(@Valid @RequestBody EmailRequest emailRequest) {
@@ -110,7 +111,6 @@ public class AuthController {
             @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "400", description = "인증번호의 유효기간이 만료되었습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
             @ApiResponse(responseCode = "404", description = "인증번호가 일치하지 않습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
-            @ApiResponse(responseCode = "409", description = "이미 사용 중인 이메일 주소입니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
     })
     @PostMapping("/emails/verifications")
     public ResponseEntity<Void> verificationEmail(@Valid @RequestBody EmailVerificationRequest emailVerificationRequest) {
