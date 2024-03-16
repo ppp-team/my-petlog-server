@@ -8,7 +8,9 @@ import com.ppp.api.pet.dto.response.MyPetsResponse;
 import com.ppp.api.pet.exception.ErrorCode;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.service.FileStorageManageService;
+import com.ppp.common.service.ThumbnailService;
 import com.ppp.domain.common.constant.Domain;
+import com.ppp.domain.common.constant.FileType;
 import com.ppp.domain.common.util.GenerationUtil;
 import com.ppp.domain.guardian.Guardian;
 import com.ppp.domain.guardian.constant.GuardianRole;
@@ -42,6 +44,8 @@ public class PetService {
     private final GuardianService guardianService;
     private final GuardianQuerydslRepository guardianQuerydslRepository;
     private final GuardianRepository guardianRepository;
+    private final ThumbnailService thumbnailService;
+
 
     @Transactional
     public void createPet(PetRequest petRequest, User user, MultipartFile petImage) {
@@ -66,6 +70,7 @@ public class PetService {
         guardianService.createGuardian(savedPet, user, GuardianRole.LEADER);
 
         savePetImage(pet, petImage);
+        savePetThumbnail(pet);
     }
 
     private void savePetImage(Pet pet, MultipartFile petImage) {
@@ -76,6 +81,22 @@ public class PetService {
                     .orElseThrow(() -> new PetException(ErrorCode.PET_IMAGE_REGISTRATION_FAILED));
             uploadPetImage(pet, savedPath);
         }
+    }
+
+    private void savePetThumbnail(Pet pet) {
+        petImageRepository.findByPet(pet).ifPresent(
+            image -> {
+                try {
+                    if (image.getThumbnailUrl() != null) {
+                        fileStorageManageService.deleteImage(image.getThumbnailUrl());
+                    }
+                    String thumbnailUrl = thumbnailService.uploadThumbnailFromStorageFile(image.getUrl(), FileType.IMAGE, Domain.PET);
+                    image.addThumbnail(thumbnailUrl);
+                } catch (Exception e) {
+                    log.warn("{} is null thumbnail", pet.getId());
+                }
+            }
+        );
     }
 
     private void uploadPetImage(Pet pet, String path) {
@@ -92,6 +113,13 @@ public class PetService {
     private void deletePetImage(PetImage petImage) {
         if (petImage.getUrl() != null) {
             fileStorageManageService.deleteImage(petImage.getUrl());
+            petImageRepository.delete(petImage);
+        }
+    }
+
+    private void deletePetThumbnail(PetImage petImage) {
+        if (petImage.getThumbnailUrl() != null) {
+            fileStorageManageService.deleteImage(petImage.getThumbnailUrl());
             petImageRepository.delete(petImage);
         }
     }
@@ -129,6 +157,7 @@ public class PetService {
                 , petRequest.getIsNeutered(), petRequest.getBirth(), petRequest.getFirstMeetDate(), petRequest.getWeight(), petRequest.getRegisteredNumber());
 
         savePetImage(pet, petImage);
+        savePetThumbnail(pet);
     }
 
     @Transactional
@@ -138,7 +167,14 @@ public class PetService {
         petRepository.findMyPetByIdAndIsDeletedFalse(petId, user.getId()).ifPresent(pet -> {
             PetImage petImage = petImageRepository.findByPet(pet).orElse(new PetImage());
             deletePetImage(petImage);
+            deletePetThumbnail(petImage);
             pet.delete();
         });
+    }
+
+    public void validatePetName(String name) {
+        if (petRepository.existsByNameAndIsDeletedFalse(name)) {
+            throw new PetException(ErrorCode.PET_NAME_DUPLICATION);
+        }
     }
 }

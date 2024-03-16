@@ -25,4 +25,6 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
             "WHERE p.id = :petId " +
             "AND p.isDeleted = false")
     Optional<String> findPetCodeByIdAndIsDeletedFalse(@Param("petId") Long petId);
+
+    boolean existsByNameAndIsDeletedFalse(String name);
 }

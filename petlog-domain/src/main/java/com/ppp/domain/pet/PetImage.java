@@ -37,7 +37,7 @@ public class PetImage {
         this.url = url;
     }
 
-    public void setThumbnailUrl(String thumbnailUrl) {
+    public void addThumbnail(String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
     }
 }

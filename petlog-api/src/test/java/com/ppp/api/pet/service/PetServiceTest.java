@@ -4,6 +4,7 @@ import com.ppp.api.guardian.service.GuardianService;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
+import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.service.FileStorageManageService;
 import com.ppp.domain.guardian.constant.RepStatus;
 import com.ppp.domain.guardian.dto.MyPetDto;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -214,5 +216,18 @@ class PetServiceTest {
         //then
         assertEquals(true, pet.getIsDeleted());
         verify(petImageRepository, times(0)).delete(petImage);
+    }
+
+    @Test
+    @DisplayName("반려동물 이름 중복 검사")
+    void validatePetName_duplication() {
+        //given
+        String name = "pet_name";
+
+        //when
+        when(petRepository.existsByNameAndIsDeletedFalse(name)).thenReturn(true);
+
+        //then
+        assertThrows(PetException.class, () -> petService.validatePetName(name), "펫 이름 중복");
     }
 }
