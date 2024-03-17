@@ -1,6 +1,7 @@
 package com.ppp.api.pet.controller;
 
 import com.ppp.api.exception.ExceptionResponse;
+import com.ppp.api.pet.dto.request.CheckPetRequest;
 import com.ppp.api.pet.dto.request.PetRequest;
 import com.ppp.api.pet.dto.response.MyPetResponse;
 import com.ppp.api.pet.dto.response.MyPetsResponse;
@@ -103,6 +104,18 @@ public class PetController {
     @DeleteMapping("/v1/my/pets/{petId}")
     public ResponseEntity<Void> deleteMyPet(@PathVariable("petId") Long petId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         petService.deleteMyPet(petId, principalDetails.getUser());
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "반려동물 이름 중복 검사")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "400", description = "비어있을 수 없습니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "409", description = "중복된 펫이름 입니다.", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+    })
+    @PostMapping("/v1/my/pets/check/name")
+    public ResponseEntity<Void> checkPetName(@Valid @RequestBody CheckPetRequest checkPetRequest) {
+        petService.validatePetName(checkPetRequest.name());
         return ResponseEntity.ok().build();
     }
 }
