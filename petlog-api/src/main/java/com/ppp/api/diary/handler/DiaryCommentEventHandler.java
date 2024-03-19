@@ -2,6 +2,7 @@ package com.ppp.api.diary.handler;
 
 import com.ppp.api.diary.dto.event.DiaryCommentCreatedEvent;
 import com.ppp.api.diary.dto.event.DiaryCommentDeletedEvent;
+import com.ppp.api.diary.dto.event.DiaryReCommentCreatedEvent;
 import com.ppp.api.diary.service.DiaryCommentRedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,13 +22,23 @@ public class DiaryCommentEventHandler {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDiaryCommentCreatedEvent(DiaryCommentCreatedEvent event) {
-        diaryCommentRedisService.increaseDiaryCommentCountByDiaryId(event.getDiaryId());
+        CompletableFuture.runAsync(() -> diaryCommentRedisService.setDiaryReCommentCountByCommentId(event.getDiaryCommentId()))
+                .thenRunAsync(() -> diaryCommentRedisService.increaseDiaryCommentCountByDiaryId(event.getDiaryId()));
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDiaryCommentDeletedEvent(DiaryCommentDeletedEvent event) {
-        CompletableFuture.runAsync(() -> diaryCommentRedisService.decreaseDiaryCommentCountByDiaryId(event.getDiaryId()))
-                .thenRunAsync(() -> diaryCommentRedisService.deleteAllLikeByCommentId(event.getCommentId()));
+        CompletableFuture.runAsync(() -> diaryCommentRedisService.decreaseDiaryCommentCountByDiaryId(event.getDiaryComment().getDiary().getId()))
+                .thenRunAsync(() -> {if(event.getDiaryComment().isReComment())
+                    diaryCommentRedisService.decreaseDiaryReCommentCountByCommentId(event.getDiaryComment().getAncestorCommentId());})
+                .thenRunAsync(() -> diaryCommentRedisService.deleteAllLikeByCommentId(event.getDiaryComment().getId()));
+    }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleDiaryReCommentCreatedEvent(DiaryReCommentCreatedEvent event) {
+        CompletableFuture.runAsync(() -> diaryCommentRedisService.increaseDiaryReCommentCountByCommentId(event.getAncestorId()))
+                .thenRunAsync(() -> diaryCommentRedisService.increaseDiaryCommentCountByDiaryId(event.getDiaryId()));
     }
 }

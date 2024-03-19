@@ -2,6 +2,7 @@ package com.ppp.api.diary.service;
 
 import com.ppp.api.diary.dto.event.DiaryCommentCreatedEvent;
 import com.ppp.api.diary.dto.event.DiaryCommentDeletedEvent;
+import com.ppp.api.diary.dto.event.DiaryReCommentCreatedEvent;
 import com.ppp.api.diary.dto.request.DiaryCommentRequest;
 import com.ppp.api.diary.dto.response.DiaryCommentResponse;
 import com.ppp.api.diary.exception.DiaryException;
@@ -47,13 +48,14 @@ public class DiaryCommentService {
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateCreateComment(petId, user);
 
-        applicationEventPublisher.publishEvent(new DiaryCommentCreatedEvent(diaryId));
-        return DiaryCommentResponse.from(diaryCommentRepository.save(DiaryComment.builder()
+        DiaryComment savedComment = diaryCommentRepository.save(DiaryComment.builder()
                 .content(request.getContent())
                 .taggedUsersIdNicknameMap(getTaggedUsersIdNicknameMap(petId, request.getTaggedUserIds()))
                 .diary(diary)
                 .user(user)
-                .build()), user.getId());
+                .build());
+        applicationEventPublisher.publishEvent(new DiaryCommentCreatedEvent(savedComment));
+        return DiaryCommentResponse.from(savedComment, user.getId());
     }
 
     private Map<String, String> getTaggedUsersIdNicknameMap(Long petId, List<String> taggedUsers) {
@@ -92,7 +94,7 @@ public class DiaryCommentService {
         validateModifyComment(comment, user, petId);
 
         comment.delete();
-        applicationEventPublisher.publishEvent(new DiaryCommentDeletedEvent(comment.getDiary().getId(), commentId));
+        applicationEventPublisher.publishEvent(new DiaryCommentDeletedEvent(comment));
     }
 
     public Slice<DiaryCommentResponse> displayComments(User user, Long petId, Long diaryId, int page, int size) {
@@ -128,4 +130,20 @@ public class DiaryCommentService {
             throw new DiaryException(FORBIDDEN_PET_SPACE);
     }
 
+    @Transactional
+    public DiaryCommentResponse createReComment(User user, Long petId, Long commentId, DiaryCommentRequest request) {
+        DiaryComment parentComment = diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(commentId, petId)
+                .orElseThrow(() -> new DiaryException(DIARY_COMMENT_NOT_FOUND));
+        validateCreateComment(petId, user);
+
+        DiaryComment savedComment = diaryCommentRepository.save(DiaryComment.builder()
+                .content(request.getContent())
+                .taggedUsersIdNicknameMap(getTaggedUsersIdNicknameMap(petId, request.getTaggedUserIds()))
+                .diary(parentComment.getDiary())
+                .user(user)
+                .parent(parentComment)
+                .build());
+        applicationEventPublisher.publishEvent(new DiaryReCommentCreatedEvent(savedComment));
+        return DiaryCommentResponse.from(savedComment, user.getId());
+    }
 }

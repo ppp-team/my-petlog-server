@@ -23,6 +23,8 @@ public record DiaryCommentResponse(
         boolean isCurrentUserLiked,
         @Schema(description = "댓글 좋아요 수")
         int likeCount,
+        @Schema(description = "대댓글 수")
+        int recommentCount,
         @Schema(description = "글쓴이 정보")
         UserResponse writer,
         @ArraySchema(schema = @Schema(description = "태깅 유저 정보"))
