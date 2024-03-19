@@ -5,6 +5,7 @@ import com.ppp.api.diary.dto.event.DiaryCommentDeletedEvent;
 import com.ppp.api.diary.dto.event.DiaryReCommentCreatedEvent;
 import com.ppp.api.diary.dto.request.DiaryCommentRequest;
 import com.ppp.api.diary.dto.response.DiaryCommentResponse;
+import com.ppp.api.diary.dto.response.DiaryReCommentResponse;
 import com.ppp.api.diary.exception.DiaryException;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryComment;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.ppp.api.diary.exception.ErrorCode.*;
 
@@ -103,10 +105,11 @@ public class DiaryCommentService {
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateDisplayComments(user, petId);
 
-        return diaryCommentRepository.findByDiaryAndIsDeletedFalse(diary, PageRequest.of(page, size, Sort.by("id").descending()))
+        return diaryCommentRepository.findByDiaryAndAncestorCommentIdIsNullAndIsDeletedFalse(diary, PageRequest.of(page, size, Sort.by("id").descending()))
                 .map(comment -> DiaryCommentResponse.from(comment, user.getId(),
                         diaryCommentRedisService.isDiaryCommentLikeExistByCommentIdAndUserId(comment.getId(), user.getId()),
-                        diaryCommentRedisService.getLikeCountByCommentId(comment.getId())));
+                        diaryCommentRedisService.getLikeCountByCommentId(comment.getId()),
+                        diaryCommentRedisService.getDiaryReCommentCountByCommentId(comment.getId())));
     }
 
     private void validateDisplayComments(User user, Long petId) {
@@ -131,7 +134,7 @@ public class DiaryCommentService {
     }
 
     @Transactional
-    public DiaryCommentResponse createReComment(User user, Long petId, Long commentId, DiaryCommentRequest request) {
+    public DiaryReCommentResponse createReComment(User user, Long petId, Long commentId, DiaryCommentRequest request) {
         DiaryComment parentComment = diaryCommentRepository.findByIdAndPetIdAndIsDeletedFalse(commentId, petId)
                 .orElseThrow(() -> new DiaryException(DIARY_COMMENT_NOT_FOUND));
         validateCreateComment(petId, user);
@@ -144,6 +147,16 @@ public class DiaryCommentService {
                 .parent(parentComment)
                 .build());
         applicationEventPublisher.publishEvent(new DiaryReCommentCreatedEvent(savedComment));
-        return DiaryCommentResponse.from(savedComment, user.getId());
+        return DiaryReCommentResponse.from(savedComment, user.getId());
+    }
+
+    public List<DiaryReCommentResponse> displayReComments(User user, Long petId, Long ancestorId) {
+        validateDisplayComments(user, petId);
+
+        return diaryCommentRepository.findByAncestorCommentIdAndIsDeletedFalse(ancestorId).stream()
+                .map(recomment -> DiaryReCommentResponse.from(recomment, user.getId(),
+                        diaryCommentRedisService.isDiaryCommentLikeExistByCommentIdAndUserId(recomment.getId(), user.getId()),
+                        diaryCommentRedisService.getLikeCountByCommentId(recomment.getId())))
+                .collect(Collectors.toList());
     }
 }

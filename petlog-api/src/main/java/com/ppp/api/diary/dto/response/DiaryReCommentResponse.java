@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Schema(description = "육아 일기 댓글")
 @Builder
-public record DiaryCommentResponse(
+public record DiaryReCommentResponse(
         @Schema(description = "댓글 아이디")
         Long commentId,
         @Schema(description = "내용")
@@ -23,37 +23,38 @@ public record DiaryCommentResponse(
         boolean isCurrentUserLiked,
         @Schema(description = "댓글 좋아요 수")
         int likeCount,
-        @Schema(description = "대댓글 수")
-        int recommentCount,
         @Schema(description = "글쓴이 정보")
         UserResponse writer,
+        @Schema(description = "대댓글 받는 유저 정보")
+        UserResponse receiver,
         @ArraySchema(schema = @Schema(description = "태깅 유저 정보"))
         List<UserResponse> taggedUsers
 ) {
-    public static DiaryCommentResponse from(DiaryComment comment, String currentUserId, boolean isCurrentUserLiked, int likeCount, int recommentCount) {
-        return DiaryCommentResponse.builder()
+    public static DiaryReCommentResponse from(DiaryComment comment, String currentUserId, boolean isCurrentUserLiked, int likeCount) {
+        return DiaryReCommentResponse.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
                 .createdAt(TimeUtil.calculateTerm(comment.getCreatedAt()))
                 .writer(UserResponse.from(comment.getUser(), currentUserId))
                 .isCurrentUserLiked(isCurrentUserLiked)
                 .likeCount(likeCount)
-                .recommentCount(recommentCount)
+                .receiver(UserResponse.from(comment.getParent().getUser(), currentUserId))
                 .taggedUsers(comment.getTaggedUsersIdNicknameMap().keySet()
-                        .stream().map(id -> com.ppp.api.user.dto.response.UserResponse.of(id,
+                        .stream().map(id -> UserResponse.of(id,
                                 comment.getTaggedUsersIdNicknameMap().get(id), currentUserId))
                         .collect(Collectors.toList()))
                 .build();
     }
 
-    public static DiaryCommentResponse from(DiaryComment comment, String currentUserId) {
-        return DiaryCommentResponse.builder()
+    public static DiaryReCommentResponse from(DiaryComment comment, String currentUserId) {
+        return DiaryReCommentResponse.builder()
                 .commentId(comment.getId())
                 .content(comment.getContent())
                 .createdAt(TimeUtil.calculateTerm(comment.getCreatedAt()))
                 .writer(UserResponse.from(comment.getUser(), currentUserId))
+                .receiver(UserResponse.from(comment.getParent().getUser(), currentUserId))
                 .taggedUsers(comment.getTaggedUsersIdNicknameMap().keySet()
-                        .stream().map(id -> com.ppp.api.user.dto.response.UserResponse.of(id,
+                        .stream().map(id -> UserResponse.of(id,
                                 comment.getTaggedUsersIdNicknameMap().get(id), currentUserId))
                         .collect(Collectors.toList()))
                 .build();
