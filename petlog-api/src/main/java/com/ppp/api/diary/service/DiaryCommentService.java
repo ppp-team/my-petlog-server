@@ -153,7 +153,7 @@ public class DiaryCommentService {
     public List<DiaryReCommentResponse> displayReComments(User user, Long petId, Long ancestorId) {
         validateDisplayComments(user, petId);
 
-        return diaryCommentRepository.findByAncestorCommentIdAndIsDeletedFalse(ancestorId).stream()
+        return diaryCommentRepository.findByAncestorCommentIdAndIsDeletedFalseOrderByIdDesc(ancestorId).stream()
                 .map(recomment -> DiaryReCommentResponse.from(recomment, user.getId(),
                         diaryCommentRedisService.isDiaryCommentLikeExistByCommentIdAndUserId(recomment.getId(), user.getId()),
                         diaryCommentRedisService.getLikeCountByCommentId(recomment.getId())))

@@ -597,7 +597,7 @@ class DiaryCommentServiceTest {
                 .taggedUsersIdNicknameMap(taggedUserIdNicknameMap)
                 .build();
 
-        given(diaryCommentRepository.findByAncestorCommentIdAndIsDeletedFalse(anyLong()))
+        given(diaryCommentRepository.findByAncestorCommentIdAndIsDeletedFalseOrderByIdDesc(anyLong()))
                 .willReturn(List.of(
                         parent,
                         DiaryComment.builder()

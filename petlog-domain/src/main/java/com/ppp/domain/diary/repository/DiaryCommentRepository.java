@@ -21,7 +21,7 @@ public interface DiaryCommentRepository extends JpaRepository<DiaryComment, Long
     Slice<DiaryComment> findByDiaryAndAncestorCommentIdIsNullAndIsDeletedFalse(Diary diary, PageRequest request);
 
     @EntityGraph(attributePaths = {"parent", "parent.user"}, type = EntityGraph.EntityGraphType.FETCH)
-    List<DiaryComment> findByAncestorCommentIdAndIsDeletedFalse(Long ancestorCommentId);
+    List<DiaryComment> findByAncestorCommentIdAndIsDeletedFalseOrderByIdDesc(Long ancestorCommentId);
 
     boolean existsByIdAndIsDeletedFalse(Long id);
 
