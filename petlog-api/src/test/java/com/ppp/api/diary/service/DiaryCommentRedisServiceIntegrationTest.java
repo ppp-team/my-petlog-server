@@ -19,8 +19,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.ppp.domain.common.constant.CacheValue.DIARY_COMMENT_COUNT;
-import static com.ppp.domain.common.constant.CacheValue.DIARY_COMMENT_LIKE_COUNT;
+import static com.ppp.domain.common.constant.CacheValue.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +55,8 @@ class DiaryCommentRedisServiceIntegrationTest {
                 .evictIfPresent("1");
         Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_LIKE_COUNT.getValue()))
                 .evictIfPresent("1");
+        Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_RE_COMMENT_COUNT.getValue()))
+                .evictIfPresent("1");
     }
 
     @Test
@@ -80,16 +81,17 @@ class DiaryCommentRedisServiceIntegrationTest {
     @DisplayName("다이어리 댓글 개수 캐싱 삭제 성공")
     void cachingDeleteDiaryCommentCountByDiaryId_success() {
         //given
-        given(redisClient.getValue(Domain.DIARY_COMMENT, 1L))
-                .willReturn(Optional.of("1"));
+        Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_COUNT.getValue())).put("1", 1);
         //when
-        diaryCommentRedisService.getDiaryCommentCountByDiaryId(1L);
-        diaryCommentRedisService.deleteDiaryCommentCountByDiaryId(1L);
         Integer cached = Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_COUNT.getValue()))
+                .get("1", Integer.class);
+        diaryCommentRedisService.deleteDiaryCommentCountByDiaryId(1L);
+        Integer deleted = Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_COUNT.getValue()))
                 .get("1", Integer.class);
 
         //then
-        assertNull(cached);
+        assertEquals(cached, 1);
+        assertNull(deleted);
     }
 
     @Test
@@ -197,4 +199,73 @@ class DiaryCommentRedisServiceIntegrationTest {
         assertNull(deleted);
     }
 
+    @Test
+    @DisplayName("다이어리 대댓글 개수 캐싱 성공")
+    void cachingGetDiaryReCommentCountByCommentId_success() {
+        //given
+        given(redisClient.getValue(Domain.DIARY_RE_COMMENT, 1L))
+                .willReturn(Optional.of("1"));
+        //when
+        Integer cacheMiss = diaryCommentRedisService.getDiaryReCommentCountByCommentId(1L);
+        Integer cacheHit = diaryCommentRedisService.getDiaryReCommentCountByCommentId(1L);
+        Integer cached = Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_RE_COMMENT_COUNT.getValue()))
+                .get("1", Integer.class);
+
+        //then
+        verify(redisClient, times(1)).getValue(any(), anyLong());
+        assertEquals(cacheMiss, cacheHit);
+        assertEquals(cacheMiss, cached);
+    }
+
+    @Test
+    @DisplayName("다이어리 대댓글 개수 캐싱 삭제 성공")
+    void cachingDeleteDiaryReCommentCountByCommentId_success() {
+        //given
+        Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_RE_COMMENT_COUNT.getValue())).put("1", 1);
+        //when
+        Integer cached = Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_RE_COMMENT_COUNT.getValue()))
+                .get("1", Integer.class);
+        diaryCommentRedisService.deleteDiaryReCommentCountByCommentId(1L);
+        Integer deleted = Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_RE_COMMENT_COUNT.getValue()))
+                .get("1", Integer.class);
+        //then
+        assertEquals(cached, 1);
+        assertNull(deleted);
+    }
+
+    @Test
+    @DisplayName("다이어리 대댓글 개수 캐싱 업데이트 성공")
+    void cachingIncreaseDiaryReCommentCountByCommentId_success() {
+        //given
+        Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_RE_COMMENT_COUNT.getValue())).put("1", 1);
+        given(redisClient.incrementValue(Domain.DIARY_RE_COMMENT, 1L))
+                .willReturn(2L);
+        //when
+        Integer cached = Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_RE_COMMENT_COUNT.getValue()))
+                .get("1", Integer.class);
+        diaryCommentRedisService.increaseDiaryReCommentCountByCommentId(1L);
+        Integer updated = Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_RE_COMMENT_COUNT.getValue()))
+                .get("1", Integer.class);
+        //then
+        assertEquals(cached, 1);
+        assertEquals(updated, 2);
+    }
+
+    @Test
+    @DisplayName("다이어리 대댓글 개수 캐싱 업데이트 성공")
+    void cachingDecreaseDiaryReCommentCountByCommentId_success() {
+        //given
+        Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_RE_COMMENT_COUNT.getValue())).put("1", 1);
+        given(redisClient.decrementValue(Domain.DIARY_RE_COMMENT, 1L))
+                .willReturn(0L);
+        //when
+        Integer cached = Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_RE_COMMENT_COUNT.getValue()))
+                .get("1", Integer.class);
+        diaryCommentRedisService.decreaseDiaryReCommentCountByCommentId(1L);
+        Integer updated = Objects.requireNonNull(cacheManager.getCache(DIARY_COMMENT_RE_COMMENT_COUNT.getValue()))
+                .get("1", Integer.class);
+        //then
+        assertEquals(cached, 1);
+        assertEquals(updated, 0);
+    }
 }

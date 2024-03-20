@@ -73,4 +73,30 @@ public class DiaryCommentRedisService {
     public void deleteAllLikeByCommentId(Long commentId) {
         redisClient.removeKeyToSet(Domain.DIARY_COMMENT_LIKE, commentId);
     }
+
+    @Cacheable(value = "diaryCommentReCommentCount")
+    public Integer getDiaryReCommentCountByCommentId(Long commentId) {
+        return redisClient.getValue(Domain.DIARY_RE_COMMENT, commentId)
+                .map(Integer::parseInt)
+                .orElse(0);
+    }
+
+    public void setDiaryReCommentCountByCommentId(Long commentId) {
+        redisClient.addValue(Domain.DIARY_RE_COMMENT, commentId, "0");
+    }
+
+    @CacheEvict(value = "diaryCommentReCommentCount")
+    public void deleteDiaryReCommentCountByCommentId(Long commentId) {
+        redisClient.deleteValue(Domain.DIARY_RE_COMMENT, commentId);
+    }
+
+    @CachePut(value = "diaryCommentReCommentCount", unless = "#result == null")
+    public Long increaseDiaryReCommentCountByCommentId(Long commentId) {
+        return redisClient.incrementValue(Domain.DIARY_RE_COMMENT, commentId);
+    }
+
+    @CachePut(value = "diaryCommentReCommentCount", unless = "#result == null")
+    public Long decreaseDiaryReCommentCountByCommentId(Long commentId) {
+        return redisClient.decrementValue(Domain.DIARY_RE_COMMENT, commentId);
+    }
 }

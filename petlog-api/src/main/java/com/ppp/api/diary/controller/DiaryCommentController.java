@@ -2,6 +2,7 @@ package com.ppp.api.diary.controller;
 
 import com.ppp.api.diary.dto.request.DiaryCommentRequest;
 import com.ppp.api.diary.dto.response.DiaryCommentResponse;
+import com.ppp.api.diary.dto.response.DiaryReCommentResponse;
 import com.ppp.api.diary.service.DiaryCommentService;
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.common.security.PrincipalDetails;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Diary Comment", description = "Diary Comment APIs")
 @RestController
@@ -101,5 +104,33 @@ public class DiaryCommentController {
                                              @AuthenticationPrincipal PrincipalDetails principalDetails) {
         diaryCommentService.likeComment(principalDetails.getUser(), petId, commentId);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "대댓글 생성")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "일치하는 댓글 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+    })
+    @PostMapping(value = "/comments/{commentId}/recomment")
+    private ResponseEntity<DiaryReCommentResponse> createReComment(@PathVariable Long petId,
+                                                                   @PathVariable Long commentId,
+                                                                   @Valid @RequestBody DiaryCommentRequest request,
+                                                                   @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(diaryCommentService.createReComment(principalDetails.getUser(), petId, commentId, request));
+    }
+
+    @Operation(summary = "대댓글 조회")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "400", description = "요청 필드 에러", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))}),
+            @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
+    })
+    @GetMapping(value = "/comments/{ancestorId}/recomment")
+    private ResponseEntity<List<DiaryReCommentResponse>> displayReComments(@PathVariable Long petId,
+                                                                           @PathVariable Long ancestorId,
+                                                                           @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(diaryCommentService.displayReComments(principalDetails.getUser(), petId, ancestorId));
     }
 }

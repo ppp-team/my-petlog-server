@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,7 +18,10 @@ public interface DiaryCommentRepository extends JpaRepository<DiaryComment, Long
     Optional<DiaryComment> findByIdAndIsDeletedFalse(Long id);
 
     @EntityGraph(attributePaths = {"user"}, type = EntityGraph.EntityGraphType.FETCH)
-    Slice<DiaryComment> findByDiaryAndIsDeletedFalse(Diary diary, PageRequest request);
+    Slice<DiaryComment> findByDiaryAndAncestorCommentIdIsNullAndIsDeletedFalse(Diary diary, PageRequest request);
+
+    @EntityGraph(attributePaths = {"parent", "parent.user"}, type = EntityGraph.EntityGraphType.FETCH)
+    List<DiaryComment> findByAncestorCommentIdAndIsDeletedFalseOrderByIdDesc(Long ancestorCommentId);
 
     boolean existsByIdAndIsDeletedFalse(Long id);
 
