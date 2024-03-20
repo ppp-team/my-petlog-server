@@ -59,13 +59,11 @@ public class CacheIntegrationTest {
 
     User userA = User.builder()
             .id("abcd")
-            .username("abcde")
             .email("abcde@gmail.com")
             .build();
 
     User userB = User.builder()
             .id("qwerty")
-            .username("qwerty")
             .email("qwerty@gmail.com")
             .build();
 
