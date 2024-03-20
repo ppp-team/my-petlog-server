@@ -5,7 +5,10 @@ import com.ppp.domain.notification.constant.Type;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Table(name = "notifications")
+@Table(name = "notifications",
+indexes = {
+        @Index(name = "idx_receiver", columnList = "receiverId")
+})
 @Getter
 @Entity
 @Builder
