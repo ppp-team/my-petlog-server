@@ -22,7 +22,7 @@ public class PetQuerydslRepository {
         return jpaQueryFactory.select(constructor(PetDto.class, pet.id, petImage.url, pet.name))
                 .from(subscription)
                 .innerJoin(subscription.pet, pet)
-                .innerJoin(subscription.pet, petImage.pet)
+                .leftJoin(petImage).on(petImage.pet.eq(pet))
                 .where(subscriberIdEq(userId))
                 .fetch();
     }

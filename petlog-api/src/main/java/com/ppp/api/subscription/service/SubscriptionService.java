@@ -32,7 +32,7 @@ public class SubscriptionService {
         Pet pet = petRepository.findByIdAndIsDeletedFalse(petId)
                 .orElseThrow(() -> new PetException(ErrorCode.PET_NOT_FOUND));
 
-        subscriptionRepository.findByUserAndPet(user, pet)
+        subscriptionRepository.findBySubscriberAndPet(user, pet)
                 .ifPresentOrElse(
                         subscriptionRepository::delete,
                         () -> {

@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
-    Optional<Subscription> findByUserAndPet(User user, Pet pet);
+    Optional<Subscription> findBySubscriberAndPet(User user, Pet pet);
     @EntityGraph(attributePaths = {"subscriber"}, type = EntityGraph.EntityGraphType.FETCH)
     List<Subscription> findByPetId(Long petId);
 }

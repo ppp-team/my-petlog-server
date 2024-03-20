@@ -65,7 +65,7 @@ class SubscriptionServiceTest {
                 .subscriber(user)
                 .pet(pet)
                 .build();
-        given(subscriptionRepository.findByUserAndPet(any(), any()))
+        given(subscriptionRepository.findBySubscriberAndPet(any(), any()))
                 .willReturn(Optional.of(subscription));
         //when
         subscriptionService.subscribeOrUnsubscribe(1L, user);
@@ -79,7 +79,7 @@ class SubscriptionServiceTest {
         //given
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
-        given(subscriptionRepository.findByUserAndPet(any(), any()))
+        given(subscriptionRepository.findBySubscriberAndPet(any(), any()))
                 .willReturn(Optional.empty());
         //when
         subscriptionService.subscribeOrUnsubscribe(1L, user);
