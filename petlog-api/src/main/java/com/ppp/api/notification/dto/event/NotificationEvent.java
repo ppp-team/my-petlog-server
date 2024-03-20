@@ -8,7 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class NotificationEvent {
     private Type type;
-    private String receiverId;
+    private String actorId;
     private String actorName;
+    private String receiverId;
     private String petName;
 }

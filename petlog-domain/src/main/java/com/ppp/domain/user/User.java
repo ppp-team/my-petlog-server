@@ -6,10 +6,7 @@ import com.ppp.domain.common.util.GenerationUtil;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.user.constant.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +14,7 @@ import java.util.List;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class User extends BaseTimeEntity {
 
@@ -28,12 +25,10 @@ public class User extends BaseTimeEntity {
     @Column(unique = true)
     private String email;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 20)
     private String nickname;
 
     private String password;
-
-    private String username;
 
     @Column(columnDefinition = "BIT default 0")
     private Boolean isDeleted;
@@ -45,6 +40,8 @@ public class User extends BaseTimeEntity {
     private List<Pet> pets = new ArrayList<>();
 
     private String profilePath;
+
+    private String thumbnailPath;
 
 
     public static User createUserByEmail(String email, String password, Role role) {
@@ -84,10 +81,6 @@ public class User extends BaseTimeEntity {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public void setDeleted(Boolean deleted) {

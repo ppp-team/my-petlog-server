@@ -20,19 +20,23 @@ public class Notification extends BaseTimeEntity {
     private Type type;
 
     @Column(nullable = false, length = 100)
+    private String actorId;
+
+    @Column(nullable = false, length = 100)
     private String receiverId;
 
     @Column(nullable = false, length = 100)
-    private String content;
+    private String message;
 
     @Column(columnDefinition = "bit(1) default 0")
     private Boolean isRead;
 
-    public static Notification of(Type type, String receiverId, String content) {
+    public static Notification of(Type type, String actorId, String receiverId, String message) {
         return Notification.builder()
                 .type(type)
+                .actorId(actorId)
                 .receiverId(receiverId)
-                .content(content)
+                .message(message)
                 .isRead(false)
                 .build();
     }

@@ -2,11 +2,12 @@ package com.ppp.api.notification.controller;
 
 import com.ppp.api.notification.dto.response.NotificationResponse;
 import com.ppp.api.notification.service.NotificationService;
+import com.ppp.common.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,11 +20,11 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    @PatchMapping("/v1/notifications")
+    @GetMapping("/v1/notifications")
     public Page<NotificationResponse> displayNotifications(
-            @AuthenticationPrincipal AuthenticationPrincipal authenticationPrincipal,
-            @RequestParam(required = false) int page,
-            @RequestParam(required = false) int size) {
-        return notificationService.displayNotifications(page, size);
+            @AuthenticationPrincipal PrincipalDetails principal,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "20") int size) {
+        return notificationService.displayNotifications(principal.getUser(), page, size);
     }
 }

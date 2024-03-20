@@ -1,4 +1,15 @@
 package com.ppp.api.notification.dto.response;
 
-public class NotificationResponse {
+import lombok.Builder;
+
+@Builder
+public record NotificationResponse (
+        Long id,
+        String type,
+        String message,
+        String thumbnailPath,
+        Boolean checked,
+        String createdAt
+) {
+
 }
