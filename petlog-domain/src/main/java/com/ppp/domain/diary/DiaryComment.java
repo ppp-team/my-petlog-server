@@ -18,6 +18,9 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(indexes = {
+        @Index(name = "idx_ancestor_comment_id", columnList = "ancestor_comment_id")
+})
 public class DiaryComment extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,12 +37,31 @@ public class DiaryComment extends BaseTimeEntity {
     private boolean isDeleted;
 
     @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private DiaryComment parent;
+
+    @Column(name = "ancestor_comment_id")
+    private Long ancestorCommentId;
+
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "diary_id", nullable = false)
     private Diary diary;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @PrePersist
+    private void addAncestorCommentId() {
+        if (!isReComment()) return;
+        if (parent.getAncestorCommentId() == null)
+            ancestorCommentId = parent.getId();
+        else ancestorCommentId = parent.getAncestorCommentId();
+    }
+
+    public boolean isReComment(){
+        return parent != null;
+    }
 
     public void delete() {
         isDeleted = true;
@@ -51,9 +73,10 @@ public class DiaryComment extends BaseTimeEntity {
     }
 
     @Builder
-    public DiaryComment(String content, Map<String, String> taggedUsersIdNicknameMap, Diary diary, User user) {
+    public DiaryComment(String content, Map<String, String> taggedUsersIdNicknameMap, DiaryComment parent, Diary diary, User user) {
         this.content = content;
         this.taggedUsersIdNicknameMap = taggedUsersIdNicknameMap;
+        this.parent = parent;
         this.diary = diary;
         this.user = user;
     }
