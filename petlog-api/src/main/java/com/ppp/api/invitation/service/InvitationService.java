@@ -7,7 +7,7 @@ import com.ppp.api.invitation.dto.response.InvitationResponse;
 import com.ppp.api.invitation.dto.response.MyInvitationResponse;
 import com.ppp.api.invitation.exception.ErrorCode;
 import com.ppp.api.invitation.exception.InvitationException;
-import com.ppp.api.notification.dto.event.NotificationEvent;
+import com.ppp.api.notification.dto.event.InvitationNotificationEvent;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.util.TimeUtil;
 import com.ppp.domain.guardian.constant.GuardianRole;
@@ -16,7 +16,7 @@ import com.ppp.domain.invitation.constant.InviteStatus;
 import com.ppp.domain.invitation.dto.MyInvitationDto;
 import com.ppp.domain.invitation.repository.InvitationQuerydslRepository;
 import com.ppp.domain.invitation.repository.InvitationRepository;
-import com.ppp.domain.notification.constant.Type;
+import com.ppp.domain.notification.constant.MessageCode;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.repository.PetImageRepository;
@@ -74,7 +74,7 @@ public class InvitationService {
         guardianService.createGuardian(invitation.getPet(), user, GuardianRole.MEMBER);
 
         applicationEventPublisher.publishEvent(
-                new NotificationEvent(Type.INVITATION_ACCEPT, invitation.getInviterId(), user.getNickname(), invitation.getPet().getName()));
+                new InvitationNotificationEvent(MessageCode.INVITATION_ACCEPT, user, invitation.getInviterId(), invitation.getPet().getName()));
     }
 
     @Transactional
@@ -82,7 +82,7 @@ public class InvitationService {
         Invitation invitation = updateInvitationByInvitee(invitationRequest.getInvitationId(), user, InviteStatus.PENDING, InviteStatus.REJECTED);
 
         applicationEventPublisher.publishEvent(
-                new NotificationEvent(Type.INVITATION_REJECT, invitation.getInviterId(), user.getNickname(), invitation.getPet().getName()));
+                new InvitationNotificationEvent(MessageCode.INVITATION_REJECT, user, invitation.getInviterId(), invitation.getPet().getName()));
     }
 
     private Invitation updateInvitationByInvitee(Long invitationId, User user, InviteStatus fromStatus, InviteStatus toStatus) {

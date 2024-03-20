@@ -5,7 +5,7 @@ import com.ppp.api.guardian.dto.response.GuardianResponse;
 import com.ppp.api.guardian.dto.response.GuardiansResponse;
 import com.ppp.api.guardian.exception.ErrorCode;
 import com.ppp.api.guardian.exception.GuardianException;
-import com.ppp.api.notification.dto.event.NotificationEvent;
+import com.ppp.api.notification.dto.event.InvitationNotificationEvent;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.common.service.CacheManageService;
@@ -16,7 +16,7 @@ import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.invitation.Invitation;
 import com.ppp.domain.invitation.constant.InviteStatus;
 import com.ppp.domain.invitation.repository.InvitationRepository;
-import com.ppp.domain.notification.constant.Type;
+import com.ppp.domain.notification.constant.MessageCode;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
@@ -81,7 +81,7 @@ public class GuardianService {
             guardianRepository.deleteById(requestedGuardian.getId());
 
             applicationEventPublisher.publishEvent(
-                    new NotificationEvent(Type.GUARDIAN_KICK, requestedGuardian.getUser().getId(), user.getNickname(), requestedGuardian.getPet().getName()));
+                    new InvitationNotificationEvent(MessageCode.INVITATION_GUARDIAN_KICK, user, requestedGuardian.getUser().getId(), requestedGuardian.getPet().getName()));
         }
         deleteCachedGuardianAuthority(requestedGuardian.getUser().getId(), petId);
     }
@@ -119,7 +119,8 @@ public class GuardianService {
                 .build();
         invitationRepository.save(invitation);
 
-        applicationEventPublisher.publishEvent(new NotificationEvent(Type.INVITATION_REQUEST, inviteeUser.getId(), inviterUser.getNickname(), pet.getName()));
+        applicationEventPublisher.publishEvent(
+                new InvitationNotificationEvent(MessageCode.INVITATION_REQUEST, inviterUser, invitation.getInviteeId(), invitation.getPet().getName()));
     }
 
     private void validateInvitation(Long petId, User inviteeUser, User inviterUser) {
