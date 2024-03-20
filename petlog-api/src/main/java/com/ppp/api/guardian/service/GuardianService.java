@@ -5,6 +5,7 @@ import com.ppp.api.guardian.dto.response.GuardianResponse;
 import com.ppp.api.guardian.dto.response.GuardiansResponse;
 import com.ppp.api.guardian.exception.ErrorCode;
 import com.ppp.api.guardian.exception.GuardianException;
+import com.ppp.api.notification.dto.event.InvitationNotificationEvent;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.user.dto.response.UserResponse;
 import com.ppp.common.service.CacheManageService;
@@ -15,6 +16,7 @@ import com.ppp.domain.guardian.repository.GuardianRepository;
 import com.ppp.domain.invitation.Invitation;
 import com.ppp.domain.invitation.constant.InviteStatus;
 import com.ppp.domain.invitation.repository.InvitationRepository;
+import com.ppp.domain.notification.constant.MessageCode;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
@@ -22,6 +24,7 @@ import com.ppp.domain.user.repository.UserQuerydslRepository;
 import com.ppp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +45,7 @@ public class GuardianService {
     private final InvitationRepository invitationRepository;
     private final UserQuerydslRepository userQuerydslRepository;
     private final CacheManageService cacheManageService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public GuardiansResponse displayGuardians(Long petId, User user) {
         if (!guardianRepository.existsByUserIdAndPetId(user.getId(), petId))
@@ -75,6 +79,9 @@ public class GuardianService {
             }
         } else if (isReaderGuardian(guardianMe)) {
             guardianRepository.deleteById(requestedGuardian.getId());
+
+            applicationEventPublisher.publishEvent(
+                    new InvitationNotificationEvent(MessageCode.INVITATION_GUARDIAN_KICK, user, requestedGuardian.getUser().getId(), requestedGuardian.getPet().getName()));
         }
         deleteCachedGuardianAuthority(requestedGuardian.getUser().getId(), petId);
     }
@@ -94,6 +101,7 @@ public class GuardianService {
         guardianRepository.deleteById(guardian.getId());
     }
 
+    @Transactional
     public void inviteGuardian(Long petId, InviteGuardianRequest inviteGuardianRequest, User inviterUser) {
         User inviteeUser = userRepository.findByEmail(inviteGuardianRequest.getEmail())
                 .orElseThrow(() -> new GuardianException(ErrorCode.NOT_FOUND_INVITEE));
@@ -110,6 +118,9 @@ public class GuardianService {
                 .inviteStatus(InviteStatus.PENDING)
                 .build();
         invitationRepository.save(invitation);
+
+        applicationEventPublisher.publishEvent(
+                new InvitationNotificationEvent(MessageCode.INVITATION_REQUEST, inviterUser, invitation.getInviteeId(), invitation.getPet().getName()));
     }
 
     private void validateInvitation(Long petId, User inviteeUser, User inviterUser) {

@@ -7,6 +7,7 @@ import com.ppp.api.invitation.dto.response.InvitationResponse;
 import com.ppp.api.invitation.dto.response.MyInvitationResponse;
 import com.ppp.api.invitation.exception.ErrorCode;
 import com.ppp.api.invitation.exception.InvitationException;
+import com.ppp.api.notification.dto.event.InvitationNotificationEvent;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.common.util.TimeUtil;
 import com.ppp.domain.guardian.constant.GuardianRole;
@@ -15,6 +16,7 @@ import com.ppp.domain.invitation.constant.InviteStatus;
 import com.ppp.domain.invitation.dto.MyInvitationDto;
 import com.ppp.domain.invitation.repository.InvitationQuerydslRepository;
 import com.ppp.domain.invitation.repository.InvitationRepository;
+import com.ppp.domain.notification.constant.MessageCode;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
 import com.ppp.domain.pet.repository.PetImageRepository;
@@ -22,6 +24,7 @@ import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +43,8 @@ public class InvitationService {
     private final PetRepository petRepository;
     private final PetImageRepository petImageRepository;
     private final InvitationQuerydslRepository invitationQuerydslRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
 
     @Transactional(readOnly = true)
     public List<InvitationResponse> displayInvitations(User user) {
@@ -64,17 +69,24 @@ public class InvitationService {
 
     @Transactional
     public void acceptInvitation(InvitationRequest invitationRequest, User user) {
-        Invitation invitation = updateInvitationByInvitee(invitationRequest.getInvitationId(), user.getId(), InviteStatus.PENDING, InviteStatus.ACCEPTED);
+        Invitation invitation = updateInvitationByInvitee(invitationRequest.getInvitationId(), user, InviteStatus.PENDING, InviteStatus.ACCEPTED);
+
         guardianService.createGuardian(invitation.getPet(), user, GuardianRole.MEMBER);
+
+        applicationEventPublisher.publishEvent(
+                new InvitationNotificationEvent(MessageCode.INVITATION_ACCEPT, user, invitation.getInviterId(), invitation.getPet().getName()));
     }
 
     @Transactional
     public void refuseInvitation(InvitationRequest invitationRequest, User user) {
-        updateInvitationByInvitee(invitationRequest.getInvitationId(), user.getId(), InviteStatus.PENDING, InviteStatus.REJECTED);
+        Invitation invitation = updateInvitationByInvitee(invitationRequest.getInvitationId(), user, InviteStatus.PENDING, InviteStatus.REJECTED);
+
+        applicationEventPublisher.publishEvent(
+                new InvitationNotificationEvent(MessageCode.INVITATION_REJECT, user, invitation.getInviterId(), invitation.getPet().getName()));
     }
 
-    private Invitation updateInvitationByInvitee(Long invitationId, String userId, InviteStatus fromStatus, InviteStatus toStatus) {
-        Invitation invitation = invitationRepository.findByIdAndInviteStatusAndInviteeId(invitationId, fromStatus, userId)
+    private Invitation updateInvitationByInvitee(Long invitationId, User user, InviteStatus fromStatus, InviteStatus toStatus) {
+        Invitation invitation = invitationRepository.findByIdAndInviteStatusAndInviteeId(invitationId, fromStatus, user.getId())
                 .orElseThrow(() -> new InvitationException(ErrorCode.INVITATION_NOT_FOUND));
         invitation.updateInviteStatus(toStatus);
         return invitation;
