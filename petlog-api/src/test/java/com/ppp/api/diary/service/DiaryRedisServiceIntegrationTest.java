@@ -3,6 +3,7 @@ package com.ppp.api.diary.service;
 import com.ppp.ApiApplication;
 import com.ppp.common.client.FfmpegClient;
 import com.ppp.common.client.RedisClient;
+import com.ppp.api.config.EmailConfig;
 import com.ppp.common.config.FfmpegConfig;
 import com.ppp.common.config.JasyptConfig;
 import com.ppp.domain.common.constant.Domain;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Objects;
@@ -47,6 +49,12 @@ class DiaryRedisServiceIntegrationTest {
 
     @MockBean
     private FfmpegClient ffmpegClient;
+
+    @MockBean
+    private EmailConfig emailConfig;
+
+    @MockBean
+    private JavaMailSender javaMailSender;
 
     @AfterEach
     void tearDown() {

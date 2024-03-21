@@ -18,6 +18,7 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
             .id("abcd1234")
             .isDeleted(false)
             .email("abcd@gmail.com")
+            .nickname("nickname")
             .role(Role.USER)
             .build();
 
