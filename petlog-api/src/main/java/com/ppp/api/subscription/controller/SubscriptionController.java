@@ -30,7 +30,8 @@ public class SubscriptionController {
 
     @Operation(summary = "구독 및 구독 취소")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())})
+            @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "일치하는 반려 동물 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PostMapping(value = "/{petId}/subscriptions")
     private ResponseEntity<Void> subscribe(@PathVariable Long petId,
