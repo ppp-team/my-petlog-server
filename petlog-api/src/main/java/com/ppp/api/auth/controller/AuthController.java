@@ -5,7 +5,6 @@ import com.ppp.api.auth.dto.request.SigninRequest;
 import com.ppp.api.auth.dto.request.SocialRequest;
 import com.ppp.api.auth.dto.response.AuthenticationResponse;
 import com.ppp.api.auth.service.AuthService;
-import com.ppp.api.auth.service.EmailService;
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.user.dto.request.EmailRequest;
 import com.ppp.api.user.dto.request.EmailVerificationRequest;
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final EmailService emailService;
 
     @Operation(summary = "회원가입")
     @ApiResponses(value = {

@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,15 +58,21 @@ public class CacheIntegrationTest {
     @MockBean
     private FfmpegClient ffmpegClient;
 
+    @MockBean
+    private EmailConfig emailConfig;
+
+    @MockBean
+    private JavaMailSender javaMailSender;
+
     User userA = User.builder()
             .id("abcd")
-            .username("abcde")
+            .nickname("abcde")
             .email("abcde@gmail.com")
             .build();
 
     User userB = User.builder()
             .id("qwerty")
-            .username("qwerty")
+            .nickname("qwerty")
             .email("qwerty@gmail.com")
             .build();
 
