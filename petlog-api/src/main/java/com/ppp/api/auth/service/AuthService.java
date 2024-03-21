@@ -19,7 +19,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,8 +47,7 @@ public class AuthService {
 
     private final EmailVerificationRepository emailVerificationRepository;
 
-    @Value("${mail.auth-code-expiration-millis}")
-    private long codeExpirationMillis;
+    private long codeExpirationMillis = 600000;
 
     public void signup(RegisterRequest registerRequest) {
         if(userRepository.existsByEmail(registerRequest.getEmail())) {
