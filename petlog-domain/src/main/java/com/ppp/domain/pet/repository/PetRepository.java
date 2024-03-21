@@ -1,6 +1,7 @@
 package com.ppp.domain.pet.repository;
 
 import com.ppp.domain.pet.Pet;
+import com.ppp.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,4 +28,6 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
     Optional<String> findPetCodeByIdAndIsDeletedFalse(@Param("petId") Long petId);
 
     boolean existsByNameAndIsDeletedFalse(String name);
+
+    boolean existsByIdAndUserIdAndIsDeletedFalse(Long id, String userId);
 }

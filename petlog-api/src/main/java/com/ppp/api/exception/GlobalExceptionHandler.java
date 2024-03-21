@@ -7,6 +7,7 @@ import com.ppp.api.guardian.exception.GuardianException;
 import com.ppp.api.invitation.exception.InvitationException;
 import com.ppp.api.log.exception.LogException;
 import com.ppp.api.pet.exception.PetException;
+import com.ppp.api.subscription.exception.SubscriptionException;
 import com.ppp.api.user.exception.UserException;
 import com.ppp.api.video.exception.VideoException;
 import com.ppp.common.exception.ErrorCode;
@@ -26,6 +27,18 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final String LOG_FORMAT = "Class : {}, Code : {}, Message : {}";
+
+    @ExceptionHandler(SubscriptionException.class)
+    public ResponseEntity<ExceptionResponse> handleSubscriptionException(SubscriptionException exception) {
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .status(exception.getHttpStatus().value())
+                .code(exception.getCode())
+                .message(exception.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.warn(LOG_FORMAT, exception.getClass().getSimpleName(), errorResponse.getCode(), exception.getMessage());
+        return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
+    }
 
     @ExceptionHandler(InvitationException.class)
     public ResponseEntity<ExceptionResponse> handleInvitationException(InvitationException exception) {
