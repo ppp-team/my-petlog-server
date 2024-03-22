@@ -7,11 +7,14 @@ import com.ppp.api.diary.dto.request.DiaryCommentRequest;
 import com.ppp.api.diary.dto.response.DiaryCommentResponse;
 import com.ppp.api.diary.dto.response.DiaryReCommentResponse;
 import com.ppp.api.diary.exception.DiaryException;
+import com.ppp.api.notification.dto.event.DiaryNotificationEvent;
+import com.ppp.api.notification.dto.event.DiaryTagNotificationEvent;
 import com.ppp.domain.diary.Diary;
 import com.ppp.domain.diary.DiaryComment;
 import com.ppp.domain.diary.repository.DiaryCommentRepository;
 import com.ppp.domain.diary.repository.DiaryRepository;
 import com.ppp.domain.guardian.repository.GuardianRepository;
+import com.ppp.domain.notification.constant.MessageCode;
 import com.ppp.domain.user.User;
 import com.ppp.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -57,6 +60,9 @@ public class DiaryCommentService {
                 .user(user)
                 .build());
         applicationEventPublisher.publishEvent(new DiaryCommentCreatedEvent(savedComment));
+        applicationEventPublisher.publishEvent(new DiaryNotificationEvent(MessageCode.DIARY_COMMENT_CREATE, user, diary));
+        if (request.getTaggedUserIds() != null && !request.getTaggedUserIds().isEmpty()) applicationEventPublisher.publishEvent(new DiaryTagNotificationEvent(MessageCode.DIARY_TAG, user, diary, request.getTaggedUserIds()));
+
         return DiaryCommentResponse.from(savedComment, user.getId());
     }
 

@@ -20,9 +20,9 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationQuerydslRepository notificationQuerydslRepository;
 
-    public void createNotification(Type type, String actorId, String receiverId, String message) {
+    public void createNotification(Type type, String actorId, String receiverId, String thumbnailPath, String message) {
 
-        Notification notification = Notification.of(type, actorId, receiverId, message);
+        Notification notification = Notification.of(type, actorId, receiverId, thumbnailPath, message);
         notificationRepository.save(notification);
     }
 

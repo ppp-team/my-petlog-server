@@ -9,6 +9,7 @@ import com.ppp.api.diary.dto.response.DiaryDetailResponse;
 import com.ppp.api.diary.dto.response.DiaryGroupByDateResponse;
 import com.ppp.api.diary.dto.response.DiaryResponse;
 import com.ppp.api.diary.exception.DiaryException;
+import com.ppp.api.notification.dto.event.DiaryNotificationEvent;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.video.exception.ErrorCode;
 import com.ppp.api.video.exception.VideoException;
@@ -21,6 +22,7 @@ import com.ppp.domain.diary.constant.DiaryMediaType;
 import com.ppp.domain.diary.constant.DiaryPolicy;
 import com.ppp.domain.diary.repository.DiaryRepository;
 import com.ppp.domain.guardian.repository.GuardianRepository;
+import com.ppp.domain.notification.constant.MessageCode;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.user.User;
@@ -207,13 +209,18 @@ public class DiaryService {
         return new SliceImpl<>(content, diarySlice.getPageable(), diarySlice.hasNext());
     }
 
+    @Transactional
     public void likeDiary(User user, Long petId, Long diaryId) {
         validateLikeDiary(user, petId, diaryId);
 
         if (diaryRedisService.isLikeExistByDiaryIdAndUserId(diaryId, user.getId()))
             diaryRedisService.cancelLikeByDiaryIdAndUserId(diaryId, user.getId());
-        else
+        else {
             diaryRedisService.registerLikeByDiaryIdAndUserId(diaryId, user.getId());
+            diaryRepository.findByIdAndIsDeletedFalse(diaryId).ifPresent(diary ->
+                applicationEventPublisher.publishEvent(new DiaryNotificationEvent(MessageCode.DIARY_LIKE, user, diary))
+            );
+        }
     }
 
     private void validateLikeDiary(User user, Long petId, Long diaryId) {

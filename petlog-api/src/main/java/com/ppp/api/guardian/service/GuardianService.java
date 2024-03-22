@@ -81,7 +81,7 @@ public class GuardianService {
             guardianRepository.deleteById(requestedGuardian.getId());
 
             applicationEventPublisher.publishEvent(
-                    new InvitationNotificationEvent(MessageCode.INVITATION_GUARDIAN_KICK, user, requestedGuardian.getUser().getId(), requestedGuardian.getPet().getName()));
+                    new InvitationNotificationEvent(MessageCode.INVITATION_GUARDIAN_KICK, user, requestedGuardian.getUser().getId(), requestedGuardian.getPet()));
         }
         deleteCachedGuardianAuthority(requestedGuardian.getUser().getId(), petId);
     }
@@ -120,7 +120,7 @@ public class GuardianService {
         invitationRepository.save(invitation);
 
         applicationEventPublisher.publishEvent(
-                new InvitationNotificationEvent(MessageCode.INVITATION_REQUEST, inviterUser, invitation.getInviteeId(), invitation.getPet().getName()));
+                new InvitationNotificationEvent(MessageCode.INVITATION_REQUEST, inviterUser, invitation.getInviteeId(), invitation.getPet()));
     }
 
     private void validateInvitation(Long petId, User inviteeUser, User inviterUser) {
