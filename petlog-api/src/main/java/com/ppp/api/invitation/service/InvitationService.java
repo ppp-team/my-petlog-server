@@ -70,19 +70,20 @@ public class InvitationService {
     @Transactional
     public void acceptInvitation(InvitationRequest invitationRequest, User user) {
         Invitation invitation = updateInvitationByInvitee(invitationRequest.getInvitationId(), user, InviteStatus.PENDING, InviteStatus.ACCEPTED);
-
-        guardianService.createGuardian(invitation.getPet(), user, GuardianRole.MEMBER);
+        Pet pet = invitation.getPet();
+        guardianService.createGuardian(pet, user, GuardianRole.MEMBER);
 
         applicationEventPublisher.publishEvent(
-                new InvitationNotificationEvent(MessageCode.INVITATION_ACCEPT, user, invitation.getInviterId(), invitation.getPet().getName()));
+                new InvitationNotificationEvent(MessageCode.INVITATION_ACCEPT, user, invitation.getInviterId(), pet));
     }
 
     @Transactional
     public void refuseInvitation(InvitationRequest invitationRequest, User user) {
         Invitation invitation = updateInvitationByInvitee(invitationRequest.getInvitationId(), user, InviteStatus.PENDING, InviteStatus.REJECTED);
+        Pet pet = invitation.getPet();
 
         applicationEventPublisher.publishEvent(
-                new InvitationNotificationEvent(MessageCode.INVITATION_REJECT, user, invitation.getInviterId(), invitation.getPet().getName()));
+                new InvitationNotificationEvent(MessageCode.INVITATION_REJECT, user, invitation.getInviterId(), pet));
     }
 
     private Invitation updateInvitationByInvitee(Long invitationId, User user, InviteStatus fromStatus, InviteStatus toStatus) {

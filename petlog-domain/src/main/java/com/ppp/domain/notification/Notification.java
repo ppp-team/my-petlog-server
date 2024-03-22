@@ -34,13 +34,16 @@ public class Notification extends BaseTimeEntity {
     @Column(columnDefinition = "bit(1) default 0")
     private Boolean isRead;
 
-    public static Notification of(Type type, String actorId, String receiverId, String message) {
+    private String thumbnailPath;
+
+    public static Notification of(Type type, String actorId, String receiverId, String thumbnailPath, String message) {
         return Notification.builder()
                 .type(type)
                 .actorId(actorId)
                 .receiverId(receiverId)
                 .message(message)
                 .isRead(false)
+                .thumbnailPath(thumbnailPath)
                 .build();
     }
 }

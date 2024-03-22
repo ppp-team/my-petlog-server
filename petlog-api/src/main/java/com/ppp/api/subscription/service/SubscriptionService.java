@@ -1,10 +1,12 @@
 package com.ppp.api.subscription.service;
 
+import com.ppp.api.notification.dto.event.SubscribeNotificationEvent;
 import com.ppp.api.pet.exception.ErrorCode;
 import com.ppp.api.pet.exception.PetException;
 import com.ppp.api.subscription.dto.response.SubscriberResponse;
 import com.ppp.api.subscription.dto.response.SubscribingPetResponse;
 import com.ppp.api.subscription.exception.SubscriptionException;
+import com.ppp.domain.notification.constant.MessageCode;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.repository.PetQuerydslRepository;
 import com.ppp.domain.pet.repository.PetRepository;
@@ -13,6 +15,7 @@ import com.ppp.domain.subscription.repository.SubscriptionRepository;
 import com.ppp.domain.user.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +29,7 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final PetRepository petRepository;
     private final PetQuerydslRepository petQuerydslRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public void subscribeOrUnsubscribe(Long petId, User user) {
@@ -40,6 +44,8 @@ public class SubscriptionService {
                                     .subscriber(user)
                                     .pet(pet)
                                     .build());
+                            applicationEventPublisher.publishEvent(
+                                    new SubscribeNotificationEvent(MessageCode.SUBSCRIBE, user, pet.getUser().getId(), pet.getName()));
                         });
     }
 

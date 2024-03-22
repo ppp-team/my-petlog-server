@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +38,9 @@ class SubscriptionServiceTest {
     private PetRepository petRepository;
     @Mock
     private PetQuerydslRepository petQuerydslRepository;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @InjectMocks
     private SubscriptionService subscriptionService;
 
@@ -77,6 +81,9 @@ class SubscriptionServiceTest {
     @DisplayName("구독 및 구독 해제 성공-구독")
     void subscribeOrUnsubscribe_success_WhenSubscribe() {
         //given
+        Pet pet = Pet.builder()
+                .user(user)
+                .id(1L).build();
         given(petRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(pet));
         given(subscriptionRepository.findBySubscriberAndPet(any(), any()))
