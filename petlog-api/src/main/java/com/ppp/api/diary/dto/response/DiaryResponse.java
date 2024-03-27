@@ -20,7 +20,8 @@ public record DiaryResponse(
         @Schema(description = "글쓴이에 대한 정보")
         UserResponse writer,
         @Schema(description = "댓글 개수")
-        int commentCount
+        int commentCount,
+        boolean isPublic
 ) {
     public static DiaryResponse from(Diary diary, String currentUserId, int commentCount) {
         return DiaryResponse.builder()
@@ -30,6 +31,7 @@ public record DiaryResponse(
                 .thumbnailPath(diary.getThumbnailPath())
                 .writer(UserResponse.of(diary.getUser().getId(), diary.getUser().getNickname(), currentUserId))
                 .commentCount(commentCount)
+                .isPublic(diary.isPublic())
                 .build();
     }
 
