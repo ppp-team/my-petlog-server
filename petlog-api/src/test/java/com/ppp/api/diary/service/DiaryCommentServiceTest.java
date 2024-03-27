@@ -89,6 +89,12 @@ class DiaryCommentServiceTest {
         given(mockDiary.getId()).willReturn(1L);
         given(mockDiaryComment.getAncestorCommentId()).willReturn(1L);
         given(mockDiaryComment.getUser()).willReturn(user);
+        given(mockDiaryComment.getParent()).willReturn(DiaryComment.builder()
+                .content("오늘은 바다로 산책을 갔어요")
+                .taggedUsersIdNicknameMap(taggedUserIdNicknameMap)
+                .diary(diary)
+                .user(user)
+                .build());
         given(mockDiaryComment.getContent()).willReturn("오늘은 바다로 산책을 갔어요");
     }
 
