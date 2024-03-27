@@ -18,7 +18,7 @@ import static com.querydsl.core.types.Projections.constructor;
 public class PetQuerydslRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
-    public List<PetDto> findSubscribingPetsByUserId(String userId) {
+    public List<PetDto> findSubscribedPetsByUserId(String userId) {
         return jpaQueryFactory.select(constructor(PetDto.class, pet.id, petImage.url, pet.name))
                 .from(subscription)
                 .innerJoin(subscription.pet, pet)

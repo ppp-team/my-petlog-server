@@ -3,22 +3,26 @@ package com.ppp.api.subscription.service;
 import com.ppp.api.notification.dto.event.SubscribeNotificationEvent;
 import com.ppp.api.pet.exception.ErrorCode;
 import com.ppp.api.pet.exception.PetException;
+import com.ppp.api.subscription.dto.response.SubscribedPetResponse;
 import com.ppp.api.subscription.dto.response.SubscriberResponse;
-import com.ppp.api.subscription.dto.response.SubscribingPetResponse;
+import com.ppp.api.subscription.dto.transfer.SubscriptionInfoDto;
 import com.ppp.api.subscription.exception.SubscriptionException;
 import com.ppp.domain.notification.constant.MessageCode;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.repository.PetQuerydslRepository;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.subscription.Subscription;
+import com.ppp.domain.subscription.constant.Status;
 import com.ppp.domain.subscription.repository.SubscriptionRepository;
 import com.ppp.domain.user.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.ppp.api.subscription.exception.ErrorCode.FORBIDDEN_PET_SPACE;
@@ -42,6 +46,7 @@ public class SubscriptionService {
                         () -> {
                             subscriptionRepository.save(Subscription.builder()
                                     .subscriber(user)
+                                    .status(Status.ACTIVE)
                                     .pet(pet)
                                     .build());
                             applicationEventPublisher.publishEvent(
@@ -49,9 +54,9 @@ public class SubscriptionService {
                         });
     }
 
-    public List<SubscribingPetResponse> displayMySubscribingPets(User user) {
-        return petQuerydslRepository.findSubscribingPetsByUserId(user.getId())
-                .stream().map(SubscribingPetResponse::from)
+    public List<SubscribedPetResponse> displayMySubscribedPets(User user) {
+        return petQuerydslRepository.findSubscribedPetsByUserId(user.getId())
+                .stream().map(SubscribedPetResponse::from)
                 .collect(Collectors.toList());
     }
 
@@ -66,5 +71,12 @@ public class SubscriptionService {
     private void validateManagePetsSubscribers(Long petId, String userId) {
         if (!petRepository.existsByIdAndUserIdAndIsDeletedFalse(petId, userId))
             throw new SubscriptionException(FORBIDDEN_PET_SPACE);
+    }
+
+    @Cacheable(value = "subscriptionInfo", key = "#a0")
+    public SubscriptionInfoDto getUsersSubscriptionInfo(String userId) {
+        Map<Boolean, List<Subscription>> subscriptionMap = subscriptionRepository.findBySubscriberId(userId)
+                .stream().collect(Collectors.partitioningBy(Subscription::isBlocked));
+        return SubscriptionInfoDto.of(subscriptionMap.get(false), subscriptionMap.get(true));
     }
 }

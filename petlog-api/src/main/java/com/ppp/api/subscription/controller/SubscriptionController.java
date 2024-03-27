@@ -2,7 +2,7 @@ package com.ppp.api.subscription.controller;
 
 import com.ppp.api.exception.ExceptionResponse;
 import com.ppp.api.subscription.dto.response.SubscriberResponse;
-import com.ppp.api.subscription.dto.response.SubscribingPetResponse;
+import com.ppp.api.subscription.dto.response.SubscribedPetResponse;
 import com.ppp.api.subscription.service.SubscriptionService;
 import com.ppp.common.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,12 +42,12 @@ public class SubscriptionController {
 
     @Operation(summary = "구독중인 펫 계정 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = {@Content(array = @ArraySchema(schema = @Schema(implementation = SubscribingPetResponse.class)))}),
+            @ApiResponse(responseCode = "200", content = {@Content(array = @ArraySchema(schema = @Schema(implementation = SubscribedPetResponse.class)))}),
             @ApiResponse(responseCode = "403", description = "기록 공간에 대한 권한 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @GetMapping(value = "/subscriptions")
-    private ResponseEntity<List<SubscribingPetResponse>> displayMySubscribingPets(@AuthenticationPrincipal PrincipalDetails principalDetails) {
-        return ResponseEntity.ok(subscriptionService.displayMySubscribingPets(principalDetails.getUser()));
+    private ResponseEntity<List<SubscribedPetResponse>> displayMySubscribedPets(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(subscriptionService.displayMySubscribedPets(principalDetails.getUser()));
     }
 
     @Operation(summary = "구독자 리스트 조회")

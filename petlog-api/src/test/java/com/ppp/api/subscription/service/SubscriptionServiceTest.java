@@ -1,7 +1,7 @@
 package com.ppp.api.subscription.service;
 
 import com.ppp.api.subscription.dto.response.SubscriberResponse;
-import com.ppp.api.subscription.dto.response.SubscribingPetResponse;
+import com.ppp.api.subscription.dto.response.SubscribedPetResponse;
 import com.ppp.api.subscription.exception.ErrorCode;
 import com.ppp.api.subscription.exception.SubscriptionException;
 import com.ppp.domain.pet.Pet;
@@ -102,11 +102,11 @@ class SubscriptionServiceTest {
     @DisplayName("구독중인 펫 계정 조회")
     void displayMySubscribingPets_success() {
         //given
-        given(petQuerydslRepository.findSubscribingPetsByUserId(anyString()))
+        given(petQuerydslRepository.findSubscribedPetsByUserId(anyString()))
                 .willReturn(List.of(new PetDto(1L, "PET/111111111/1232132313dsfadskfakfsa.jpg", "강아지강씨"),
                         new PetDto(2L, "PET/12345678/1232132313dsfadskfakfsa.jpg", "고양이고씨")));
         //when
-        List<SubscribingPetResponse> responses = subscriptionService.displayMySubscribingPets(user);
+        List<SubscribedPetResponse> responses = subscriptionService.displayMySubscribedPets(user);
         //then
         assertEquals(1, responses.get(0).id());
         assertEquals("강아지강씨", responses.get(0).name());
