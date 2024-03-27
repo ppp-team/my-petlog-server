@@ -100,6 +100,7 @@ class DiaryServiceTest {
         //given
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
+                .isPublic(true)
                 .content("너무 귀엽당")
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .date(LocalDate.now().toString())
@@ -133,6 +134,7 @@ class DiaryServiceTest {
         assertEquals(user.getId(), diaryCaptor.getValue().getUser().getId());
         assertEquals(pet.getId(), diaryCaptor.getValue().getPet().getId());
         assertEquals(3, diaryCaptor.getValue().getDiaryMedias().size());
+        assertTrue(diaryCaptor.getValue().isPublic());
     }
 
     @Test
@@ -141,6 +143,7 @@ class DiaryServiceTest {
         //given
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
+                .isPublic(false)
                 .uploadedVideoIds(new ArrayList<>())
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
@@ -166,6 +169,7 @@ class DiaryServiceTest {
         assertEquals(user.getId(), diaryCaptor.getValue().getUser().getId());
         assertEquals(pet.getId(), diaryCaptor.getValue().getPet().getId());
         assertEquals(2, diaryCaptor.getValue().getDiaryMedias().size());
+        assertFalse(diaryCaptor.getValue().isPublic());
     }
 
     @Test
@@ -174,6 +178,7 @@ class DiaryServiceTest {
         //given
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
+                .isPublic(true)
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
@@ -203,6 +208,7 @@ class DiaryServiceTest {
         assertEquals(user.getId(), diaryCaptor.getValue().getUser().getId());
         assertEquals(pet.getId(), diaryCaptor.getValue().getPet().getId());
         assertEquals(1, diaryCaptor.getValue().getDiaryMedias().size());
+        assertTrue(diaryCaptor.getValue().isPublic());
     }
 
     @Test
@@ -248,6 +254,7 @@ class DiaryServiceTest {
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
+                .isPublic(true)
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .date(LocalDate.now().toString())
                 .build();
@@ -270,6 +277,7 @@ class DiaryServiceTest {
         //given
         DiaryCreateRequest request = DiaryCreateRequest.builder()
                 .title("우리 강아지")
+                .isPublic(true)
                 .content("너무 귀엽당")
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .date(LocalDate.now().toString())
@@ -297,13 +305,15 @@ class DiaryServiceTest {
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
-                .deletedMediaIds(Set.of(1L))
+                .isPublic(true)
+                .deletedVideoIds(Set.of(1L))
                 .uploadedVideoIds(new ArrayList<>())
                 .date(LocalDate.now().toString())
                 .build();
 
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(false)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -311,7 +321,6 @@ class DiaryServiceTest {
         DiaryMedia diaryMedia = mock(DiaryMedia.class);
         diary.addDiaryMedias(List.of(diaryMedia));
 
-        given(diaryMedia.getId()).willReturn(1L);
 
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diary));
@@ -331,6 +340,7 @@ class DiaryServiceTest {
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
         assertEquals(2, diary.getDiaryMedias().size());
+        assertTrue(diary.isPublic());
     }
 
     @Test
@@ -340,12 +350,14 @@ class DiaryServiceTest {
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
+                .isPublic(true)
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(new HashSet<>())
+                .deletedVideoIds(new HashSet<>())
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(false)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -374,6 +386,7 @@ class DiaryServiceTest {
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
         assertEquals(3, diary.getDiaryMedias().size());
+        assertTrue(diary.isPublic());
     }
 
     @Test
@@ -383,12 +396,14 @@ class DiaryServiceTest {
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
+                .isPublic(true)
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(new HashSet<>())
+                .deletedVideoIds(new HashSet<>())
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(false)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -414,6 +429,7 @@ class DiaryServiceTest {
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
         assertEquals(1, diary.getDiaryMedias().size());
+        assertTrue(diary.isPublic());
     }
 
 
@@ -424,14 +440,16 @@ class DiaryServiceTest {
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
+                .isPublic(true)
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(Set.of(1L))
+                .deletedVideoIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
 
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
                 .content("츄르를 좋아해")
+                .isPublic(false)
                 .thumbnailPath("oldthumbnail")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -439,7 +457,6 @@ class DiaryServiceTest {
         DiaryMedia diaryMedia = mock(DiaryMedia.class);
         diary.addDiaryMedias(List.of(diaryMedia));
 
-        given(diaryMedia.getId()).willReturn(1L);
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
                 .willReturn(Optional.of(diary));
         given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
@@ -464,6 +481,7 @@ class DiaryServiceTest {
         assertEquals(request.getTitle(), diary.getTitle());
         assertEquals(request.getContent(), diary.getContent());
         assertEquals(request.getDate(), diary.getDate().toString());
+        assertTrue(diary.isPublic());
     }
 
 
@@ -474,8 +492,9 @@ class DiaryServiceTest {
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
+                .isPublic(true)
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(Set.of(1L))
+                .deletedVideoIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
@@ -493,8 +512,9 @@ class DiaryServiceTest {
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
+                .isPublic(true)
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(Set.of(1L))
+                .deletedVideoIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
@@ -518,8 +538,9 @@ class DiaryServiceTest {
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
+                .isPublic(true)
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(new HashSet<>())
+                .deletedVideoIds(new HashSet<>())
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
 
@@ -550,60 +571,21 @@ class DiaryServiceTest {
     }
 
     @Test
-    @DisplayName("일기 수정 실패-media upload limit over-이미지 수 제한")
-    void updateDiary_fail_MEDIA_UPLOAD_LIMIT_OVER_WhenImageSizeOver() {
-        //given
-        DiaryUpdateRequest request = DiaryUpdateRequest.builder()
-                .title("우리 강아지")
-                .content("너무 귀엽당")
-                .date(LocalDate.now().toString())
-                .deletedMediaIds(new HashSet<>())
-                .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
-                .build();
-
-        Diary diary = Diary.builder()
-                .title("우리집 고양이")
-                .content("츄르를 좋아해")
-                .date(LocalDate.of(2020, 11, 11))
-                .user(user)
-                .pet(pet).build();
-
-
-        diary.addDiaryMedias(List.of(
-                getDiaryMedia(DiaryMediaType.IMAGE),
-                getDiaryMedia(DiaryMediaType.IMAGE),
-                getDiaryMedia(DiaryMediaType.IMAGE),
-                getDiaryMedia(DiaryMediaType.IMAGE),
-                getDiaryMedia(DiaryMediaType.IMAGE),
-                getDiaryMedia(DiaryMediaType.IMAGE),
-                getDiaryMedia(DiaryMediaType.IMAGE),
-                getDiaryMedia(DiaryMediaType.IMAGE),
-                getDiaryMedia(DiaryMediaType.IMAGE),
-                getDiaryMedia(DiaryMediaType.IMAGE)));
-        given(diaryRepository.findByIdAndIsDeletedFalse(anyLong()))
-                .willReturn(Optional.of(diary));
-        given(guardianRepository.existsByUserIdAndPetId(user.getId(), pet.getId()))
-                .willReturn(true);
-        //when
-        DiaryException exception = assertThrows(DiaryException.class, () -> diaryService.updateDiary(user, 1L, 1L, request, images));
-        //then
-        assertEquals(MEDIA_UPLOAD_LIMIT_OVER.getCode(), exception.getCode());
-    }
-
-    @Test
     @DisplayName("일기 수정 실패-not diary owner")
     void updateDiary_fail_NOT_DIARY_OWNER() {
         //given
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
+                .isPublic(true)
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(Set.of(1L))
+                .deletedVideoIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         User otherUser = User.builder()
                 .id("other-user").build();
         Diary diary = Diary.builder()
+                .isPublic(false)
                 .title("우리집 고양이")
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
@@ -625,12 +607,14 @@ class DiaryServiceTest {
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
+                .isPublic(true)
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(Set.of(1L))
+                .deletedVideoIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(true)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -653,12 +637,14 @@ class DiaryServiceTest {
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
                 .content("너무 귀엽당")
+                .isPublic(true)
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(Set.of(1L))
+                .deletedVideoIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(true)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -682,13 +668,15 @@ class DiaryServiceTest {
         //given
         DiaryUpdateRequest request = DiaryUpdateRequest.builder()
                 .title("우리 강아지")
+                .isPublic(true)
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(Set.of(1L))
+                .deletedVideoIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(false)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -715,6 +703,7 @@ class DiaryServiceTest {
         //given
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(true)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -748,6 +737,7 @@ class DiaryServiceTest {
         //given
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(true)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -768,6 +758,7 @@ class DiaryServiceTest {
                 .id("other-user").build();
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(true)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(otherUser)
@@ -787,6 +778,7 @@ class DiaryServiceTest {
         //given
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(true)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -808,6 +800,7 @@ class DiaryServiceTest {
         //given
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(true)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -861,6 +854,7 @@ class DiaryServiceTest {
                 .id("other-user").build();
         Diary diary = Diary.builder()
                 .title("우리집 고양이")
+                .isPublic(true)
                 .content("츄르를 좋아해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -882,18 +876,21 @@ class DiaryServiceTest {
         given(diaryRepository.findByPetIdAndIsDeletedFalseOrderByDateDesc(anyLong(), any()))
                 .willReturn(new SliceImpl<>(List.of(
                         Diary.builder()
+                                .isPublic(true)
                                 .title("우리집 고양이")
                                 .content("츄르를 좋아해")
                                 .date(LocalDate.of(2022, 12, 11))
                                 .user(user)
                                 .pet(pet).build(),
                         Diary.builder()
+                                .isPublic(true)
                                 .title("우리집 고양이")
                                 .content("츄르를 먹어")
                                 .date(LocalDate.of(2022, 12, 11))
                                 .user(user)
                                 .pet(pet).build(),
                         Diary.builder()
+                                .isPublic(true)
                                 .title("우리집 강아지")
                                 .content("츄르를 싫어해")
                                 .date(LocalDate.of(2020, 11, 11))
@@ -935,6 +932,7 @@ class DiaryServiceTest {
         //given
         Diary diary = Diary.builder()
                 .title("우리집 강아지")
+                .isPublic(true)
                 .content("츄르를 싫어해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -961,6 +959,7 @@ class DiaryServiceTest {
         //given
         Diary diary = Diary.builder()
                 .title("우리집 강아지")
+                .isPublic(true)
                 .content("츄르를 싫어해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)
@@ -981,6 +980,7 @@ class DiaryServiceTest {
         //given
         Diary diary = Diary.builder()
                 .title("우리집 강아지")
+                .isPublic(true)
                 .content("츄르를 싫어해")
                 .date(LocalDate.of(2020, 11, 11))
                 .user(user)

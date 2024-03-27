@@ -42,6 +42,9 @@ public class Diary extends BaseTimeEntity {
     @Column(columnDefinition = "bit(1) default 0")
     private boolean isDeleted;
 
+    @Column(columnDefinition = "bit(1) default 0")
+    private boolean isPublic;
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
@@ -68,10 +71,11 @@ public class Diary extends BaseTimeEntity {
         this.diaryMedias.addAll(diaryMedias);
     }
 
-    public void update(String title, String content, LocalDate date, List<DiaryMedia> diaryMedias) {
+    public void update(String title, String content, LocalDate date, List<DiaryMedia> diaryMedias, boolean isPublic) {
         this.title = title;
         this.content = content;
         this.date = date;
+        this.isPublic = isPublic;
         addDiaryMedias(diaryMedias);
     }
 
@@ -111,12 +115,13 @@ public class Diary extends BaseTimeEntity {
     }
 
     @Builder
-    public Diary(String title, String content, LocalDate date, Pet pet, User user, String thumbnailPath) {
+    public Diary(String title, String content, LocalDate date, Pet pet, User user, String thumbnailPath, boolean isPublic) {
         this.title = title;
         this.content = content;
         this.date = date;
         this.pet = pet;
         this.user = user;
         this.thumbnailPath = thumbnailPath;
+        this.isPublic = isPublic;
     }
 }

@@ -72,6 +72,7 @@ public class DiaryService {
         Diary diary = Diary.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
+                .isPublic(request.getIsPublic())
                 .date(LocalDate.parse(request.getDate()))
                 .user(user)
                 .pet(pet)
@@ -118,35 +119,30 @@ public class DiaryService {
                 .filter(foundDiary -> Objects.equals(foundDiary.getPet().getId(), petId))
                 .orElseThrow(() -> new DiaryException(DIARY_NOT_FOUND));
         validateModifyDiary(diary, user, petId);
-        List<DiaryMedia> keepingVideos = diary.getKeepingVideos(request.getDeletedMediaIds());
-        List<DiaryMedia> keepingImages = diary.getKeepingImages(request.getDeletedMediaIds());
-        validateMediaSize(keepingVideos.size(), keepingImages.size(),
-                request.getUploadedVideoIds().size(), images == null ? 0 : images.size());
+        List<DiaryMedia> keepingVideos = diary.getKeepingVideos(request.getDeletedVideoIds());
+        validateVideoSize(keepingVideos.size(), request.getUploadedVideoIds().size());
         List<TempVideo> newlyUploadedVideos = getUploadedVideos(request.getUploadedVideoIds(), user);
 
-        List<DiaryMedia> diaryMediasToBeDeleted = getDiaryMediasToBoDeleted(diary, keepingVideos, keepingImages);
+        List<DiaryMedia> diaryMediasToBeDeleted = getDiaryMediasToBeDeleted(diary, keepingVideos);
         List<DiaryMedia> diaryMediasToBeUpdated = uploadAndGetDiaryMedias(images, newlyUploadedVideos, diary);
-        keepOldDiaryMedia(diaryMediasToBeUpdated, keepingVideos, keepingImages);
+        keepOldDiaryMedia(diaryMediasToBeUpdated, keepingVideos);
 
         applicationEventPublisher.publishEvent(new DiaryUpdatedEvent(diaryId, diaryMediasToBeDeleted, diary.getThumbnailPath()));
-        diary.update(request.getTitle(), request.getContent(), LocalDate.parse(request.getDate()), diaryMediasToBeUpdated);
+        diary.update(request.getTitle(), request.getContent(), LocalDate.parse(request.getDate()), diaryMediasToBeUpdated, request.getIsPublic());
     }
 
-    private List<DiaryMedia> getDiaryMediasToBoDeleted(Diary diary, List<DiaryMedia> keepingVideos, List<DiaryMedia> keepingImages) {
+    private List<DiaryMedia> getDiaryMediasToBeDeleted(Diary diary, List<DiaryMedia> keepingVideos) {
         List<DiaryMedia> diaryMediasToBeDeleted = new ArrayList<>(diary.getDiaryMedias());
-        diaryMediasToBeDeleted.removeAll(keepingImages);
         diaryMediasToBeDeleted.removeAll(keepingVideos);
         return diaryMediasToBeDeleted;
     }
 
-    private void keepOldDiaryMedia(List<DiaryMedia> updatedMedias, List<DiaryMedia> keepingVideos, List<DiaryMedia> keepingImages) {
-        updatedMedias.addAll(keepingImages);
+    private void keepOldDiaryMedia(List<DiaryMedia> updatedMedias, List<DiaryMedia> keepingVideos) {
         updatedMedias.addAll(keepingVideos);
     }
 
-    private void validateMediaSize(int keepingVideoSize, int keepingImageSize, int requestedVideoSize, int requestedImageSize) {
-        if (keepingVideoSize + requestedVideoSize > DiaryPolicy.VIDEO_UPLOAD_LIMIT
-                || keepingImageSize + requestedImageSize > DiaryPolicy.IMAGE_UPLOAD_LIMIT)
+    private void validateVideoSize(int keepingVideoSize, int requestedVideoSize) {
+        if (keepingVideoSize + requestedVideoSize > DiaryPolicy.VIDEO_UPLOAD_LIMIT)
             throw new DiaryException(MEDIA_UPLOAD_LIMIT_OVER);
     }
 
@@ -218,7 +214,7 @@ public class DiaryService {
         else {
             diaryRedisService.registerLikeByDiaryIdAndUserId(diaryId, user.getId());
             diaryRepository.findByIdAndIsDeletedFalse(diaryId).ifPresent(diary ->
-                applicationEventPublisher.publishEvent(new DiaryNotificationEvent(MessageCode.DIARY_LIKE, user, diary))
+                    applicationEventPublisher.publishEvent(new DiaryNotificationEvent(MessageCode.DIARY_LIKE, user, diary))
             );
         }
     }

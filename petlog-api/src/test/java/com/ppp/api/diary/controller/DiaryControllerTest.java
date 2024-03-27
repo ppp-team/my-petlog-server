@@ -126,7 +126,7 @@ class DiaryControllerTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(Set.of(1L))
+                .deletedVideoIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         //when
@@ -156,7 +156,7 @@ class DiaryControllerTest {
                 .title("우리 강아지")
                 .content("너무 귀엽당")
                 .date(LocalDate.now().toString())
-                .deletedMediaIds(Set.of(1L))
+                .deletedVideoIds(Set.of(1L))
                 .uploadedVideoIds(List.of("c8e8f796-8e29-4067-86c4-0eae419a054e"))
                 .build();
         //when

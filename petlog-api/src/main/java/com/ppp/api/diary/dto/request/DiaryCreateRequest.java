@@ -29,6 +29,9 @@ public class DiaryCreateRequest {
     @Date(message = "적합한 날짜를 입력해주세요.")
     private String date;
 
+    @Schema(description = "공개 여부")
+    private Boolean isPublic;
+
     @ArraySchema(arraySchema = @Schema(description = "임시 동영상 아이디", example = "[\"c8e8f796-8e29-4067-86c4-0eae419a054e\"]"))
     @Size(max = 1)
     private List<String> uploadedVideoIds = new ArrayList<>();
