@@ -36,7 +36,7 @@ public record DiaryFeedResponse(
     }
 
     @Builder
-    private record Pet(
+    public record Pet(
             String name,
             Long id,
             String profilePath,

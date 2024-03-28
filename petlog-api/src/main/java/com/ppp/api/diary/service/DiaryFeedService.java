@@ -25,7 +25,7 @@ public class DiaryFeedService {
     public Set<DiaryFeedResponse> retrieveDiaryFeed(User user, int page, int size) {
         SubscriptionInfoDto subscriptionInfo = subscriptionService.getUsersSubscriptionInfo(user.getId());
         List<DiaryFeedResponse> subscribedPetsDiaries = diaryQuerydslRepository
-                .findSubscribedPetsDiariesByUserId(subscriptionInfo.subscribedPetIds(), PageRequest.of(page, size / 2))
+                .findSubscribedPetsDiariesBySubscription(subscriptionInfo.subscribedPetIds(), PageRequest.of(page, size / 2))
                 .stream().map(dto -> DiaryFeedResponse.from(dto,
                         diaryCommentRedisService.getDiaryCommentCountByDiaryId(dto.getDiaryId()),
                         diaryRedisService.isLikeExistByDiaryIdAndUserId(dto.getDiaryId(), user.getId()),

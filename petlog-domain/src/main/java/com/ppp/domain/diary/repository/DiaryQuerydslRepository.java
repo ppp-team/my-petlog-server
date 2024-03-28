@@ -44,7 +44,7 @@ public class DiaryQuerydslRepository {
                 );
     }
 
-    public List<PetDiaryDto> findSubscribedPetsDiariesByUserId(Set<Long> subscribedPetIds, Pageable pageable) {
+    public List<PetDiaryDto> findSubscribedPetsDiariesBySubscription(Set<Long> subscribedPetIds, Pageable pageable) {
         List<PetDiaryDto> contents = jpaQueryFactory
                 .from(diary)
                 .leftJoin(diary.diaryMedias, diaryMedia)
