@@ -39,6 +39,10 @@ public class Subscription extends BaseTimeEntity {
         return Status.BLOCK.equals(status);
     }
 
+    public void block() {
+        status = Status.BLOCK;
+    }
+
     @Builder
     public Subscription(Pet pet, User subscriber, Status status) {
         this.pet = pet;
