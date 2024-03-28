@@ -5,6 +5,8 @@ import com.ppp.api.notification.dto.event.DiaryTagNotificationEvent;
 import com.ppp.api.notification.dto.event.InvitationNotificationEvent;
 import com.ppp.api.notification.dto.event.SubscribeNotificationEvent;
 import com.ppp.api.notification.service.NotificationService;
+import com.ppp.domain.diary.DiaryLike;
+import com.ppp.domain.diary.repository.DiaryLikeRepository;
 import com.ppp.domain.notification.constant.Type;
 import com.ppp.domain.pet.Pet;
 import com.ppp.domain.pet.PetImage;
@@ -22,6 +24,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class NotificationHandler {
     private final NotificationService notificationService;
     private final PetImageRepository petImageRepository;
+    private final DiaryLikeRepository diaryLikeRepository;
 
     private String findThumbnailPath(Pet pet) {
         PetImage petImage = petImageRepository.findByPet(pet).orElse(null);
@@ -61,12 +64,16 @@ public class NotificationHandler {
         switch (event.getMessageCode()) {
             case DIARY_COMMENT_CREATE:
                 message = String.format("%s의 일기에 %s님이 댓글을 달았습니다.", event.getDiary().getPet().getName(), event.getActor().getNickname());
+                notificationService.createNotification(Type.DIARY, event.getActor().getId(), event.getDiary().getUser().getId(), event.getActor().getThumbnailPath(), message);
                 break;
             case DIARY_LIKE:
                 message = String.format("%s님이 %s의 일기를 좋아합니다.",  event.getActor().getNickname(),  event.getDiary().getPet().getName());
+                if (!diaryLikeRepository.existsByDiaryIdAndUserId(event.getDiary().getId(), event.getActor().getId())) {
+                    notificationService.createNotification(Type.DIARY, event.getActor().getId(), event.getDiary().getUser().getId(), event.getActor().getThumbnailPath(), message);
+                    diaryLikeRepository.save(new DiaryLike(event.getDiary().getId(), event.getActor().getId()));
+                }
                 break;
         }
-        notificationService.createNotification(Type.DIARY, event.getActor().getId(), event.getDiary().getUser().getId(), event.getActor().getThumbnailPath(), message);
     }
 
     @Async
