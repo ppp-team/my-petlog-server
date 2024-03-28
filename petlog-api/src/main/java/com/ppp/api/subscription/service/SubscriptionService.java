@@ -84,13 +84,12 @@ public class SubscriptionService {
     }
 
     @Transactional
-    public void blockSubscriber(Long petId, String subscriberId, User user) {
+    public void blockOrUnblockSubscriber(Long petId, String subscriberId, User user) {
         validateManagePetsSubscribers(petId, user.getId());
 
         Subscription subscription = subscriptionRepository.findBySubscriberIdAndPetId(subscriberId, petId)
-                .stream().filter(sub -> !sub.isBlocked()).findFirst()
                 .orElseThrow(() -> new SubscriptionException(SUBSCRIBER_NOT_FOUND));
-        subscription.block();
+        subscription.switchBlockStatus();
         deleteCachedSubscriptionInfo(subscriberId);
     }
 

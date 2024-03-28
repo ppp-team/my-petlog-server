@@ -70,10 +70,10 @@ public class SubscriptionController {
             @ApiResponse(responseCode = "404", description = "일치하는 구독자 없음", content = {@Content(schema = @Schema(implementation = ExceptionResponse.class))})
     })
     @PutMapping(value = "/{petId}/subscriptions")
-    private ResponseEntity<Void> blockSubscriber(@PathVariable Long petId,
+    private ResponseEntity<Void> blockOrUnblockSubscriber(@PathVariable Long petId,
                                                  @Valid @RequestBody SubscriberBlockRequest request,
                                                  @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        subscriptionService.blockSubscriber(petId, request.getUserId(), principalDetails.getUser());
+        subscriptionService.blockOrUnblockSubscriber(petId, request.getUserId(), principalDetails.getUser());
         return ResponseEntity.ok().build();
     }
 }

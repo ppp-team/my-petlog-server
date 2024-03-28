@@ -39,8 +39,10 @@ public class Subscription extends BaseTimeEntity {
         return Status.BLOCK.equals(status);
     }
 
-    public void block() {
-        status = Status.BLOCK;
+    public void switchBlockStatus() {
+        if (isBlocked())
+            status = Status.ACTIVE;
+        else status = Status.BLOCK;
     }
 
     @Builder
