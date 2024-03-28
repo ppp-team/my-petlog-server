@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -56,5 +57,23 @@ public class NotificationQuerydslRepository {
         orderSpecifiers.add(new OrderSpecifier(Order.ASC, notification.isRead));
         orderSpecifiers.add(new OrderSpecifier(Order.DESC, notification.createdAt));
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
+    }
+
+    @Transactional
+    public void readNotification(String receiverId) {
+        queryFactory
+                .update(notification)
+                .where(notification.receiverId.eq(receiverId)
+                    .and(notification.isRead.eq(false)))
+                .set(notification.isRead, true)
+                .execute();
+    }
+
+    @Transactional
+    public void deleteNotification(String receiverId) {
+        queryFactory
+                .delete(notification)
+                .where(notification.receiverId.eq(receiverId))
+                .execute();
     }
 }

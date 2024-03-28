@@ -43,4 +43,12 @@ public class NotificationService {
                     .createdAt(TimeUtil.calculateTerm(dto.getCreatedAt()))
                     .build());
     }
+
+    public void readNotifications(User user) {
+        notificationQuerydslRepository.readNotification(user.getId());
+    }
+
+    public void deleteNotifications(User user) {
+        notificationQuerydslRepository.deleteNotification(user.getId());
+    }
 }
