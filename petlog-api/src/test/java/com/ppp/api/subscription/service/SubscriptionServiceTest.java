@@ -1,7 +1,8 @@
 package com.ppp.api.subscription.service;
 
+import com.ppp.api.subscription.dto.response.SubscribedPetResponse;
 import com.ppp.api.subscription.dto.response.SubscriberResponse;
-import com.ppp.api.subscription.dto.response.SubscribingPetResponse;
+import com.ppp.api.subscription.dto.transfer.SubscriptionInfoDto;
 import com.ppp.api.subscription.exception.ErrorCode;
 import com.ppp.api.subscription.exception.SubscriptionException;
 import com.ppp.domain.pet.Pet;
@@ -9,6 +10,7 @@ import com.ppp.domain.pet.dto.PetDto;
 import com.ppp.domain.pet.repository.PetQuerydslRepository;
 import com.ppp.domain.pet.repository.PetRepository;
 import com.ppp.domain.subscription.Subscription;
+import com.ppp.domain.subscription.constant.Status;
 import com.ppp.domain.subscription.repository.SubscriptionRepository;
 import com.ppp.domain.user.User;
 import org.junit.jupiter.api.DisplayName;
@@ -23,8 +25,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -58,6 +59,9 @@ class SubscriptionServiceTest {
 
     static Pet pet = Pet.builder()
             .id(1L).build();
+
+    static Pet petB = Pet.builder()
+            .id(2L).build();
 
     @Test
     @DisplayName("구독 및 구독 해제 성공-구독 해제")
@@ -102,11 +106,11 @@ class SubscriptionServiceTest {
     @DisplayName("구독중인 펫 계정 조회")
     void displayMySubscribingPets_success() {
         //given
-        given(petQuerydslRepository.findSubscribingPetsByUserId(anyString()))
+        given(petQuerydslRepository.findSubscribedPetsByUserId(anyString()))
                 .willReturn(List.of(new PetDto(1L, "PET/111111111/1232132313dsfadskfakfsa.jpg", "강아지강씨"),
                         new PetDto(2L, "PET/12345678/1232132313dsfadskfakfsa.jpg", "고양이고씨")));
         //when
-        List<SubscribingPetResponse> responses = subscriptionService.displayMySubscribingPets(user);
+        List<SubscribedPetResponse> responses = subscriptionService.displayMySubscribedPets(user);
         //then
         assertEquals(1, responses.get(0).id());
         assertEquals("강아지강씨", responses.get(0).name());
@@ -151,5 +155,29 @@ class SubscriptionServiceTest {
         SubscriptionException exception = assertThrows(SubscriptionException.class, () -> subscriptionService.displayMyPetsSubscribers(1L, user));
         //then
         assertEquals(ErrorCode.FORBIDDEN_PET_SPACE.getCode(), exception.getCode());
+    }
+
+    @Test
+    @DisplayName("유저의 구독 정보 조회 테스트")
+    void getUsersSubscriptionInfo_success() {
+        //given
+        given(subscriptionRepository.findBySubscriberId(anyString()))
+                .willReturn(List.of(
+                        Subscription.builder()
+                                .status(Status.ACTIVE)
+                                .subscriber(user)
+                                .pet(pet).build(),
+                        Subscription.builder()
+                                .status(Status.BLOCK)
+                                .subscriber(user)
+                                .pet(petB).build()
+                ));
+        //when
+        SubscriptionInfoDto response = subscriptionService.getUsersSubscriptionInfo("hihi");
+        //then
+        assertEquals(response.blockedPetIds().size(), 1);
+        assertEquals(response.subscribedPetIds().size(), 1);
+        assertTrue(response.subscribedPetIds().contains(1L));
+        assertTrue(response.blockedPetIds().contains(2L));
     }
 }

@@ -1,6 +1,7 @@
 package com.ppp.api.diary.dto.response;
 
 import com.ppp.domain.diary.DiaryMedia;
+import com.ppp.domain.diary.dto.DiaryMediaDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -16,6 +17,13 @@ public record DiaryMediaResponse(
         return DiaryMediaResponse.builder()
                 .mediaId(diaryMedia.getId())
                 .path(diaryMedia.getPath())
+                .build();
+    }
+
+    public static DiaryMediaResponse from(DiaryMediaDto dto) {
+        return DiaryMediaResponse.builder()
+                .mediaId(dto.getId())
+                .path(dto.getPath())
                 .build();
     }
 }
